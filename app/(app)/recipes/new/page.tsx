@@ -32,13 +32,6 @@ function parsedToInitial(parsed: ParsedRecipe): Partial<Recipe> {
   };
 }
 
-// ── Tab styles ────────────────────────────────────────────────────────────────
-
-const TAB = {
-  active:   'px-4 py-2 text-sm font-medium rounded-t-lg border border-b-0 border-stone-300 bg-white text-orange-600',
-  inactive: 'px-4 py-2 text-sm font-medium rounded-t-lg text-stone-500 hover:text-stone-700 border border-transparent',
-};
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function NewRecipePage() {
@@ -52,20 +45,39 @@ export default function NewRecipePage() {
     setTab('manual');
   };
 
+  const isMarkdown = tab === 'markdown';
+
   return (
-    <div className={tab === 'markdown' ? 'max-w-5xl mx-auto px-4 py-8' : 'max-w-3xl mx-auto px-4 py-8'}>
-      <Link href="/recipes" className="inline-block text-stone-500 hover:text-stone-700 mb-6 text-sm">
-        ← Back
+    <div className={isMarkdown ? 'max-w-5xl mx-auto px-4 py-8' : 'max-w-3xl mx-auto px-4 py-8'}>
+      <Link
+        href="/recipes"
+        className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
+        style={{ color: 'var(--text-3)' }}
+      >
+        ← Volver
       </Link>
-      <h1 className="text-2xl font-bold text-stone-800 mb-6">New recipe</h1>
+      <h1
+        className="font-display text-3xl font-bold mb-6"
+        style={{ color: 'var(--text-1)' }}
+      >
+        Nueva receta
+      </h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-stone-300">
+      <div
+        className="flex gap-0"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <button
           type="button"
           data-testid="manual-tab"
           onClick={() => setTab('manual')}
-          className={tab === 'manual' ? TAB.active : TAB.inactive}
+          className="font-label text-xs tracking-widest uppercase px-4 py-2.5 transition-colors"
+          style={{
+            color: tab === 'manual' ? 'var(--color-terracotta)' : 'var(--text-3)',
+            borderBottom: tab === 'manual' ? '2px solid var(--color-terracotta)' : '2px solid transparent',
+            marginBottom: '-1px',
+          }}
         >
           Manual
         </button>
@@ -73,13 +85,25 @@ export default function NewRecipePage() {
           type="button"
           data-testid="markdown-tab"
           onClick={() => setTab('markdown')}
-          className={tab === 'markdown' ? TAB.active : TAB.inactive}
+          className="font-label text-xs tracking-widest uppercase px-4 py-2.5 transition-colors"
+          style={{
+            color: tab === 'markdown' ? 'var(--color-terracotta)' : 'var(--text-3)',
+            borderBottom: tab === 'markdown' ? '2px solid var(--color-terracotta)' : '2px solid transparent',
+            marginBottom: '-1px',
+          }}
         >
           Import from Markdown
         </button>
       </div>
 
-      <div className="border border-t-0 border-stone-300 rounded-b-lg rounded-tr-lg p-6 bg-white">
+      <div
+        className="rounded-b-xl rounded-tr-xl p-6 mt-0"
+        style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderTop: 'none',
+        }}
+      >
         {tab === 'manual' && (
           <RecipeForm
             key={formKey}

@@ -13,16 +13,16 @@ interface Props {
   onRemove?: () => void;
 }
 
-const inputClass =
-  'border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white';
-
 export default function StepRow({ index, value, onChange, onRemove }: Props) {
   const set = (field: keyof StepField, v: string | boolean) =>
     onChange({ ...value, [field]: v });
 
   return (
-    <div className="flex gap-2 items-start">
-      <span className="mt-2.5 flex-shrink-0 w-6 h-6 bg-orange-100 text-orange-700 rounded-full text-xs font-bold flex items-center justify-center">
+    <div className="flex gap-3 items-start">
+      <span
+        className="font-label mt-2.5 flex-shrink-0 text-base font-bold leading-none"
+        style={{ color: 'var(--color-terracotta)', minWidth: '1.25rem' }}
+      >
         {index + 1}
       </span>
 
@@ -30,17 +30,21 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
         <textarea
           value={value.content}
           onChange={e => set('content', e.target.value)}
-          placeholder={`Step ${index + 1}…`}
+          placeholder={`Paso ${index + 1}…`}
           rows={2}
           aria-label={`Step ${index + 1}`}
-          className={`w-full resize-none ${inputClass}`}
+          className="input-base w-full resize-none"
         />
-        <label className="flex items-center gap-2 text-sm text-stone-500 cursor-pointer select-none">
+        <label
+          className="font-label flex items-center gap-2 text-xs tracking-widest uppercase cursor-pointer select-none"
+          style={{ color: 'var(--text-3)' }}
+        >
           <input
             type="checkbox"
             checked={value.timerEnabled}
             onChange={e => set('timerEnabled', e.target.checked)}
-            className="accent-orange-500"
+            className="accent-terracotta"
+            style={{ accentColor: '#D4703F' }}
           />
           Timer
           {value.timerEnabled && (
@@ -48,9 +52,10 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
               type="text"
               value={value.timerInput}
               onChange={e => set('timerInput', e.target.value)}
-              placeholder="e.g. 5 min, 1h 30min"
+              placeholder="ej. 5 min, 1h 30min"
               aria-label="Timer duration"
-              className={`ml-1 w-36 ${inputClass}`}
+              className="input-base ml-1 w-36"
+              style={{ display: 'inline-block' }}
             />
           )}
         </label>
@@ -61,7 +66,7 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
           type="button"
           onClick={onRemove}
           aria-label="Remove step"
-          className="mt-2 p-2 text-stone-400 hover:text-red-500 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          className="btn-remove mt-2 p-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           ×
         </button>

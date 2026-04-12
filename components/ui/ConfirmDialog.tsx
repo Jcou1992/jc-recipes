@@ -28,30 +28,46 @@ export default function ConfirmDialog({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40"
+        className="absolute inset-0"
+        style={{ background: 'rgba(0,0,0,0.65)' }}
         onClick={onCancel}
         aria-hidden="true"
       />
 
       {/* Panel */}
-      <div className="relative bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-        <h2 id="confirm-title" className="text-lg font-semibold text-stone-800 mb-2">
+      <div
+        className="relative rounded-2xl p-6 w-full max-w-sm animate-scale-in"
+        style={{
+          background: 'var(--bg-card)',
+          boxShadow: 'var(--shadow-dialog)',
+        }}
+      >
+        <h2
+          id="confirm-title"
+          className="font-display text-xl font-semibold mb-2"
+          style={{ color: 'var(--text-1)' }}
+        >
           {title}
         </h2>
-        <p className="text-sm text-stone-600 mb-6">{description}</p>
+        <p
+          className="font-body text-sm mb-6"
+          style={{ color: 'var(--text-2)' }}
+        >
+          {description}
+        </p>
 
         <div className="flex gap-3 justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-100 transition-colors min-h-[44px]"
+            className="btn-ghost"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors min-h-[44px]"
+            className="btn-danger"
           >
             {confirmLabel}
           </button>

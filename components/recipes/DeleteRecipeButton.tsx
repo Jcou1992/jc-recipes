@@ -27,18 +27,25 @@ export default function DeleteRecipeButton({ id, name }: Props) {
 
   return (
     <>
-      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+      {error && (
+        <p
+          className="font-label text-xs tracking-wide mb-2"
+          style={{ color: 'var(--color-terracotta)' }}
+        >
+          {error}
+        </p>
+      )}
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="px-3 py-1.5 text-sm border border-red-200 rounded-lg text-red-600 hover:bg-red-50 transition-colors min-h-[44px]"
+        className="btn-danger"
       >
         Delete
       </button>
       <ConfirmDialog
         open={open}
         title="Delete recipe"
-        description={`Are you sure you want to delete "${name}"? This cannot be undone.`}
+        description={`¿Eliminar "${name}"? Esta acción no se puede deshacer.`}
         confirmLabel={pending ? 'Deleting…' : 'Delete'}
         onConfirm={handleConfirm}
         onCancel={() => setOpen(false)}

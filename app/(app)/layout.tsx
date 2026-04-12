@@ -9,14 +9,25 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session) redirect('/login');
 
   return (
-    <div className="min-h-screen">
-      <nav className="bg-white border-b border-stone-200">
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <nav
+        style={{
+          background: 'var(--bg-card)',
+          borderBottom: '1px solid var(--border)',
+        }}
+      >
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <a href="/recipes" className="text-lg font-bold text-orange-600">jc-recipes</a>
+          <a
+            href="/recipes"
+            className="font-display text-xl font-bold tracking-tight"
+            style={{ color: 'var(--color-terracotta)' }}
+          >
+            jc-recipes
+          </a>
           <form action={logout}>
             <button
               type="submit"
-              className="text-sm text-stone-500 hover:text-stone-700 transition-colors min-h-[44px] px-2"
+              className="nav-signout font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
             >
               Sign out
             </button>

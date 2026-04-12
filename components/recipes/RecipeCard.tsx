@@ -11,30 +11,55 @@ export default function RecipeCard({ recipe }: Props) {
   return (
     <Link
       href={`/recipes/${recipe.id}`}
-      className="block bg-white rounded-xl border border-stone-200 p-4 hover:border-orange-300 hover:shadow-sm transition-all"
+      className="recipe-card block rounded-xl p-5 transition-all"
+      style={{
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
     >
-      <h2 className="font-semibold text-stone-800 text-base leading-snug mb-1 line-clamp-2">
+      <h2
+        className="font-display text-xl font-semibold leading-snug mb-1 line-clamp-2"
+        style={{ color: 'var(--text-1)' }}
+      >
         {recipe.name}
       </h2>
 
       {recipe.description && (
-        <p className="text-stone-500 text-sm line-clamp-2 mb-3">{recipe.description}</p>
+        <p
+          className="font-body text-sm line-clamp-2 mb-3"
+          style={{ color: 'var(--text-2)' }}
+        >
+          {recipe.description}
+        </p>
       )}
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-stone-400">
-        <span>{recipe.servings} serving{recipe.servings !== 1 ? 's' : ''}</span>
-        {totalTime > 0 && <span>{totalTime} min</span>}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
+        <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+          {recipe.servings} {recipe.servings !== 1 ? 'porciones' : 'porción'}
+        </span>
+        {totalTime > 0 && (
+          <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+            {totalTime} min
+          </span>
+        )}
         {recipe.ingredients.length > 0 && (
-          <span>{recipe.ingredients.length} ingredient{recipe.ingredients.length !== 1 ? 's' : ''}</span>
+          <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+            {recipe.ingredients.length} ingredientes
+          </span>
         )}
       </div>
 
       {recipe.tags && recipe.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-3">
+        <div className="flex flex-wrap gap-1">
           {recipe.tags.map(tag => (
             <span
               key={tag}
-              className="bg-stone-100 text-stone-500 text-xs px-2 py-0.5 rounded-full"
+              className="font-label text-xs tracking-wider uppercase px-2 py-0.5 rounded-full"
+              style={{
+                background: 'rgba(237,209,142,0.1)',
+                color: 'var(--color-gold)',
+                border: '1px solid rgba(237,209,142,0.15)',
+              }}
             >
               {tag}
             </span>

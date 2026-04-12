@@ -51,10 +51,11 @@ function stepsToFields(steps: Step[]): StepField[] {
     : [{ content: '', timerEnabled: false, timerInput: '' }];
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Label style ───────────────────────────────────────────────────────────────
 
-const inputClass =
-  'w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white';
+const labelStyle: React.CSSProperties = { color: 'var(--text-3)' };
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props) {
   const router = useRouter();
@@ -138,15 +139,26 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <div
+          className="font-label text-xs tracking-wide px-4 py-3 rounded-lg"
+          style={{
+            background: 'rgba(212,112,63,0.1)',
+            border: '1px solid rgba(212,112,63,0.3)',
+            color: 'var(--color-terracotta)',
+          }}
+        >
           {error}
         </div>
       )}
 
       {/* Name (required) */}
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="name">
-          Name <span className="text-red-500">*</span>
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={labelStyle}
+          htmlFor="name"
+        >
+          Name <span style={{ color: 'var(--color-terracotta)' }}>*</span>
         </label>
         <input
           id="name"
@@ -154,15 +166,19 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           value={name}
           onChange={e => setName(e.target.value)}
           required
-          placeholder="Recipe name"
-          className={inputClass}
+          placeholder="Nombre de la receta"
+          className="input-base"
         />
       </div>
 
       {/* Servings (required) */}
       <div className="w-32">
-        <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="servings">
-          Servings <span className="text-red-500">*</span>
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={labelStyle}
+          htmlFor="servings"
+        >
+          Servings <span style={{ color: 'var(--color-terracotta)' }}>*</span>
         </label>
         <input
           id="servings"
@@ -171,22 +187,26 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           value={servings}
           onChange={e => setServings(e.target.value)}
           required
-          className={inputClass}
+          className="input-base"
         />
       </div>
 
       {/* Ingredients (required) */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-stone-700">
-            Ingredients <span className="text-red-500">*</span>
+          <label
+            className="font-label block text-xs tracking-widest uppercase"
+            style={labelStyle}
+          >
+            Ingredients <span style={{ color: 'var(--color-terracotta)' }}>*</span>
           </label>
           <button
             type="button"
             onClick={addIngredient}
-            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            className="font-label text-xs tracking-widest uppercase transition-colors"
+            style={{ color: 'var(--color-terracotta)' }}
           >
-            + Add
+            + Añadir
           </button>
         </div>
         <div className="space-y-2">
@@ -204,15 +224,19 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       {/* Steps (required) */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="block text-sm font-medium text-stone-700">
-            Steps <span className="text-red-500">*</span>
+          <label
+            className="font-label block text-xs tracking-widest uppercase"
+            style={labelStyle}
+          >
+            Steps <span style={{ color: 'var(--color-terracotta)' }}>*</span>
           </label>
           <button
             type="button"
             onClick={addStep}
-            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            className="font-label text-xs tracking-widest uppercase transition-colors"
+            style={{ color: 'var(--color-terracotta)' }}
           >
-            + Add step
+            + Paso
           </button>
         </div>
         <div className="space-y-3">
@@ -230,14 +254,24 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
       {/* Optional fields — collapsible */}
       <details className="group">
-        <summary className="cursor-pointer text-sm font-medium text-stone-500 hover:text-stone-700 select-none list-none flex items-center gap-1">
+        <summary
+          className="cursor-pointer font-label text-xs tracking-widest uppercase select-none list-none flex items-center gap-1 transition-colors"
+          style={{ color: 'var(--text-3)' }}
+        >
           <span className="group-open:rotate-90 transition-transform inline-block">›</span>
           Optional fields
         </summary>
-        <div className="mt-4 space-y-4 pl-4 border-l-2 border-stone-100">
+        <div
+          className="mt-4 space-y-4 pl-4"
+          style={{ borderLeft: '2px solid var(--border)' }}
+        >
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="description">
+            <label
+              className="font-label block text-xs tracking-widest uppercase mb-1.5"
+              style={labelStyle}
+              htmlFor="description"
+            >
               Description
             </label>
             <textarea
@@ -245,15 +279,19 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               value={description}
               onChange={e => setDescription(e.target.value)}
               rows={2}
-              placeholder="Short description shown in the list view"
-              className={`${inputClass} resize-none`}
+              placeholder="Descripción corta para la vista de lista"
+              className="input-base resize-none"
             />
           </div>
 
           {/* Prep + Cook time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="prep-time">
+              <label
+                className="font-label block text-xs tracking-widest uppercase mb-1.5"
+                style={labelStyle}
+                htmlFor="prep-time"
+              >
                 Prep time (min)
               </label>
               <input
@@ -262,11 +300,15 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 min="0"
                 value={prepTime}
                 onChange={e => setPrepTime(e.target.value)}
-                className={inputClass}
+                className="input-base"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="cook-time">
+              <label
+                className="font-label block text-xs tracking-widest uppercase mb-1.5"
+                style={labelStyle}
+                htmlFor="cook-time"
+              >
                 Cook time (min)
               </label>
               <input
@@ -275,14 +317,18 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 min="0"
                 value={cookTime}
                 onChange={e => setCookTime(e.target.value)}
-                className={inputClass}
+                className="input-base"
               />
             </div>
           </div>
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="tags">
+            <label
+              className="font-label block text-xs tracking-widest uppercase mb-1.5"
+              style={labelStyle}
+              htmlFor="tags"
+            >
               Tags
             </label>
             <input
@@ -291,13 +337,17 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               value={tags}
               onChange={e => setTags(e.target.value)}
               placeholder="tag1, tag2, tag3"
-              className={inputClass}
+              className="input-base"
             />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="notes">
+            <label
+              className="font-label block text-xs tracking-widest uppercase mb-1.5"
+              style={labelStyle}
+              htmlFor="notes"
+            >
               Notes
             </label>
             <textarea
@@ -305,8 +355,8 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
-              placeholder="Variations, tips, sourcing notes…"
-              className={`${inputClass} resize-none`}
+              placeholder="Variaciones, consejos, notas de compra…"
+              className="input-base resize-none"
             />
           </div>
         </div>
@@ -314,17 +364,13 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-orange-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 min-h-[44px]"
-        >
-          {loading ? 'Saving…' : submitLabel}
+        <button type="submit" disabled={loading} className="btn-primary">
+          {loading ? 'Guardando…' : submitLabel}
         </button>
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-2.5 rounded-lg border border-stone-300 text-stone-600 text-sm font-medium hover:bg-stone-100 transition-colors min-h-[44px]"
+          className="btn-ghost"
         >
           Cancel
         </button>

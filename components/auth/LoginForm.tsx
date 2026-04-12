@@ -3,9 +3,6 @@
 import { useActionState } from 'react';
 import { login } from '@/app/actions/auth';
 
-const inputClass =
-  'w-full border border-stone-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white';
-
 type State = { error: string } | null;
 
 export default function LoginForm() {
@@ -14,13 +11,24 @@ export default function LoginForm() {
   return (
     <form action={action} className="space-y-4">
       {state?.error && (
-        <p className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-sm">
+        <p
+          className="font-label text-xs tracking-wide px-3 py-2.5 rounded-lg"
+          style={{
+            background: 'rgba(212,112,63,0.1)',
+            border: '1px solid rgba(212,112,63,0.3)',
+            color: 'var(--color-terracotta)',
+          }}
+        >
           {state.error}
         </p>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="email">
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={{ color: 'var(--text-3)' }}
+          htmlFor="email"
+        >
           Email
         </label>
         <input
@@ -29,13 +37,17 @@ export default function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          placeholder="you@example.com"
-          className={inputClass}
+          placeholder="tu@email.com"
+          className="input-base"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1" htmlFor="password">
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={{ color: 'var(--text-3)' }}
+          htmlFor="password"
+        >
           Password
         </label>
         <input
@@ -45,16 +57,16 @@ export default function LoginForm() {
           autoComplete="current-password"
           required
           placeholder="••••••••"
-          className={inputClass}
+          className="input-base"
         />
       </div>
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full bg-orange-500 text-white py-2.5 rounded-lg font-medium hover:bg-orange-600 transition-colors disabled:opacity-50"
+        className="btn-primary w-full mt-2"
       >
-        {pending ? 'Signing in…' : 'Sign in'}
+        {pending ? 'Accediendo…' : 'Sign in'}
       </button>
     </form>
   );

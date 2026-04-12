@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from('recipes').select('name').eq('id', id).single();
-  return { title: data ? `${data.name} - jc-recipes` : 'Recipe' };
+  return { title: data ? `${data.name} - jc-recipes` : 'Receta' };
 }
 
 export default async function RecipeDetailPage({ params }: PageProps) {
@@ -46,44 +46,73 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link href="/recipes" className="inline-block text-stone-500 hover:text-stone-700 mb-6 text-sm">
-        ← Back to recipes
+    <div className="max-w-3xl mx-auto px-4 py-8 animate-fade-up">
+      <Link
+        href="/recipes"
+        className="font-label text-xs tracking-widest uppercase inline-block mb-8 transition-colors"
+        style={{ color: 'var(--text-3)' }}
+      >
+        ← Volver
       </Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-stone-800 leading-snug">{recipe.name}</h1>
-        <div className="flex gap-2 flex-shrink-0">
-          <Link
-            href={`/recipes/${id}/edit`}
-            className="px-3 py-1.5 text-sm border border-stone-300 rounded-lg text-stone-600 hover:bg-stone-100 transition-colors min-h-[44px] flex items-center"
-          >
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <h1 className="font-display text-4xl font-bold leading-tight" style={{ color: 'var(--text-1)' }}>
+          {recipe.name}
+        </h1>
+        <div className="flex gap-2 flex-shrink-0 mt-1">
+          <Link href={`/recipes/${id}/edit`} className="btn-ghost">
             Edit
           </Link>
           <DeleteRecipeButton id={id} name={recipe.name} />
         </div>
       </div>
 
-      {/* Meta */}
-      <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-500 mb-4">
-        <span>{recipe.servings} serving{recipe.servings !== 1 ? 's' : ''}</span>
-        {recipe.prep_time != null && <span>Prep: {formatTime(recipe.prep_time)}</span>}
-        {recipe.cook_time != null && <span>Cook: {formatTime(recipe.cook_time)}</span>}
+      {/* Description */}
+      {recipe.description && (
+        <p className="font-body text-lg mb-5" style={{ color: 'var(--text-2)' }}>
+          {recipe.description}
+        </p>
+      )}
+
+      {/* Meta strip */}
+      <div
+        className="flex flex-wrap gap-x-6 gap-y-1 mb-6 pb-6"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
+          {recipe.servings} serving{recipe.servings !== 1 ? 's' : ''}
+        </span>
+        {recipe.prep_time != null && (
+          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
+            Prep: {formatTime(recipe.prep_time)}
+          </span>
+        )}
+        {recipe.cook_time != null && (
+          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
+            Cocción: {formatTime(recipe.cook_time)}
+          </span>
+        )}
         {totalTime > 0 && recipe.prep_time != null && recipe.cook_time != null && (
-          <span>Total: {formatTime(totalTime)}</span>
+          <span className="font-label text-sm tracking-wide font-semibold" style={{ color: 'var(--text-1)' }}>
+            Total: {formatTime(totalTime)}
+          </span>
         )}
       </div>
 
-      {recipe.description && (
-        <p className="text-stone-600 mb-6">{recipe.description}</p>
-      )}
-
       {/* Tags */}
       {recipe.tags && recipe.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-6">
+        <div className="flex flex-wrap gap-1.5 mb-8">
           {recipe.tags.map(tag => (
-            <span key={tag} className="bg-stone-100 text-stone-500 text-xs px-2 py-0.5 rounded-full">
+            <span
+              key={tag}
+              className="font-label text-xs tracking-wider uppercase px-2.5 py-0.5 rounded-full"
+              style={{
+                background: 'rgba(237,209,142,0.12)',
+                color: 'var(--color-gold)',
+                border: '1px solid rgba(237,209,142,0.2)',
+              }}
+            >
               {tag}
             </span>
           ))}
@@ -92,15 +121,20 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
       {/* Ingredients */}
       {recipe.ingredients.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-stone-700 mb-3">Ingredients</h2>
-          <ul className="space-y-1.5">
+        <section className="mb-10">
+          <h2 className="section-label mb-4">Ingredientes</h2>
+          <ul className="space-y-2.5">
             {recipe.ingredients.map((ing, i) => (
-              <li key={i} className="flex gap-2 text-sm">
-                <span className="text-stone-800 font-medium min-w-20">
+              <li key={i} className="flex gap-3 items-baseline">
+                <span
+                  className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right"
+                  style={{ color: 'var(--color-terracotta)' }}
+                >
                   {formatAmount(ing.amount)}{ing.unit ? ` ${ing.unit}` : ''}
                 </span>
-                <span className="text-stone-600">{ing.name}</span>
+                <span className="font-body text-base" style={{ color: 'var(--text-1)' }}>
+                  {ing.name}
+                </span>
               </li>
             ))}
           </ul>
@@ -109,20 +143,28 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
       {/* Steps */}
       {recipe.steps.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-stone-700 mb-3">Steps</h2>
-          <ol className="space-y-4">
+        <section className="mb-10">
+          <h2 className="section-label mb-4">Preparación</h2>
+          <ol className="space-y-5">
             {[...recipe.steps]
               .sort((a, b) => a.order - b.order)
               .map(step => (
-                <li key={step.order} className="flex gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 bg-orange-100 text-orange-700 rounded-full text-xs font-bold flex items-center justify-center mt-0.5">
+                <li key={step.order} className="flex gap-4">
+                  <span
+                    className="font-label flex-shrink-0 text-lg font-bold leading-none mt-0.5"
+                    style={{ color: 'var(--color-terracotta)', minWidth: '1.5rem' }}
+                  >
                     {step.order}
                   </span>
                   <div>
-                    <p className="text-stone-700 text-sm">{step.content}</p>
+                    <p className="font-body text-base leading-relaxed" style={{ color: 'var(--text-1)' }}>
+                      {step.content}
+                    </p>
                     {step.timer_seconds != null && (
-                      <p className="text-xs text-orange-600 mt-1">
+                      <p
+                        className="font-label text-xs tracking-wider uppercase mt-1.5"
+                        style={{ color: 'var(--color-terracotta)' }}
+                      >
                         ⏱ {formatTime(step.timer_seconds / 60)}
                       </p>
                     )}
@@ -135,9 +177,17 @@ export default async function RecipeDetailPage({ params }: PageProps) {
 
       {/* Notes */}
       {recipe.notes && (
-        <section>
-          <h2 className="text-lg font-semibold text-stone-700 mb-2">Notes</h2>
-          <p className="text-stone-600 text-sm whitespace-pre-line">{recipe.notes}</p>
+        <section
+          className="rounded-xl p-5"
+          style={{
+            background: 'var(--bg-raised)',
+            border: '1px solid var(--border)',
+          }}
+        >
+          <h2 className="section-label mb-3">Notas</h2>
+          <p className="font-body text-base whitespace-pre-line" style={{ color: 'var(--text-2)' }}>
+            {recipe.notes}
+          </p>
         </section>
       )}
     </div>

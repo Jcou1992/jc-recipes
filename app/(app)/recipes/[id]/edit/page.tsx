@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from('recipes').select('name').eq('id', id).single();
-  return { title: data ? `Edit ${data.name} - jc-recipes` : 'Edit Recipe' };
+  return { title: data ? `Editar ${data.name} - jc-recipes` : 'Editar receta' };
 }
 
 export default async function EditRecipePage({ params }: PageProps) {
@@ -36,10 +36,19 @@ export default async function EditRecipePage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <Link href={`/recipes/${id}`} className="inline-block text-stone-500 hover:text-stone-700 mb-6 text-sm">
-        ← Back
+      <Link
+        href={`/recipes/${id}`}
+        className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
+        style={{ color: 'var(--text-3)' }}
+      >
+        ← Volver
       </Link>
-      <h1 className="text-2xl font-bold text-stone-800 mb-8">Edit recipe</h1>
+      <h1
+        className="font-display text-3xl font-bold mb-8"
+        style={{ color: 'var(--text-1)' }}
+      >
+        Editar receta
+      </h1>
       <RecipeForm
         initialData={recipe}
         onSubmit={handleUpdate}
