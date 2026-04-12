@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Sakai 境 — Logo</title>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#D4703F"/>
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="stylesheet" href="sakai-tokens.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;400;700&family=Barlow+Condensed:wght@300;400;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --black: #0D0D0F;
+    --terra: #D4703F;
+    --gold:  #EDD18E;
+    --bone:  #F5F1E8;
+    --dark-terra: #9A5030;
+    --muted: #A89F96;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111013;
+    color: var(--bone);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px;
+  -webkit-text-size-adjust: 100%;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+
+  /* Header */
+  .page-header { margin-bottom: 52px; }
+  .page-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; letter-spacing: 0.22em;
+    color: var(--muted); margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .page-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 28px; font-weight: 200;
+    color: var(--gold); letter-spacing: 0.1em;
+  }
+
+  /* Section */
+  .section { margin-bottom: 48px; }
+  .section-label {
+    font-size: 9px; letter-spacing: 0.2em;
+    color: var(--muted); margin-bottom: 18px;
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* Logo containers */
+  .variants-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .variants-grid.single { grid-template-columns: 1fr; }
+  .variants-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+
+  @media (max-width: 600px) {
+    .variants-grid, .variants-grid.triple { grid-template-columns: 1fr; }
+  }
+
+  .logo-cell {
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .logo-canvas {
+    display: flex; align-items: center; justify-content: center;
+    padding: 48px 32px;
+    flex: 1;
+    min-height: 240px;
+    position: relative;
+  }
+  .logo-meta {
+    padding: 10px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .logo-meta-name {
+    font-size: 10px; letter-spacing: 0.12em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .logo-meta-usage {
+    font-size: 9px; letter-spacing: 0.1em; color: #7A7470;
+    text-transform: uppercase;
+  }
+
+  /* ── LOGO MARK SVG STYLES ── */
+
+  /* Primary — dark bg */
+  .bg-dark { background: var(--black); }
+  .bg-dark-cell { background: #0A0A0C; border: 1px solid rgba(255,255,255,0.05); }
+
+  /* Light bg */
+  .bg-bone { background: var(--bone); }
+  .bg-bone-cell { background: #f5f0e8; border: 1px solid rgba(0,0,0,0.06); }
+
+  /* Terra bg */
+  .bg-terra { background: var(--terra); }
+  .bg-terra-cell { background: #B85C38; border: 1px solid rgba(0,0,0,0.1); }
+
+  /* Gold bg */
+  .bg-gold { background: var(--gold); }
+  .bg-gold-cell { background: #E8C882; border: 1px solid rgba(0,0,0,0.08); }
+
+  /* ── THE LOGO SVG ── */
+  .logo-svg { overflow: visible; }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .logo-cell { animation: fadeIn 0.6s ease forwards; opacity: 0; }
+  .logo-cell:nth-child(1) { animation-delay: 0.1s; }
+  .logo-cell:nth-child(2) { animation-delay: 0.2s; }
+  .logo-cell:nth-child(3) { animation-delay: 0.3s; }
+  .logo-cell:nth-child(4) { animation-delay: 0.4s; }
+  .logo-cell:nth-child(5) { animation-delay: 0.5s; }
+  .logo-cell:nth-child(6) { animation-delay: 0.6s; }
+
+  /* Color swatches */
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .swatch-block {
+    width: 64px; height: 64px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .swatch-name { font-size: 10px; letter-spacing: 0.08em; color: var(--muted); }
+  .swatch-hex { font-size: 11px; color: var(--bone); font-family: 'Cormorant Garamond', serif; }
+
+  /* Typography specimen */
+  .type-specimen {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px; padding: 28px 32px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .type-row { display: flex; align-items: baseline; gap: 20px; }
+  .type-label { font-size: 9px; letter-spacing: 0.14em; color: var(--muted); width: 90px; flex-shrink: 0; }
+
+  /* Use cases */
+  .use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 500px) { .use-cases { grid-template-columns: 1fr; } }
+
+  .use-case {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px; padding: 16px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 80px;
+    position: relative; overflow: hidden;
+  }
+  .use-case-label {
+    position: absolute; bottom: 8px; left: 12px;
+    font-size: 8px; letter-spacing: 0.14em; color: #7A7470;
+    text-transform: uppercase;
+  }
+
+  /* ─── RESPONSIVE ───────────────────────────────── */
+  @media (max-width: 640px) {
+    body { padding: 24px 14px 48px; }
+    .page-title { font-size: 22px; }
+    .page-header { margin-bottom: 32px; }
+    .section { margin-bottom: 32px; }
+    .section-label { font-size: 9px; }
+
+    /* Logo cells — less padding on mobile */
+    .logo-canvas { padding: 28px 16px; min-height: 180px; }
+    .logo-meta { flex-direction: column; align-items: flex-start; gap: 2px; }
+
+    /* All grids collapse */
+    .variants-grid,
+    .variants-grid.triple,
+    .use-cases { grid-template-columns: 1fr !important; }
+
+    /* SVGs scale down */
+    .logo-svg { max-width: 100%; height: auto; }
+
+    /* Typography specimen */
+    .type-specimen { padding: 18px 16px; gap: 16px; }
+    .type-row { flex-direction: column; gap: 4px; align-items: flex-start; }
+    .type-label { width: auto; }
+
+    /* Swatches wrap naturally — already flex-wrap */
+    .swatch-block { width: 52px; height: 52px; }
+  }
+
+  @media (max-width: 400px) {
+    .logo-canvas { padding: 20px 12px; min-height: 150px; }
+  }
+
+  /* Ensure SVGs never overflow their container */
+  .logo-canvas svg { max-width: 100%; height: auto; }
+  .logo-svg { display: block; }
+</style>
+<script src="/lib/sakai-auth.js"></script>
+</head>
+<body>
+<style>.swipe-hint{position:fixed;bottom:calc(env(safe-area-inset-bottom, 0px) + 32px);left:50%;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:8px;background:rgba(20,18,22,0.82);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(200,185,165,0.85);pointer-events:none;opacity:0;transition:opacity 1s ease;white-space:nowrap;backdrop-filter:blur(8px);}.swipe-hint::before{content:'';animation:pulse-arrow 1.2s ease-in-out infinite;}.swipe-hint.visible{opacity:1;}@keyframes pulse-arrow{0%,100%{opacity:0.4;transform:translateX(0);}50%{opacity:1;transform:translateX(3px);}}.hub-back{display:none;position:fixed;bottom:32px;left:24px;z-index:9999;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(122,112,96,0.7);text-decoration:none;transition:color .2s;}.hub-back:hover{color:#D4703F;}body{animation:page-in 0.25s ease forwards;}@keyframes page-in{from{opacity:0;}to{opacity:1;}}</style>
+<div class="swipe-hint" id="swipeHint">desliza → para volver</div><a class="hub-back" id="hubBack" href="index.html">← Hub</a>
+<script src="sakai-nav.js"></script>
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-label">Sistema de Identidad Visual</div>
+    <div class="page-title">境 Sakai — Brand Identity</div>
+  </div>
+
+  <!-- PRIMARY LOGO -->
+  <div class="section">
+    <div class="section-label">Logo Principal</div>
+    <div class="variants-grid single">
+      <div class="logo-cell bg-dark-cell">
+        <div class="logo-canvas bg-dark">
+          <svg class="logo-svg" width="320" height="180" viewBox="0 0 320 180">
+            <!-- Kanji 境 -->
+            <text
+              x="160" y="90"
+              font-family="'Noto Serif JP', serif"
+              font-size="72" font-weight="300"
+              fill="#E8C882"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              letter-spacing="0"
+            >境</text>
+
+            <!-- Dividing line -->
+            <line x1="60" y1="116" x2="260" y2="116" stroke="#B85C38" stroke-width="0.8" opacity="0.9"/>
+
+            <!-- SAKAI wordmark -->
+            <text
+              x="160" y="138"
+              font-family="'Barlow Condensed', sans-serif"
+              font-size="28" font-weight="700"
+              fill="#F0EBE0"
+              text-anchor="middle"
+              letter-spacing="14"
+            >SAKAI</text>
+
+            <!-- Tagline -->
+            <text
+              x="160" y="158"
+              font-family="'Cormorant Garamond', serif"
+              font-size="9" font-weight="300"
+              font-style="italic"
+              fill="#5A5550"
+              text-anchor="middle"
+              letter-spacing="4"
+            >Cocina de Frontera · Monterrey</text>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#0A0A0C;">
+          <span class="logo-meta-name">Principal — Fondo Oscuro</span>
+          <span class="logo-meta-usage">Uso principal · Digital & Print</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIATIONS -->
+  <div class="section">
+    <div class="section-label">Variaciones de Color</div>
+    <div class="variants-grid">
+
+      <!-- Bone / Light -->
+      <div class="logo-cell bg-bone-cell">
+        <div class="logo-canvas bg-bone">
+          <svg class="logo-svg" width="260" height="150" viewBox="0 0 260 150">
+            <text x="130" y="72" font-family="'Noto Serif JP',serif" font-size="58" font-weight="300"
+              fill="#0D0D0F" text-anchor="middle" dominant-baseline="middle">境</text>
+            <line x1="40" y1="94" x2="220" y2="94" stroke="#B85C38" stroke-width="0.8"/>
+            <text x="130" y="114" font-family="'Barlow Condensed',sans-serif" font-size="22" font-weight="700"
+              fill="#0D0D0F" text-anchor="middle" letter-spacing="12">SAKAI</text>
+            <text x="130" y="132" font-family="'Cormorant Garamond',serif" font-size="8" font-style="italic"
+              fill="#9A9088" text-anchor="middle" letter-spacing="3">Cocina de Frontera</text>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#ede8e0;border-top:1px solid rgba(0,0,0,0.06);">
+          <span class="logo-meta-name" style="color:#9A9088;">Invertido — Fondo Claro</span>
+          <span class="logo-meta-usage">Papelería · Packaging</span>
+        </div>
+      </div>
+
+      <!-- Terracotta -->
+      <div class="logo-cell bg-terra-cell">
+        <div class="logo-canvas bg-terra">
+          <svg class="logo-svg" width="260" height="150" viewBox="0 0 260 150">
+            <text x="130" y="72" font-family="'Noto Serif JP',serif" font-size="58" font-weight="300"
+              fill="#F0EBE0" text-anchor="middle" dominant-baseline="middle">境</text>
+            <line x1="40" y1="94" x2="220" y2="94" stroke="#0D0D0F" stroke-width="0.8" opacity="0.4"/>
+            <text x="130" y="114" font-family="'Barlow Condensed',sans-serif" font-size="22" font-weight="700"
+              fill="#F0EBE0" text-anchor="middle" letter-spacing="12">SAKAI</text>
+            <text x="130" y="132" font-family="'Cormorant Garamond',serif" font-size="8" font-style="italic"
+              fill="rgba(240,235,224,0.55)" text-anchor="middle" letter-spacing="3">Cocina de Frontera</text>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#a35230;border-top:1px solid rgba(0,0,0,0.1);">
+          <span class="logo-meta-name" style="color:rgba(240,235,224,0.5);">Terracota</span>
+          <span class="logo-meta-usage" style="color:rgba(240,235,224,0.25);">Merch · Uniformes</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ICON / MARK ONLY -->
+  <div class="section">
+    <div class="section-label">Ícono / Marca Sola</div>
+    <div class="variants-grid triple">
+
+      <!-- Icon dark -->
+      <div class="logo-cell bg-dark-cell">
+        <div class="logo-canvas bg-dark" style="min-height:160px; padding:32px;">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="18" fill="#161614"/>
+            <text x="50" y="56" font-family="'Noto Serif JP',serif" font-size="52" font-weight="300"
+              fill="#E8C882" text-anchor="middle" dominant-baseline="middle">境</text>
+            <!-- Corner dots -->
+            <circle cx="12" cy="12" r="1.5" fill="#B85C38" opacity="0.6"/>
+            <circle cx="88" cy="12" r="1.5" fill="#B85C38" opacity="0.6"/>
+            <circle cx="12" cy="88" r="1.5" fill="#B85C38" opacity="0.6"/>
+            <circle cx="88" cy="88" r="1.5" fill="#B85C38" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#0A0A0C;">
+          <span class="logo-meta-name">App Icon</span>
+          <span class="logo-meta-usage">iOS · Android</span>
+        </div>
+      </div>
+
+      <!-- Icon terra -->
+      <div class="logo-cell bg-terra-cell">
+        <div class="logo-canvas bg-terra" style="min-height:160px; padding:32px;">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="18" fill="rgba(0,0,0,0.15)"/>
+            <text x="50" y="56" font-family="'Noto Serif JP',serif" font-size="52" font-weight="300"
+              fill="#F0EBE0" text-anchor="middle" dominant-baseline="middle">境</text>
+            <circle cx="12" cy="12" r="1.5" fill="rgba(240,235,224,0.4)"/>
+            <circle cx="88" cy="12" r="1.5" fill="rgba(240,235,224,0.4)"/>
+            <circle cx="12" cy="88" r="1.5" fill="rgba(240,235,224,0.4)"/>
+            <circle cx="88" cy="88" r="1.5" fill="rgba(240,235,224,0.4)"/>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#a35230;border-top:1px solid rgba(0,0,0,0.1);">
+          <span class="logo-meta-name" style="color:rgba(240,235,224,0.5);">Ícono Terracota</span>
+          <span class="logo-meta-usage" style="color:rgba(240,235,224,0.25);">Variante cálida</span>
+        </div>
+      </div>
+
+      <!-- Icon bone -->
+      <div class="logo-cell bg-bone-cell">
+        <div class="logo-canvas bg-bone" style="min-height:160px; padding:32px;">
+          <svg width="100" height="100" viewBox="0 0 100 100">
+            <rect width="100" height="100" rx="18" fill="rgba(0,0,0,0.05)"/>
+            <text x="50" y="56" font-family="'Noto Serif JP',serif" font-size="52" font-weight="300"
+              fill="#0D0D0F" text-anchor="middle" dominant-baseline="middle">境</text>
+            <circle cx="12" cy="12" r="1.5" fill="#B85C38" opacity="0.7"/>
+            <circle cx="88" cy="12" r="1.5" fill="#B85C38" opacity="0.7"/>
+            <circle cx="12" cy="88" r="1.5" fill="#B85C38" opacity="0.7"/>
+            <circle cx="88" cy="88" r="1.5" fill="#B85C38" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#ede8e0;border-top:1px solid rgba(0,0,0,0.06);">
+          <span class="logo-meta-name" style="color:#9A9088;">Ícono Claro</span>
+          <span class="logo-meta-usage">Papelería</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HORIZONTAL -->
+  <div class="section">
+    <div class="section-label">Versión Horizontal</div>
+    <div class="variants-grid single">
+      <div class="logo-cell bg-dark-cell">
+        <div class="logo-canvas bg-dark" style="min-height:120px; padding:32px 48px;">
+          <svg class="logo-svg" width="400" height="70" viewBox="0 0 400 70">
+            <!-- Kanji -->
+            <text x="35" y="38" font-family="'Noto Serif JP',serif" font-size="52" font-weight="300"
+              fill="#E8C882" text-anchor="middle" dominant-baseline="middle">境</text>
+            <!-- Vertical separator -->
+            <line x1="68" y1="12" x2="68" y2="58" stroke="#B85C38" stroke-width="0.8"/>
+            <!-- Text block -->
+            <text x="84" y="28" font-family="'Barlow Condensed',sans-serif" font-size="26" font-weight="700"
+              fill="#F0EBE0" dominant-baseline="middle" letter-spacing="8">SAKAI</text>
+            <text x="84" y="50" font-family="'Cormorant Garamond',serif" font-size="9" font-style="italic"
+              fill="#5A5550" dominant-baseline="middle" letter-spacing="3">Cocina de Frontera · Monterrey</text>
+          </svg>
+        </div>
+        <div class="logo-meta" style="background:#0A0A0C;">
+          <span class="logo-meta-name">Horizontal</span>
+          <span class="logo-meta-usage">Headers · Banners · Menú</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR PALETTE -->
+  <div class="section">
+    <div class="section-label">Paleta de Color</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="swatch-block" style="background:#0D0D0F;"></div>
+        <div class="swatch-name">Negro</div>
+        <div class="swatch-hex">#0D0D0F</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#B85C38;"></div>
+        <div class="swatch-name">Terracota</div>
+        <div class="swatch-hex">#B85C38</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#E8C882; border-color:rgba(255,255,255,0.12);"></div>
+        <div class="swatch-name">Oro Viejo</div>
+        <div class="swatch-hex">#E8C882</div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-block" style="background:#F0EBE0; border-color:rgba(255,255,255,0.12);"></div>
+        <div class="swatch-name">Hueso</div>
+        <div class="swatch-hex">#F0EBE0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="section">
+    <div class="section-label">Tipografía</div>
+    <div class="type-specimen">
+      <div class="type-row">
+        <span class="type-label">Display · Kanji</span>
+        <span style="font-family:'Noto Serif JP',serif; font-size:42px; font-weight:200; color:var(--gold);">境</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Wordmark</span>
+        <span style="font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:700; letter-spacing:0.18em; color:var(--bone);">SAKAI</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Tagline</span>
+        <span style="font-family:'Cormorant Garamond',serif; font-size:16px; font-style:italic; font-weight:300; color:var(--muted);">Cocina de Frontera</span>
+      </div>
+      <div class="type-row">
+        <span class="type-label">Body / UI</span>
+        <span style="font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:400; letter-spacing:0.06em; color:var(--muted);">MENÚ · PLATILLOS · MONTERREY · 境</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- USE CASES -->
+  <div class="section">
+    <div class="section-label">Aplicaciones</div>
+    <div class="use-cases">
+
+      <!-- Instagram avatar -->
+      <div class="use-case" style="background:#0D0D0F; border-color:rgba(255,255,255,0.06);">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div style="width:52px;height:52px;border-radius:50%;background:#0A0A0C;border:2px solid #E8C882;display:flex;align-items:center;justify-content:center;">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+              <text x="18" y="21" font-family="'Noto Serif JP',serif" font-size="22" font-weight="300"
+                fill="#E8C882" text-anchor="middle" dominant-baseline="middle">境</text>
+            </svg>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;">sakai.mty</div>
+            <div style="font-size:10px;color:var(--muted);">Cocina de Frontera · MTY</div>
+          </div>
+        </div>
+        <span class="use-case-label">Avatar Instagram</span>
+      </div>
+
+      <!-- Servilleta / stamp -->
+      <div class="use-case" style="background:var(--bone);">
+        <svg width="100" height="80" viewBox="0 0 100 80">
+          <rect x="2" y="2" width="96" height="76" rx="4" fill="none" stroke="#0D0D0F" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <text x="50" y="34" font-family="'Noto Serif JP',serif" font-size="28" font-weight="300"
+            fill="#0D0D0F" text-anchor="middle" dominant-baseline="middle">境</text>
+          <line x1="18" y1="46" x2="82" y2="46" stroke="#B85C38" stroke-width="0.7"/>
+          <text x="50" y="60" font-family="'Barlow Condensed',sans-serif" font-size="12" font-weight="700"
+            fill="#0D0D0F" text-anchor="middle" letter-spacing="5">SAKAI</text>
+        </svg>
+        <span class="use-case-label" style="color:#9A9088;">Sello / Servilleta</span>
+      </div>
+
+      <!-- Sticker oscuro -->
+      <div class="use-case" style="background:#1A1612; border-color:rgba(255,255,255,0.04);">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle cx="45" cy="45" r="42" fill="#0D0D0F" stroke="#B85C38" stroke-width="0.8"/>
+          <circle cx="45" cy="45" r="38" fill="none" stroke="#B85C38" stroke-width="0.3" opacity="0.4"/>
+          <text x="45" y="42" font-family="'Noto Serif JP',serif" font-size="34" font-weight="300"
+            fill="#E8C882" text-anchor="middle" dominant-baseline="middle">境</text>
+          <text x="45" y="63" font-family="'Barlow Condensed',sans-serif" font-size="9" font-weight="700"
+            fill="#F0EBE0" text-anchor="middle" letter-spacing="4">SAKAI</text>
+        </svg>
+        <span class="use-case-label">Sticker · Packaging</span>
+      </div>
+
+      <!-- Embossed / minimal -->
+      <div class="use-case" style="background:#1C1209; border-color:rgba(184,92,56,0.15);">
+        <svg width="160" height="60" viewBox="0 0 160 60">
+          <text x="26" y="36" font-family="'Noto Serif JP',serif" font-size="38" font-weight="200"
+            fill="#E8C882" text-anchor="middle" dominant-baseline="middle" opacity="0.9">境</text>
+          <line x1="48" y1="16" x2="48" y2="44" stroke="#B85C38" stroke-width="0.6" opacity="0.7"/>
+          <text x="58" y="28" font-family="'Barlow Condensed',sans-serif" font-size="18" font-weight="700"
+            fill="#F0EBE0" letter-spacing="6" dominant-baseline="middle">SAKAI</text>
+          <text x="58" y="44" font-family="'Cormorant Garamond',serif" font-size="7.5" font-style="italic"
+            fill="#5A5550" letter-spacing="2" dominant-baseline="middle">Cocina de Frontera</text>
+        </svg>
+        <span class="use-case-label">Menú · Impresión</span>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

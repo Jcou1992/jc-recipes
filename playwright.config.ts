@@ -1,27 +1,37 @@
 import { defineConfig, devices } from '@playwright/test';
+import { config } from 'dotenv';
+import path from 'path';
+
+config({ path: path.resolve(__dirname, '.env.local') });
 
 export default defineConfig({
-  testDir: './e2e',
-  fullyParallel: true,
+  testDir: './tests/e2e',
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  timeout: 60_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: 'Desktop Chrome',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 720 } },
     },
     {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 14'] },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 7'] },
     },
   ],
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
   },
 });
