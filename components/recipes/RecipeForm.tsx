@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import IngredientRow, { type IngredientField } from './IngredientRow';
 import StepRow, { type StepField } from './StepRow';
 import { parseTimeToMinutes } from '@/lib/utils/parse-recipe-markdown';
+import { useUnsavedChanges } from '@/lib/hooks/useUnsavedChanges';
+import { useToast } from '@/components/ui/ToastContext';
 import type { Recipe, RecipePayload, Ingredient, Step } from '@/types/recipe';
+import type { ActionResult } from '@/app/actions/recipes';
 
 interface Props {
   initialData?: Partial<Recipe>;
-  onSubmit: (payload: RecipePayload) => Promise<{ error: string } | null>;
+  onSubmit: (payload: RecipePayload) => Promise<ActionResult>;
   submitLabel: string;
 }
 
@@ -26,10 +29,10 @@ function parseAmount(str: string): number {
 
 function formatAmount(n: number): string {
   if (n === 0) return '';
-  if (n === 0.5) return '1/2';
+  if (n === 0.5)  return '1/2';
   if (n === 0.25) return '1/4';
   if (n === 0.75) return '3/4';
-  if (n === 1.5) return '1 1/2';
+  if (n === 1.5)  return '1 1/2';
   return n % 1 === 0 ? String(n) : String(n);
 }
 
@@ -59,12 +62,12 @@ const labelStyle: React.CSSProperties = { color: 'var(--text-3)' };
 
 export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props) {
   const router = useRouter();
-  const [error, setError] = useState('');
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
 
   // Required fields
-  const [name, setName] = useState(initialData?.name ?? '');
-  const [servings, setServings] = useState(String(initialData?.servings ?? 1));
+  const [name, setName]             = useState(initialData?.name ?? '');
+  const [servings, setServings]     = useState(String(initialData?.servings ?? 1));
   const [ingredients, setIngredients] = useState<IngredientField[]>(
     ingredientsToFields(initialData?.ingredients ?? [])
   );
@@ -74,10 +77,25 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
   // Optional fields
   const [description, setDescription] = useState(initialData?.description ?? '');
-  const [prepTime, setPrepTime] = useState(initialData?.prep_time ? String(initialData.prep_time) : '');
-  const [cookTime, setCookTime] = useState(initialData?.cook_time ? String(initialData.cook_time) : '');
-  const [tags, setTags] = useState((initialData?.tags ?? []).join(', '));
-  const [notes, setNotes] = useState(initialData?.notes ?? '');
+  const [prepTime, setPrepTime]       = useState(initialData?.prep_time ? String(initialData.prep_time) : '');
+  const [cookTime, setCookTime]       = useState(initialData?.cook_time ? String(initialData.cook_time) : '');
+  const [tags, setTags]               = useState((initialData?.tags ?? []).join(', '));
+  const [notes, setNotes]             = useState(initialData?.notes ?? '');
+
+  // Dirty tracking — true if any field changed from initial
+  const initialRef = useRef({ name: initialData?.name ?? '', servings: String(initialData?.servings ?? 1) });
+  const [isDirty, setIsDirty] = useState(false);
+
+  useEffect(() => {
+    const dirty =
+      name !== (initialData?.name ?? '') ||
+      servings !== String(initialData?.servings ?? 1) ||
+      description !== (initialData?.description ?? '') ||
+      notes !== (initialData?.notes ?? '');
+    setIsDirty(dirty);
+  }, [name, servings, description, notes, initialData]);
+
+  useUnsavedChanges(isDirty);
 
   const addIngredient = () =>
     setIngredients(prev => [...prev, { amount: '', unit: '', name: '' }]);
@@ -94,7 +112,6 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const parsedIngredients: Ingredient[] = ingredients
       .filter(i => i.name.trim())
@@ -129,28 +146,19 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     };
 
     const result = await onSubmit(payload);
+
     if (result?.error) {
-      setError(result.error);
+      showToast(result.error, 'error');
       setLoading(false);
+      return;
     }
-    // On success the server action redirects — loading state stays true briefly
+
+    // On success the server action calls redirect() — framework handles navigation
+    setIsDirty(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div
-          className="font-label text-xs tracking-wide px-4 py-3 rounded-lg"
-          style={{
-            background: 'rgba(212,112,63,0.1)',
-            border: '1px solid rgba(212,112,63,0.3)',
-            color: 'var(--color-terracotta)',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
       {/* Name (required) */}
       <div>
         <label
@@ -369,7 +377,10 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         </button>
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => {
+            if (isDirty && !window.confirm('Tienes cambios sin guardar. ¿Salir de todas formas?')) return;
+            router.back();
+          }}
           className="btn-ghost"
         >
           Cancel

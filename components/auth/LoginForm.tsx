@@ -12,7 +12,7 @@ export default function LoginForm() {
     <form action={action} className="space-y-4">
       {state?.error && (
         <p
-          className="font-label text-xs tracking-wide px-3 py-2.5 rounded-lg"
+          className="bg-red-50 font-label text-xs tracking-wide px-3 py-2.5 rounded-lg"
           style={{
             background: 'rgba(212,112,63,0.1)',
             border: '1px solid rgba(212,112,63,0.3)',

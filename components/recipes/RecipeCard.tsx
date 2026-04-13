@@ -26,7 +26,7 @@ export default function RecipeCard({ recipe }: Props) {
 
       {recipe.description && (
         <p
-          className="font-body text-sm line-clamp-2 mb-3"
+          className="font-body text-base line-clamp-2 mb-3"
           style={{ color: 'var(--text-2)' }}
         >
           {recipe.description}
@@ -34,16 +34,16 @@ export default function RecipeCard({ recipe }: Props) {
       )}
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
-        <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+        <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
           {recipe.servings} {recipe.servings !== 1 ? 'porciones' : 'porción'}
         </span>
         {totalTime > 0 && (
-          <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
             {totalTime} min
           </span>
         )}
         {recipe.ingredients.length > 0 && (
-          <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
             {recipe.ingredients.length} ingredientes
           </span>
         )}

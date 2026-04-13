@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { RecipePayload } from '@/types/recipe';
 
-type ActionResult = { error: string } | null;
+export type ActionResult = { error: string } | null;
 
 export async function createRecipe(payload: RecipePayload): Promise<ActionResult> {
   const supabase = await createClient();

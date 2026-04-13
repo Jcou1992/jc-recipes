@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { deleteRecipe } from '@/app/actions/recipes';
+import { useToast } from '@/components/ui/ToastContext';
 
 interface Props {
   id: string;
@@ -10,36 +11,25 @@ interface Props {
 }
 
 export default function DeleteRecipeButton({ id, name }: Props) {
-  const [open, setOpen]         = useState(false);
-  const [pending, setPending]   = useState(false);
-  const [error, setError]       = useState('');
+  const { showToast } = useToast();
+  const [open, setOpen]       = useState(false);
+  const [pending, setPending] = useState(false);
 
   const handleConfirm = async () => {
     setPending(true);
     const result = await deleteRecipe(id);
     if (result?.error) {
-      setError(result.error);
+      showToast(result.error, 'error');
       setPending(false);
       setOpen(false);
+      return;
     }
-    // On success, server action redirects to /recipes
+    // On success the server action calls redirect() — framework handles navigation
   };
 
   return (
     <>
-      {error && (
-        <p
-          className="font-label text-xs tracking-wide mb-2"
-          style={{ color: 'var(--color-terracotta)' }}
-        >
-          {error}
-        </p>
-      )}
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="btn-danger"
-      >
+      <button type="button" onClick={() => setOpen(true)} className="btn-danger">
         Delete
       </button>
       <ConfirmDialog

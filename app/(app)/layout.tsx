@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { logout } from '@/app/actions/auth';
+import AppProviders from '@/components/ui/AppProviders';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -34,7 +35,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </div>
       </nav>
-      <main>{children}</main>
+      <AppProviders>
+        <main>{children}</main>
+      </AppProviders>
     </div>
   );
 }

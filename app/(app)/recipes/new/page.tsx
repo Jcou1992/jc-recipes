@@ -5,7 +5,8 @@ import Link from 'next/link';
 import RecipeForm from '@/components/recipes/RecipeForm';
 import MarkdownImport from '@/components/recipes/MarkdownImport';
 import { createRecipe } from '@/app/actions/recipes';
-import type { Recipe, RecipePayload } from '@/types/recipe';
+import { useToast } from '@/components/ui/ToastContext';
+import type { Recipe } from '@/types/recipe';
 import type { ParsedRecipe } from '@/lib/utils/parse-recipe-markdown';
 
 // ── Markdown → form data mapping ─────────────────────────────────────────────
@@ -35,6 +36,7 @@ function parsedToInitial(parsed: ParsedRecipe): Partial<Recipe> {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function NewRecipePage() {
+  const { showToast } = useToast();
   const [tab, setTab]             = useState<'manual' | 'markdown'>('manual');
   const [formKey, setFormKey]     = useState(0);
   const [initialData, setInitial] = useState<Partial<Recipe> | undefined>(undefined);
@@ -43,6 +45,7 @@ export default function NewRecipePage() {
     setInitial(parsedToInitial(parsed));
     setFormKey(k => k + 1);
     setTab('manual');
+    showToast('Receta importada desde Markdown', 'success');
   };
 
   const isMarkdown = tab === 'markdown';
