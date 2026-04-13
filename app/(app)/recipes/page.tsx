@@ -29,7 +29,7 @@ export default async function RecipesPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-3xl font-bold" style={{ color: 'var(--text-1)' }}>
+        <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
           My Recipes
         </h1>
         <Link href="/recipes/new" className="btn-primary min-h-[44px]">

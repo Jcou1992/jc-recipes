@@ -12,10 +12,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <nav
-        style={{
-          background: 'var(--bg-card)',
-          borderBottom: '1px solid var(--border)',
-        }}
+        className="nav-frosted sticky top-0 z-10"
+        style={{ borderBottom: '1px solid var(--border)' }}
       >
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <a

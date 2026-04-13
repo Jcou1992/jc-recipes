@@ -30,15 +30,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   if (error || !recipe) notFound();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 animate-fade-up">
-      <Link
-        href="/recipes"
-        className="font-label text-xs tracking-widest uppercase inline-block mb-8 transition-colors"
-        style={{ color: 'var(--text-3)' }}
-      >
-        ← Volver
-      </Link>
-
+    <div className="max-w-3xl mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <h1 className="font-display text-4xl font-bold leading-tight" style={{ color: 'var(--text-1)' }}>
@@ -65,7 +57,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
           {recipe.tags.map(tag => (
             <span
               key={tag}
-              className="font-label text-xs tracking-wider uppercase px-2.5 py-0.5 rounded-full"
+              className="font-label text-sm tracking-wider uppercase px-2.5 py-0.5 rounded-full"
               style={{
                 background: 'rgba(237,209,142,0.12)',
                 color: 'var(--color-gold)',

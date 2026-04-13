@@ -238,8 +238,8 @@ test('cooking mode: enter from detail page, navigate steps, exit returns to deta
   });
   await page.goto(recipeUrl);
 
-  // Enter cooking mode
-  const cookBtn = page.getByTestId('cook-mode-btn');
+  // Enter cooking mode (mobile uses cook-mode-btn, desktop uses cook-mode-btn-desktop)
+  const cookBtn = page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first();
   await expect(cookBtn).toBeVisible();
   await cookBtn.click();
   await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
@@ -284,7 +284,7 @@ test('cooking mode: timer controls work', async ({ page }) => {
 
   // Check if timer field exists — skip gracefully if step form doesn't have timer
   await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').click();
+  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
 
   const timerDisplay = page.getByTestId('cook-timer-display').or(page.getByTestId('cook-timer-display-mobile'));
@@ -334,7 +334,7 @@ test('cooking mode: wake lock is requested', async ({ page }) => {
     steps: ['Single step.'],
   });
   await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').click();
+  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
 
   // Give wake lock time to be called
@@ -349,7 +349,7 @@ test('cooking mode: progress bar reflects current step', async ({ page }) => {
     steps: ['Step A.', 'Step B.', 'Step C.', 'Step D.'],
   });
   await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').click();
+  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
 
   const progressBar = page.getByTestId('cook-progress-bar');
   if (await progressBar.isVisible()) {
@@ -377,7 +377,7 @@ test('cooking mode: ingredient sheet toggles on mobile', async ({ page }) => {
     steps: ['Chop the onion.'],
   });
   await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').click();
+  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
 
   const toggle = page.getByTestId('cook-ingredient-sheet-toggle');
   await expect(toggle).toBeVisible();

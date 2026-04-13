@@ -18,7 +18,7 @@
   --border:        rgba(255,255,255,0.07);
   --border-input:  rgba(255,255,255,0.13);
   --text-1:        #EDE8DC;
-  --text-2:        rgba(237,232,220,0.55);
+  --text-2:        #A89E92;
   --text-3:        #8A7E72;
   --ring:          rgba(212,112,63,0.45);
   --shadow-card:   0 0 0 1px rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.45);
@@ -35,12 +35,25 @@
     --border:        rgba(13,13,15,0.09);
     --border-input:  rgba(13,13,15,0.18);
     --text-1:        #17120A;
-    --text-2:        rgba(23,18,10,0.58);
+    --text-2:        #4A4039;
     --text-3:        #6B5F54;
     --ring:          rgba(212,112,63,0.35);
     --shadow-card:   0 0 0 1px rgba(13,13,15,0.07), 0 2px 12px rgba(0,0,0,0.06);
     --shadow-dialog: 0 0 0 1px rgba(13,13,15,0.08), 0 24px 64px rgba(0,0,0,0.15);
   }
+}
+
+/* ── Grain texture overlay ──────────────────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  will-change: transform;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────────── */
@@ -50,6 +63,7 @@
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    font-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
   }
 
   body {
@@ -57,6 +71,7 @@
     color: var(--text-1);
     font-family: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif);
     font-size: 1rem;
+    font-weight: 400;
     line-height: 1.65;
     min-height: 100svh;
     -webkit-font-smoothing: antialiased;
@@ -69,6 +84,16 @@
     border-radius: 3px;
   }
   :focus:not(:focus-visible) { outline: none; }
+}
+
+/* ── Layout utilities ───────────────────────────────────────────────────────── */
+@layer utilities {
+  .nav-frosted {
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    background: var(--bg-card);
+    background: color-mix(in srgb, var(--bg) 80%, transparent);
+  }
 }
 
 /* ── Font utilities ─────────────────────────────────────────────────────────── */
@@ -186,7 +211,7 @@
 
   /* Markdown preview — uses CSS vars so light mode works correctly */
   .md-h1 { font-size: 1.25rem; font-weight: 700; margin-top: .5rem; color: var(--text-1); }
-  .md-h2 { font-size: 0.6875rem; font-weight: 600; margin-top: 1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
+  .md-h2 { font-size: 0.8125rem; font-weight: 600; margin-top: 1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
   .md-blockquote { border-left: 3px solid rgba(212,112,63,0.4); padding-left: .75rem; color: var(--text-2); font-style: italic; }
   .md-ul { margin-left: 1.25rem; list-style: disc; }
   .md-ol { margin-left: 1.25rem; list-style: decimal; }
@@ -206,12 +231,15 @@
     color: var(--text-1);
   }
 
-  /* Recipe card hover border */
+  /* Recipe card hover border + lift */
   .recipe-card {
     border: 1px solid var(--border);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.15s;
   }
   .recipe-card:hover {
     border-color: rgba(212, 112, 63, 0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,0.55);
   }
 
   /* Section label (Ingredientes, Pasos, etc.) */
@@ -273,7 +301,8 @@
   /* Page breaks */
   section { break-inside: avoid; }
 
-  /* Remove animation */
+  /* Remove grain + animation */
+  body::after { display: none !important; }
   .animate-fade-up { animation: none !important; }
 
   /* Tags — print flat */

@@ -171,19 +171,22 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             </div>
           )}
 
-          {/* Sort — desktop dropdown */}
-          <div className="hidden sm:block flex-shrink-0">
-            <select
-              value={sort}
-              onChange={e => updateParams({ sort: e.target.value })}
-              className="input-base text-sm font-label py-2 cursor-pointer w-auto"
-              aria-label="Sort recipes"
-              data-testid="sort-select"
-            >
-              {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
-                <option key={k} value={k}>{SORT_LABELS[k]}</option>
-              ))}
-            </select>
+          {/* Sort — desktop pill buttons */}
+          <div className="hidden sm:flex flex-shrink-0 gap-1.5" data-testid="sort-select">
+            {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+              <button
+                key={k}
+                onClick={() => updateParams({ sort: k })}
+                className="font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] transition-all"
+                style={sort === k
+                  ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                  : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
+                }
+                aria-pressed={sort === k}
+              >
+                {SORT_LABELS[k]}
+              </button>
+            ))}
           </div>
 
           {/* Sort — mobile button */}
@@ -253,9 +256,15 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-up">
-          {filtered.map(recipe => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filtered.map((recipe, index) => (
+            <div
+              key={recipe.id}
+              className={`animate-fade-up${index === 0 ? ' sm:col-span-2' : ''}`}
+              style={{ animationDelay: `${Math.min(index, 6) * 60}ms`, animationFillMode: 'both' }}
+            >
+              <RecipeCard recipe={recipe} featured={index === 0} />
+            </div>
           ))}
         </div>
       )}

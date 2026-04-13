@@ -242,110 +242,142 @@ export default function RecipeDetailClient({ recipe }: Props) {
         </div>
       </div>
 
-      {/* Ingredients */}
-      {recipe.ingredients.length > 0 && (
-        <section className="mb-10" data-testid="ingredients-section">
-          <h2 className="section-label mb-4">Ingredientes</h2>
-          <ul className="space-y-2.5">
-            {displayedIngredients.map((ing, i) => (
-              <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
-                <span
-                  className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right"
-                  style={{ color: 'var(--color-terracotta)' }}
-                  data-testid={`ingredient-amount-${i}`}
+      {/* Two-column body on md+ */}
+      <div className="md:grid md:grid-cols-[2fr_3fr] md:gap-10 md:items-start">
+
+        {/* LEFT: sticky sidebar — shown when there are ingredients or steps */}
+        {(recipe.ingredients.length > 0 || recipe.steps.length > 0) && (
+          <aside className="md:sticky md:top-20 mb-10 md:mb-0">
+            {recipe.ingredients.length > 0 && (
+              <section data-testid="ingredients-section">
+                <h2 className="section-label mb-4">Ingredientes</h2>
+                <ul className="space-y-2.5">
+                  {displayedIngredients.map((ing, i) => (
+                    <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
+                      <span
+                        className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right"
+                        style={{ color: 'var(--color-terracotta)' }}
+                        data-testid={`ingredient-amount-${i}`}
+                      >
+                        {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
+                      </span>
+                      <span className="font-body text-base" style={{ color: 'var(--text-1)' }}>
+                        {ing.name}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* Copy ingredients button */}
+            {recipe.ingredients.length > 0 && (
+              <div className="mt-4 mb-6">
+                <button
+                  onClick={async () => {
+                    const text = displayedIngredients
+                      .map(i => `${i.displayAmount}${i.unit ? ` ${i.unit}` : ''} ${i.name}`.trim())
+                      .join('\n');
+                    try {
+                      await navigator.clipboard.writeText(text);
+                      showToast('Ingredientes copiados', 'success');
+                    } catch {
+                      showToast('No se pudo copiar al portapapeles', 'error');
+                    }
+                  }}
+                  className="btn-ghost text-sm"
+                  data-testid="copy-ingredients-btn"
                 >
-                  {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
-                </span>
-                <span className="font-body text-base" style={{ color: 'var(--text-1)' }}>
-                  {ing.name}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+                  Copiar ingredientes
+                </button>
+              </div>
+            )}
 
-      {/* Copy ingredients button */}
-      {recipe.ingredients.length > 0 && (
-        <div className="mb-6 -mt-4">
-          <button
-            onClick={async () => {
-              const text = displayedIngredients
-                .map(i => `${i.displayAmount}${i.unit ? ` ${i.unit}` : ''} ${i.name}`.trim())
-                .join('\n');
-              try {
-                await navigator.clipboard.writeText(text);
-                showToast('Ingredientes copiados', 'success');
-              } catch {
-                showToast('No se pudo copiar al portapapeles', 'error');
-              }
-            }}
-            className="btn-ghost text-sm"
-            data-testid="copy-ingredients-btn"
-          >
-            Copiar ingredientes
-          </button>
+            {/* Desktop Cocinar button — always in left column when there are steps */}
+            {recipe.steps.length > 0 && (
+              <div className="hidden md:block">
+                <Link
+                  href={cookUrl}
+                  className="btn-primary w-full text-center"
+                  data-testid="cook-mode-btn-desktop"
+                >
+                  Cocinar
+                </Link>
+              </div>
+            )}
+          </aside>
+        )}
+
+        {/* RIGHT: steps + notes */}
+        <div>
+          {recipe.steps.length > 0 && (
+            <section className="mb-10">
+              <h2 className="section-label mb-4">Preparación</h2>
+              <ol className="space-y-6">
+                {[...recipe.steps]
+                  .sort((a, b) => a.order - b.order)
+                  .map(step => (
+                    <li key={step.order} className="flex gap-4 items-start">
+                      <span
+                        className="font-label flex-shrink-0"
+                        style={{ fontSize: '2.5rem', lineHeight: 1, color: 'var(--color-terracotta)', minWidth: '2.5rem' }}
+                      >
+                        {step.order}
+                      </span>
+                      <div className="pt-1">
+                        <p className="font-body text-base leading-relaxed" style={{ color: 'var(--text-1)' }}>
+                          {step.content}
+                        </p>
+                        {step.timer_seconds != null && (
+                          <p
+                            className="font-label text-xs tracking-wider uppercase mt-1.5"
+                            style={{ color: 'var(--color-terracotta)' }}
+                          >
+                            ⏱ {formatTime(step.timer_seconds / 60)}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+              </ol>
+            </section>
+          )}
+
+          {recipe.notes && (
+            <section
+              className="rounded-xl p-5"
+              style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}
+            >
+              <h2 className="section-label mb-3">Notas</h2>
+              <p className="font-body text-base whitespace-pre-line" style={{ color: 'var(--text-2)' }}>
+                {recipe.notes}
+              </p>
+            </section>
+          )}
         </div>
-      )}
 
-      {/* Cocinar button */}
+      </div>
+
+      {/* Mobile sticky footer Cocinar button */}
       {recipe.steps.length > 0 && (
-        <div className="mb-10 flex sm:justify-end">
+        <div
+          className="md:hidden fixed bottom-0 left-0 right-0 z-20 px-4 py-3"
+          style={{
+            background: 'color-mix(in srgb, var(--bg) 92%, transparent)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderTop: '1px solid var(--border)',
+            paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))',
+          }}
+        >
           <Link
             href={cookUrl}
-            className="btn-primary w-full sm:w-auto text-center"
+            className="btn-primary w-full text-center block"
             data-testid="cook-mode-btn"
           >
             Cocinar
           </Link>
         </div>
-      )}
-
-      {/* Steps */}
-      {recipe.steps.length > 0 && (
-        <section className="mb-10">
-          <h2 className="section-label mb-4">Preparación</h2>
-          <ol className="space-y-5">
-            {[...recipe.steps]
-              .sort((a, b) => a.order - b.order)
-              .map(step => (
-                <li key={step.order} className="flex gap-4">
-                  <span
-                    className="font-label flex-shrink-0 text-lg font-bold leading-none mt-0.5"
-                    style={{ color: 'var(--color-terracotta)', minWidth: '1.5rem' }}
-                  >
-                    {step.order}
-                  </span>
-                  <div>
-                    <p className="font-body text-base leading-relaxed" style={{ color: 'var(--text-1)' }}>
-                      {step.content}
-                    </p>
-                    {step.timer_seconds != null && (
-                      <p
-                        className="font-label text-xs tracking-wider uppercase mt-1.5"
-                        style={{ color: 'var(--color-terracotta)' }}
-                      >
-                        ⏱ {formatTime(step.timer_seconds / 60)}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              ))}
-          </ol>
-        </section>
-      )}
-
-      {/* Notes */}
-      {recipe.notes && (
-        <section
-          className="rounded-xl p-5"
-          style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}
-        >
-          <h2 className="section-label mb-3">Notas</h2>
-          <p className="font-body text-base whitespace-pre-line" style={{ color: 'var(--text-2)' }}>
-            {recipe.notes}
-          </p>
-        </section>
       )}
     </div>
   );

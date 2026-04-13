@@ -181,8 +181,8 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
   return (
     <div
-      className="fixed inset-0 flex flex-col"
-      style={{ background: '#0A0A0C', color: '#EDE8DC' }}
+      className="fixed inset-0 z-20 flex flex-col animate-scale-in"
+      style={{ background: 'var(--bg)', color: 'var(--text-1)' }}
       data-testid="cook-mode"
     >
       {/* Active timer pills */}
@@ -214,24 +214,24 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       {/* Desktop layout */}
       <div className="hidden sm:flex h-full">
         {/* Left: step panel (60%) */}
-        <div className="flex-[3] flex flex-col h-full border-r" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+        <div className="flex-[3] flex flex-col h-full border-r" style={{ borderColor: 'var(--border)' }}>
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+          <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
             <Link
               href={`/recipes/${recipe.id}`}
               className="font-label text-xs tracking-widest uppercase transition-colors"
-              style={{ color: 'rgba(237,232,220,0.5)' }}
+              style={{ color: 'var(--text-3)' }}
               data-testid="cook-exit-btn"
             >
               ← Salir
             </Link>
-            <span className="font-label text-sm tracking-wide" style={{ color: 'rgba(237,232,220,0.5)' }}>
+            <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-3)' }}>
               Paso {currentIndex + 1} de {totalSteps}
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5" style={{ background: 'rgba(255,255,255,0.07)' }}>
+          <div className="h-1.5" style={{ background: 'var(--border)' }}>
             <div
               className="h-full transition-all duration-300"
               style={{
@@ -245,7 +245,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           <div className="flex-1 flex flex-col justify-center px-10 py-8 overflow-y-auto">
             <p
               className="font-body mb-8"
-              style={{ fontSize: '2rem', fontWeight: 500, lineHeight: 1.5, color: '#EDE8DC' }}
+              style={{ fontSize: '2rem', fontWeight: 500, lineHeight: 1.5, color: 'var(--text-1)' }}
               data-testid="cook-step-text"
             >
               {currentStep.content}
@@ -255,7 +255,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               <div className="flex items-center gap-4">
                 <span
                   className="font-label text-4xl font-bold tabular-nums"
-                  style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : '#EDE8DC' }}
+                  style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : 'var(--text-1)' }}
                   data-testid="cook-timer-display"
                 >
                   {formatSeconds(currentTimer.remaining)}
@@ -277,12 +277,12 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </div>
 
           {/* Prev / Next */}
-          <div className="grid grid-cols-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="grid grid-cols-2" style={{ borderTop: '1px solid var(--border)' }}>
             <button
               onClick={() => goTo(currentIndex - 1)}
               disabled={currentIndex === 0}
               className="font-label text-sm tracking-wider uppercase py-5 transition-colors border-r disabled:opacity-30"
-              style={{ borderColor: 'rgba(255,255,255,0.07)', color: 'rgba(237,232,220,0.7)' }}
+              style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}
               data-testid="cook-prev-btn"
             >
               ← Anterior
@@ -291,7 +291,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               onClick={() => goTo(currentIndex + 1)}
               disabled={currentIndex === totalSteps - 1}
               className="font-label text-sm tracking-wider uppercase py-5 transition-colors disabled:opacity-30"
-              style={{ color: 'rgba(237,232,220,0.7)' }}
+              style={{ color: 'var(--text-2)' }}
               data-testid="cook-next-btn"
             >
               Siguiente →
@@ -301,7 +301,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
         {/* Right: ingredients (40%) */}
         <div className="flex-[2] flex flex-col h-full overflow-y-auto px-6 py-6">
-          <h2 className="section-label mb-5" style={{ color: 'rgba(237,232,220,0.35)' }}>
+          <h2 className="section-label mb-5" style={{ color: 'var(--text-3)' }}>
             Ingredientes
           </h2>
           <ul className="space-y-3">
@@ -317,7 +317,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
                   style={checkedIngredients.has(i)
                     ? { background: 'var(--color-terracotta)', borderColor: 'var(--color-terracotta)' }
-                    : { background: 'transparent', borderColor: 'rgba(237,232,220,0.25)' }
+                    : { background: 'transparent', borderColor: 'var(--border-input)' }
                   }
                 >
                   {checkedIngredients.has(i) && (
@@ -329,7 +329,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 <span
                   className="font-body text-sm"
                   style={{
-                    color: checkedIngredients.has(i) ? 'rgba(237,232,220,0.3)' : 'rgba(237,232,220,0.8)',
+                    color: checkedIngredients.has(i) ? 'color-mix(in srgb, var(--text-1) 30%, transparent)' : 'var(--text-2)',
                     textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
                   }}
                   data-testid={`cook-ingredient-${i}`}
@@ -352,22 +352,22 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         onTouchEnd={onTouchEnd}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <Link
             href={`/recipes/${recipe.id}`}
             className="font-label text-xs tracking-widest uppercase min-h-[44px] flex items-center pr-4"
-            style={{ color: 'rgba(237,232,220,0.5)' }}
+            style={{ color: 'var(--text-3)' }}
             data-testid="cook-exit-btn-mobile"
           >
             ← Salir
           </Link>
-          <span className="font-label text-sm tracking-wide" style={{ color: 'rgba(237,232,220,0.5)' }}>
+          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-3)' }}>
             Paso {currentIndex + 1} de {totalSteps}
           </span>
         </div>
 
         {/* Progress bar */}
-        <div className="h-1.5" style={{ background: 'rgba(255,255,255,0.07)' }}>
+        <div className="h-1.5" style={{ background: 'var(--border)' }}>
           <div
             className="h-full transition-all duration-300"
             style={{
@@ -382,7 +382,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         <div className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
           <p
             className="font-body mb-8"
-            style={{ fontSize: '1.75rem', fontWeight: 500, lineHeight: 1.5, color: '#EDE8DC' }}
+            style={{ fontSize: '1.75rem', fontWeight: 500, lineHeight: 1.5, color: 'var(--text-1)' }}
             data-testid="cook-step-text-mobile"
           >
             {currentStep.content}
@@ -392,7 +392,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             <div className="flex items-center gap-4">
               <span
                 className={`font-label text-3xl font-bold tabular-nums ${currentTimer.remaining === 0 ? 'animate-pulse' : ''}`}
-                style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : '#EDE8DC' }}
+                style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : 'var(--text-1)' }}
                 data-testid="cook-timer-display-mobile"
               >
                 {formatSeconds(currentTimer.remaining)}
@@ -414,15 +414,15 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         </div>
 
         {/* Prev / Next */}
-        <div className="grid grid-cols-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="grid grid-cols-2" style={{ borderTop: '1px solid var(--border)' }}>
           <button
             onClick={() => goTo(currentIndex - 1)}
             disabled={currentIndex === 0}
             className="font-label text-sm tracking-wider uppercase flex items-center justify-center border-r disabled:opacity-30"
             style={{
               minHeight: '64px',
-              borderColor: 'rgba(255,255,255,0.07)',
-              color: 'rgba(237,232,220,0.7)',
+              borderColor: 'var(--border)',
+              color: 'var(--text-2)',
             }}
             data-testid="cook-prev-btn-mobile"
           >
@@ -432,7 +432,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             onClick={() => goTo(currentIndex + 1)}
             disabled={currentIndex === totalSteps - 1}
             className="font-label text-sm tracking-wider uppercase flex items-center justify-center disabled:opacity-30"
-            style={{ minHeight: '64px', color: 'rgba(237,232,220,0.7)' }}
+            style={{ minHeight: '64px', color: 'var(--text-2)' }}
             data-testid="cook-next-btn-mobile"
           >
             Siguiente →
@@ -442,12 +442,12 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         {/* Ingredient bottom sheet handle */}
         <div
           className="border-t"
-          style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          style={{ borderColor: 'var(--border)' }}
         >
           <button
             onClick={() => setSheetOpen(o => !o)}
             className="w-full flex items-center justify-between px-5 font-label text-xs tracking-widest uppercase"
-            style={{ minHeight: '48px', color: 'rgba(237,232,220,0.5)' }}
+            style={{ minHeight: '48px', color: 'var(--text-3)' }}
             aria-expanded={sheetOpen}
             data-testid="cook-ingredient-sheet-toggle"
           >
@@ -483,7 +483,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                       className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center"
                       style={checkedIngredients.has(i)
                         ? { background: 'var(--color-terracotta)', borderColor: 'var(--color-terracotta)' }
-                        : { background: 'transparent', borderColor: 'rgba(237,232,220,0.25)' }
+                        : { background: 'transparent', borderColor: 'var(--border-input)' }
                       }
                     >
                       {checkedIngredients.has(i) && (
@@ -495,7 +495,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                     <span
                       className="font-body text-sm"
                       style={{
-                        color: checkedIngredients.has(i) ? 'rgba(237,232,220,0.3)' : 'rgba(237,232,220,0.8)',
+                        color: checkedIngredients.has(i) ? 'color-mix(in srgb, var(--text-1) 30%, transparent)' : 'var(--text-2)',
                         textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
                       }}
                     >
