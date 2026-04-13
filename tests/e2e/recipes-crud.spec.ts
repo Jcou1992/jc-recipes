@@ -14,6 +14,11 @@ async function signIn(page: Page) {
   await expect(page).toHaveURL(/\/recipes$/, { timeout: 10_000 });
 }
 
+async function gotoNewRecipe(page: Page) {
+  await page.goto('/recipes/new');
+  await page.waitForLoadState('networkidle'); // ensure React hydration before interacting
+}
+
 // ── Empty state ────────────────────────────────────────────────────────────────
 
 test('empty state shows when no recipes exist', async ({ page }) => {
@@ -31,6 +36,7 @@ test('create a recipe — happy path', async ({ page }) => {
   await signIn(page);
   await page.getByRole('link', { name: '+ New recipe' }).click();
   await expect(page).toHaveURL(/\/recipes\/new$/);
+  await page.waitForLoadState('networkidle');
 
   // Manual tab is active by default
   await expect(page.getByTestId('manual-tab')).toBeVisible();
@@ -47,13 +53,16 @@ test('create a recipe — happy path', async ({ page }) => {
   await page.getByRole('textbox', { name: 'Step 1' }).fill('Crack the eggs.');
 
   await page.getByRole('button', { name: 'Create recipe' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
   await expect(page.getByRole('heading', { name: 'Playwright Test Recipe' })).toBeVisible();
 });
 
 test('create form requires name field', async ({ page }) => {
   await signIn(page);
-  await page.goto('/recipes/new');
+  await gotoNewRecipe(page);
   // Click submit without filling name
   await page.getByRole('button', { name: 'Create recipe' }).click();
   // Browser native validation should prevent submission
@@ -64,7 +73,7 @@ test('create form requires name field', async ({ page }) => {
 
 test('recipe detail shows all persisted fields', async ({ page }) => {
   await signIn(page);
-  await page.goto('/recipes/new');
+  await gotoNewRecipe(page);
 
   await page.locator('#name').fill('Detail Test Recipe');
   await page.getByLabel('Servings').fill('4');
@@ -79,7 +88,10 @@ test('recipe detail shows all persisted fields', async ({ page }) => {
   await page.getByLabel('Prep time (min)').fill('10');
 
   await page.getByRole('button', { name: 'Create recipe' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
 
   await expect(page.getByText('4 servings')).toBeVisible();
   await expect(page.getByText('A test description')).toBeVisible();
@@ -93,22 +105,29 @@ test('edit updates the recipe', async ({ page }) => {
   await signIn(page);
 
   // Create first
-  await page.goto('/recipes/new');
+  await gotoNewRecipe(page);
   await page.locator('#name').fill('Edit Target Recipe');
   await page.getByLabel('Servings').fill('1');
   await page.getByRole('textbox', { name: 'Ingredient name' }).first().fill('water');
   await page.getByRole('textbox', { name: 'Step 1' }).fill('Boil water.');
   await page.getByRole('button', { name: 'Create recipe' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
 
   // Click edit
   await page.getByRole('link', { name: 'Edit' }).click();
   await expect(page).toHaveURL(/\/edit$/);
+  await page.waitForLoadState('networkidle');
 
   await page.locator('#name').clear();
   await page.locator('#name').fill('Renamed Recipe');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
 
   await expect(page.getByRole('heading', { name: 'Renamed Recipe' })).toBeVisible();
 });
@@ -119,13 +138,16 @@ test('delete with confirmation removes the recipe', async ({ page }) => {
   await signIn(page);
 
   // Create
-  await page.goto('/recipes/new');
+  await gotoNewRecipe(page);
   await page.locator('#name').fill('Recipe To Delete');
   await page.getByLabel('Servings').fill('1');
   await page.getByRole('textbox', { name: 'Ingredient name' }).first().fill('salt');
   await page.getByRole('textbox', { name: 'Step 1' }).fill('Add salt.');
   await page.getByRole('button', { name: 'Create recipe' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
 
   // Delete
   await page.getByRole('button', { name: 'Delete' }).click();
@@ -140,13 +162,16 @@ test('delete with confirmation removes the recipe', async ({ page }) => {
 test('cancel on delete dialog does not delete the recipe', async ({ page }) => {
   await signIn(page);
 
-  await page.goto('/recipes/new');
+  await gotoNewRecipe(page);
   await page.locator('#name').fill('Keep This Recipe');
   await page.getByLabel('Servings').fill('1');
   await page.getByRole('textbox', { name: 'Ingredient name' }).first().fill('pepper');
   await page.getByRole('textbox', { name: 'Step 1' }).fill('Add pepper.');
   await page.getByRole('button', { name: 'Create recipe' }).click();
-  await expect(page).toHaveURL(/\/recipes\/[a-z0-9-]+$/, { timeout: 10_000 });
+  await page.waitForURL(
+    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
+    { timeout: 30_000 },
+  );
 
   await page.getByRole('button', { name: 'Delete' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();

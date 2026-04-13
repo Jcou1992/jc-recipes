@@ -7,6 +7,7 @@ config({ path: path.resolve(__dirname, '.env.local') });
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   timeout: 60_000,
