@@ -29,3 +29,8 @@ export interface Recipe {
 
 // Shape sent to the DB on create / update (no auto-generated fields)
 export type RecipePayload = Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+
+export interface BulkActionResult {
+  succeeded: string[];
+  failed: Array<{ id: string; error: string }>;
+}

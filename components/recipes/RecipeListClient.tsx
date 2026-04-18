@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState, useRef, useEffect, useTransition } from 'react';
+import { useMemo, useState, useRef, useEffect, useTransition, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import RecipeCard from './RecipeCard';
+import BulkActionBar from './BulkActionBar';
 import type { Recipe } from '@/types/recipe';
 
 function normalise(s: string) {
@@ -17,6 +18,8 @@ const SORT_LABELS: Record<SortKey, string> = {
   fastest: 'Fastest',
   'most-ingredients': 'Most ingredients',
 };
+
+const SELECT_LIMIT = 100;
 
 interface Props {
   recipes: Recipe[];
@@ -40,7 +43,28 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const [showSortSheet, setShowSortSheet] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Selection state
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [lastSelectedIdx, setLastSelectedIdx] = useState<number | null>(null);
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+
   useEffect(() => { setSearchInput(q); }, [q]);
+
+  // Clear hidden/selected IDs that no longer exist after a refresh
+  useEffect(() => {
+    const existing = new Set(recipes.map(r => r.id));
+    setHiddenIds(prev => {
+      const next = new Set<string>();
+      for (const id of prev) if (existing.has(id)) next.add(id);
+      return next.size === prev.size ? prev : next;
+    });
+    setSelectedIds(prev => {
+      const next = new Set<string>();
+      for (const id of prev) if (existing.has(id)) next.add(id);
+      return next.size === prev.size ? prev : next;
+    });
+  }, [recipes]);
 
   function updateParams(updates: Record<string, string | null>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -73,7 +97,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   }
 
   const filtered = useMemo(() => {
-    let list = recipes;
+    let list = recipes.filter(r => !hiddenIds.has(r.id));
 
     if (q) {
       const nq = normalise(q);
@@ -102,12 +126,130 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
     }
 
     return list;
-  }, [recipes, q, activeTags, sort]);
+  }, [recipes, hiddenIds, q, activeTags, sort]);
 
   const hasFilters = !!(q || activeTags.length > 0 || sort !== 'newest');
 
+  // ── Selection helpers ───────────────────────────────────────────────────────
+  const enterSelectMode = useCallback(() => {
+    setSelectMode(true);
+    setLastSelectedIdx(null);
+  }, []);
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+    setLastSelectedIdx(null);
+  }, []);
+
+  const toggleSelect = useCallback(
+    (id: string, idx: number, shift: boolean) => {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (shift && lastSelectedIdx !== null && lastSelectedIdx !== idx) {
+          const [from, to] = [Math.min(lastSelectedIdx, idx), Math.max(lastSelectedIdx, idx)];
+          for (let i = from; i <= to; i++) {
+            const r = filtered[i];
+            if (r && next.size < SELECT_LIMIT) next.add(r.id);
+          }
+        } else if (next.has(id)) {
+          next.delete(id);
+        } else {
+          if (next.size >= SELECT_LIMIT) return prev;
+          next.add(id);
+        }
+        return next;
+      });
+      setLastSelectedIdx(idx);
+    },
+    [filtered, lastSelectedIdx],
+  );
+
+  const selectAllVisible = useCallback(() => {
+    setSelectedIds(prev => {
+      const visibleIds = filtered.map(r => r.id);
+      const allSelected = visibleIds.length > 0 && visibleIds.every(id => prev.has(id));
+      if (allSelected) {
+        const next = new Set(prev);
+        for (const id of visibleIds) next.delete(id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const id of visibleIds) {
+        if (next.size >= SELECT_LIMIT) break;
+        next.add(id);
+      }
+      return next;
+    });
+  }, [filtered]);
+
+  const handleOptimisticHide = useCallback((ids: string[]) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      for (const id of ids) next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleOptimisticRestore = useCallback((ids: string[]) => {
+    setHiddenIds(prev => {
+      const next = new Set(prev);
+      for (const id of ids) next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const selectedCount = selectedIds.size;
+  const allSelected =
+    filtered.length > 0 && filtered.every(r => selectedIds.has(r.id));
+
+  const selectedRecipes = useMemo(
+    () => recipes.filter(r => selectedIds.has(r.id)),
+    [recipes, selectedIds],
+  );
+
   return (
-    <div>
+    <div className={selectMode && selectedCount > 0 ? 'pb-24' : ''}>
+      {/* Top row: select toggle */}
+      <div className="flex items-center justify-between mb-3">
+        {selectMode && filtered.length > 0 ? (
+          <button
+            type="button"
+            onClick={selectAllVisible}
+            className="font-label text-xs tracking-wider uppercase min-h-[44px] flex items-center gap-2"
+            style={{ color: 'var(--text-2)' }}
+            data-testid="select-all"
+          >
+            <span
+              className="inline-flex w-5 h-5 rounded-full items-center justify-center"
+              style={{
+                background: allSelected ? 'var(--color-terracotta)' : 'transparent',
+                border: `2px solid ${allSelected ? 'var(--color-terracotta)' : 'var(--border)'}`,
+              }}
+              aria-hidden="true"
+            >
+              {allSelected && (
+                <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </span>
+            {allSelected ? 'Deselect all' : `Select all (${filtered.length})`}
+          </button>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={selectMode ? exitSelectMode : enterSelectMode}
+          className="font-label text-xs tracking-wider uppercase min-h-[44px] px-2"
+          style={{ color: 'var(--text-2)' }}
+          data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
+        >
+          {selectMode ? 'Done' : 'Select'}
+        </button>
+      </div>
+
       {/* Search bar */}
       <div className="relative mb-4">
         <input
@@ -260,13 +402,30 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           {filtered.map((recipe, index) => (
             <div
               key={recipe.id}
-              className={`animate-fade-up${index === 0 ? ' sm:col-span-2' : ''}`}
+              className={`animate-fade-up${!selectMode && index === 0 ? ' sm:col-span-2' : ''}`}
               style={{ animationDelay: `${Math.min(index, 6) * 60}ms`, animationFillMode: 'both' }}
             >
-              <RecipeCard recipe={recipe} featured={index === 0} />
+              <RecipeCard
+                recipe={recipe}
+                featured={!selectMode && index === 0}
+                selectMode={selectMode}
+                selected={selectedIds.has(recipe.id)}
+                onToggle={shift => toggleSelect(recipe.id, index, shift)}
+              />
             </div>
           ))}
         </div>
+      )}
+
+      {selectMode && selectedCount > 0 && (
+        <BulkActionBar
+          selectedIds={Array.from(selectedIds)}
+          selectedRecipes={selectedRecipes}
+          allTags={allTags}
+          onDone={exitSelectMode}
+          onOptimisticHide={handleOptimisticHide}
+          onOptimisticRestore={handleOptimisticRestore}
+        />
       )}
     </div>
   );

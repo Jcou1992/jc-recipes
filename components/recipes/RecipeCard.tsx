@@ -1,12 +1,24 @@
+'use client';
+
 import Link from 'next/link';
+import type { MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
 
 interface Props {
   recipe: Recipe;
   featured?: boolean;
+  selectMode?: boolean;
+  selected?: boolean;
+  onToggle?: (shift: boolean) => void;
 }
 
-export default function RecipeCard({ recipe, featured = false }: Props) {
+export default function RecipeCard({
+  recipe,
+  featured = false,
+  selectMode = false,
+  selected = false,
+  onToggle,
+}: Props) {
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
 
   const metaRow = (
@@ -45,65 +57,82 @@ export default function RecipeCard({ recipe, featured = false }: Props) {
     </div>
   );
 
-  if (featured) {
-    return (
-      <Link
-        href={`/recipes/${recipe.id}`}
-        className="recipe-card block rounded-xl p-6 transition-all"
-        style={{
-          background: 'var(--bg-card)',
-          boxShadow: 'var(--shadow-card)',
-        }}
-      >
-        <h2
-          className="font-display text-2xl font-semibold leading-snug mb-2"
-          style={{ color: 'var(--text-1)' }}
+  const padClass = featured ? 'p-6' : 'p-5';
+  const titleClass = featured
+    ? 'font-display text-2xl font-semibold leading-snug mb-2'
+    : 'font-display text-xl font-semibold leading-snug mb-1 line-clamp-2';
+  const descClass = featured
+    ? 'font-body text-base line-clamp-3 mb-4'
+    : 'font-body text-base line-clamp-2 mb-3';
+
+  const inner = (
+    <>
+      {selectMode && (
+        <div
+          className="absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+          style={{
+            background: selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.9)',
+            border: `2px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
+          }}
+          aria-hidden="true"
         >
-          {recipe.name}
-        </h2>
-
-        {recipe.description && (
-          <p
-            className="font-body text-base line-clamp-3 mb-4"
-            style={{ color: 'var(--text-2)' }}
-          >
-            {recipe.description}
-          </p>
-        )}
-
-        {metaRow}
-        {tagRow}
-      </Link>
-    );
-  }
-
-  return (
-    <Link
-      href={`/recipes/${recipe.id}`}
-      className="recipe-card block rounded-xl p-5 transition-all"
-      style={{
-        background: 'var(--bg-card)',
-        boxShadow: 'var(--shadow-card)',
-      }}
-    >
-      <h2
-        className="font-display text-xl font-semibold leading-snug mb-1 line-clamp-2"
-        style={{ color: 'var(--text-1)' }}
-      >
+          {selected && (
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+        </div>
+      )}
+      <h2 className={titleClass} style={{ color: 'var(--text-1)' }}>
         {recipe.name}
       </h2>
 
       {recipe.description && (
-        <p
-          className="font-body text-base line-clamp-2 mb-3"
-          style={{ color: 'var(--text-2)' }}
-        >
+        <p className={descClass} style={{ color: 'var(--text-2)' }}>
           {recipe.description}
         </p>
       )}
 
       {metaRow}
       {tagRow}
+    </>
+  );
+
+  if (selectMode) {
+    const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+      onToggle?.(e.shiftKey);
+    };
+    return (
+      <div
+        className={`recipe-card relative block rounded-xl ${padClass} transition-all cursor-pointer select-none`}
+        style={{
+          background: 'var(--bg-card)',
+          boxShadow: selected ? '0 0 0 2px var(--color-terracotta)' : 'var(--shadow-card)',
+          opacity: selected ? 1 : 0.85,
+        }}
+        onClick={handleClick}
+        role="button"
+        aria-pressed={selected}
+        aria-label={`${selected ? 'Deselect' : 'Select'} ${recipe.name}`}
+        data-testid={`recipe-card-${recipe.id}`}
+        data-selected={selected ? 'true' : 'false'}
+      >
+        {inner}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={`/recipes/${recipe.id}`}
+      className={`recipe-card relative block rounded-xl ${padClass} transition-all`}
+      style={{
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+      data-testid={`recipe-card-${recipe.id}`}
+    >
+      {inner}
     </Link>
   );
 }
