@@ -19,7 +19,6 @@ const SORT_LABELS: Record<SortKey, string> = {
   'most-ingredients': 'Most ingredients',
 };
 
-const SELECT_LIMIT = 100;
 
 interface Props {
   recipes: Recipe[];
@@ -155,7 +154,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         } else if (next.has(id)) {
           next.delete(id);
         } else {
-          if (next.size >= SELECT_LIMIT) return prev;
           next.add(id);
         }
         return next;
@@ -175,10 +173,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         return next;
       }
       const next = new Set(prev);
-      for (const id of visibleIds) {
-        if (next.size >= SELECT_LIMIT) break;
-        next.add(id);
-      }
+      for (const id of visibleIds) next.add(id);
       return next;
     });
   }, [filtered]);
@@ -242,10 +237,15 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         <button
           type="button"
           onClick={selectMode ? exitSelectMode : enterSelectMode}
-          className="font-label text-xs tracking-wider uppercase min-h-[44px] px-2"
+          className="font-label text-xs tracking-wider uppercase min-h-[44px] px-2 flex items-center gap-1.5"
           style={{ color: 'var(--text-2)' }}
           data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
         >
+          {!selectMode && (
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="4" strokeWidth={2} />
+            </svg>
+          )}
           {selectMode ? 'Done' : 'Select'}
         </button>
       </div>
