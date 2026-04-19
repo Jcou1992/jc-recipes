@@ -60,25 +60,25 @@ function markdownToHtml(md: string): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const PLACEHOLDER = `# Nombre de la receta
+const PLACEHOLDER = `# Recipe name
 
-> Descripción breve (opcional)
+> Brief description (optional)
 
 **Prep time:** 20 min
 **Cook time:** 30 min
 **Servings:** 4
 
 ## Ingredients
-- 200g ingrediente
-- 1 tbsp ingrediente
-- 3 nombre
+- 200g ingredient
+- 1 tbsp ingredient
+- 3 name
 
 ## Steps
-1. Primer paso.
-2. Segundo paso. [timer: 5min]
+1. First step.
+2. Second step. [timer: 5min]
 
 ## Notes
-Notas aquí.
+Notes here.
 
 ## Tags
 tag1, tag2`;
@@ -133,7 +133,7 @@ export default function MarkdownImport({ onImport }: Props) {
               border: '1px solid var(--border)',
             }}
             dangerouslySetInnerHTML={{
-              __html: previewHtml || `<p class="md-placeholder">La vista previa aparecerá aquí…</p>`,
+              __html: previewHtml || `<p class="md-placeholder">Preview will appear here…</p>`,
             }}
           />
         </div>

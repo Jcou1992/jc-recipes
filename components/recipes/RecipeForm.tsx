@@ -174,7 +174,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           value={name}
           onChange={e => setName(e.target.value)}
           required
-          placeholder="Nombre de la receta"
+          placeholder="Recipe name"
           className="input-base"
         />
       </div>
@@ -214,7 +214,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             className="font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--color-terracotta)' }}
           >
-            + Añadir
+            + Add
           </button>
         </div>
         <div className="space-y-2">
@@ -244,7 +244,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             className="font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--color-terracotta)' }}
           >
-            + Paso
+            + Step
           </button>
         </div>
         <div className="space-y-3">
@@ -287,7 +287,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               value={description}
               onChange={e => setDescription(e.target.value)}
               rows={2}
-              placeholder="Descripción corta para la vista de lista"
+              placeholder="Short description for the list view"
               className="input-base resize-none"
             />
           </div>
@@ -363,7 +363,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
-              placeholder="Variaciones, consejos, notas de compra…"
+              placeholder="Variations, tips, shopping notes…"
               className="input-base resize-none"
             />
           </div>
@@ -373,12 +373,12 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       {/* Actions */}
       <div className="flex gap-3 pt-2">
         <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Guardando…' : submitLabel}
+          {loading ? 'Saving…' : submitLabel}
         </button>
         <button
           type="button"
           onClick={() => {
-            if (isDirty && !window.confirm('Tienes cambios sin guardar. ¿Salir de todas formas?')) return;
+            if (isDirty && !window.confirm('You have unsaved changes. Leave anyway?')) return;
             router.back();
           }}
           className="btn-ghost"

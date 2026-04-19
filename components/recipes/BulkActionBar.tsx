@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/ToastContext';
@@ -34,6 +34,8 @@ export default function BulkActionBar({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [showProgress, setShowProgress] = useState(false);
+  const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const count = selectedIds.length;
 
@@ -49,7 +51,10 @@ export default function BulkActionBar({
     setConfirmOpen(false);
     const ids = [...selectedIds];
     onOptimisticHide(ids);
+    progressTimerRef.current = setTimeout(() => setShowProgress(true), 1000);
     const result = await bulkDeleteRecipes(ids);
+    if (progressTimerRef.current) clearTimeout(progressTimerRef.current);
+    setShowProgress(false);
     if (result.succeeded.length === 0) {
       onOptimisticRestore(ids);
       showToast(`Error deleting: ${result.failed[0]?.error ?? 'Unknown'}`, 'error');
@@ -115,13 +120,26 @@ export default function BulkActionBar({
         data-testid="bulk-action-bar"
       >
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
-          <span
-            className="font-label text-sm tracking-wide flex-shrink-0 pr-2"
-            style={{ color: 'var(--text-1)' }}
-            data-testid="bulk-count"
-          >
-            {count} {count === 1 ? 'recipe selected' : 'recipes selected'}
-          </span>
+          {showProgress ? (
+            <span
+              className="font-label text-sm tracking-wide flex-shrink-0 pr-2 flex items-center gap-2"
+              style={{ color: 'var(--text-1)' }}
+              data-testid="bulk-count"
+            >
+              <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <path strokeLinecap="round" d="M12 2a10 10 0 0 1 10 10" />
+              </svg>
+              Deleting…
+            </span>
+          ) : (
+            <span
+              className="font-label text-sm tracking-wide flex-shrink-0 pr-2"
+              style={{ color: 'var(--text-1)' }}
+              data-testid="bulk-count"
+            >
+              {count} {count === 1 ? 'recipe selected' : 'recipes selected'}
+            </span>
+          )}
 
           <button
             type="button"
@@ -195,8 +213,8 @@ export default function BulkActionBar({
         title={count === 1 ? 'Delete recipe' : `Delete ${count} recipes`}
         description={
           count === 1
-            ? '¿Eliminar esta receta? Esta acción no se puede deshacer.'
-            : `¿Eliminar ${count} recetas? Esta acción no se puede deshacer.`
+            ? 'Delete this recipe? This cannot be undone.'
+            : `Delete ${count} recipes? This cannot be undone.`
         }
         confirmLabel={isPending ? 'Deleting…' : 'Delete'}
         onConfirm={handleDelete}

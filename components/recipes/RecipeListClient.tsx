@@ -39,6 +39,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const sort = (searchParams.get('sort') ?? 'newest') as SortKey;
 
   const [searchInput, setSearchInput] = useState(q);
+  const [tagSearch, setTagSearch] = useState('');
   const [showSortSheet, setShowSortSheet] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -149,7 +150,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           const [from, to] = [Math.min(lastSelectedIdx, idx), Math.max(lastSelectedIdx, idx)];
           for (let i = from; i <= to; i++) {
             const r = filtered[i];
-            if (r && next.size < SELECT_LIMIT) next.add(r.id);
+            if (r) next.add(r.id);
           }
         } else if (next.has(id)) {
           next.delete(id);
@@ -256,7 +257,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           type="search"
           value={searchInput}
           onChange={e => handleSearchChange(e.target.value)}
-          placeholder="Buscar recetas…"
+          placeholder="Search recipes…"
           className="input-base w-full pl-10 pr-10"
           aria-label="Search recipes"
           data-testid="recipe-search"
@@ -283,35 +284,57 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         )}
       </div>
 
+      {/* Tag search */}
+      {allTags.length > 0 && (
+        <div className="mb-2">
+          <input
+            type="search"
+            value={tagSearch}
+            onChange={e => setTagSearch(e.target.value)}
+            placeholder="Filter tags…"
+            className="input-base w-full text-sm"
+            aria-label="Filter tags"
+            data-testid="tag-search"
+          />
+        </div>
+      )}
+
       {/* Tag strip + sort row */}
       {(allTags.length > 0 || sort !== 'newest') && (
         <div className="flex items-center gap-3 mb-6">
           {/* Tag strip */}
-          {allTags.length > 0 && (
-            <div
-              className="flex gap-2 overflow-x-auto flex-1 pb-1"
-              style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
-            >
-              {allTags.map(tag => {
-                const active = activeTags.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full transition-all min-h-[44px] flex items-center"
-                    style={active
-                      ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
-                      : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-                    }
-                    aria-pressed={active}
-                    data-testid={`tag-filter-${tag}`}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {allTags.length > 0 && (() => {
+            const visibleTags = allTags.filter(t => normalise(t).includes(normalise(tagSearch)));
+            return visibleTags.length > 0 ? (
+              <div
+                className="flex gap-2 overflow-x-auto flex-1 pb-1"
+                style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
+              >
+                {visibleTags.map(tag => {
+                  const active = activeTags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full transition-all min-h-[44px] flex items-center"
+                      style={active
+                        ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                        : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
+                      }
+                      aria-pressed={active}
+                      data-testid={`tag-filter-${tag}`}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="font-label text-xs tracking-wide py-2 flex-1" style={{ color: 'var(--text-3)' }}>
+                No tags found
+              </p>
+            );
+          })()}
 
           {/* Sort — desktop pill buttons */}
           <div className="hidden sm:flex flex-shrink-0 gap-1.5" data-testid="sort-select">
@@ -363,7 +386,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           >
             <div className="w-10 h-1 rounded-full mx-auto mb-6" style={{ background: 'var(--border)' }} />
             <p className="font-label text-xs tracking-widest uppercase mb-4" style={{ color: 'var(--text-3)' }}>
-              Ordenar por
+              Sort by
             </p>
             <div className="flex flex-col gap-2">
               {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
@@ -389,11 +412,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
       {filtered.length === 0 ? (
         <div className="text-center py-20" data-testid="filtered-empty-state">
           <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
-            No hay recetas que coincidan
+            No matching recipes
           </p>
           {hasFilters && (
             <button onClick={clearFilters} className="btn-ghost mt-4" data-testid="clear-filters-btn">
-              Limpiar filtros
+              Clear filters
             </button>
           )}
         </div>
