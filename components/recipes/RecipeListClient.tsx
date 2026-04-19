@@ -40,6 +40,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   const [searchInput, setSearchInput] = useState(q);
   const [tagSearch, setTagSearch] = useState('');
+  const [tagSearchOpen, setTagSearchOpen] = useState(false);
   const [showSortSheet, setShowSortSheet] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -93,6 +94,8 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   function clearFilters() {
     setSearchInput('');
+    setTagSearch('');
+    setTagSearchOpen(false);
     startTransition(() => { router.replace(pathname, { scroll: false }); });
   }
 
@@ -284,24 +287,56 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         )}
       </div>
 
-      {/* Tag search */}
-      {allTags.length > 0 && (
-        <div className="mb-2">
-          <input
-            type="search"
-            value={tagSearch}
-            onChange={e => setTagSearch(e.target.value)}
-            placeholder="Filter tags…"
-            className="input-base w-full text-sm"
-            aria-label="Filter tags"
-            data-testid="tag-search"
-          />
-        </div>
-      )}
-
       {/* Tag strip + sort row */}
       {(allTags.length > 0 || sort !== 'newest') && (
         <div className="flex items-center gap-3 mb-6">
+          {/* Inline tag search toggle */}
+          {allTags.length > 0 && (
+            tagSearchOpen ? (
+              <div className="relative flex-shrink-0 flex items-center" style={{ width: '148px' }}>
+                <svg className="absolute left-2.5 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  autoFocus
+                  type="search"
+                  value={tagSearch}
+                  onChange={e => setTagSearch(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Escape') { setTagSearch(''); setTagSearchOpen(false); } }}
+                  placeholder="Filter tags…"
+                  className="w-full pl-7 pr-7 py-1.5 rounded-full text-xs font-label tracking-wide"
+                  style={{ background: 'var(--bg-raised)', border: '1px solid var(--color-terracotta)', color: 'var(--text-1)', outline: 'none' }}
+                  aria-label="Filter tags"
+                  data-testid="tag-search"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setTagSearch(''); setTagSearchOpen(false); }}
+                  className="absolute right-2 flex items-center justify-center min-h-[44px] min-w-[44px]"
+                  aria-label="Close tag search"
+                >
+                  <svg className="w-3 h-3" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setTagSearchOpen(true)}
+                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                style={{ background: 'var(--bg-raised)', color: 'var(--text-3)', border: '1px solid var(--border)' }}
+                aria-label="Search tags"
+                aria-expanded={false}
+                data-testid="tag-search-toggle"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            )
+          )}
+
           {/* Tag strip */}
           {allTags.length > 0 && (() => {
             const visibleTags = allTags.filter(t => normalise(t).includes(normalise(tagSearch)));

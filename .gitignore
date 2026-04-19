@@ -7,3 +7,6 @@ data/
 tests/e2e/.auth/
 *.tsbuildinfo
 graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_uncached.txt
+.obsidian/

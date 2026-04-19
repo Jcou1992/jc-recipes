@@ -41,7 +41,7 @@
       "source_file": "middleware.ts",
       "source_location": "L1",
       "id": "middleware_ts",
-      "community": 15,
+      "community": 10,
       "norm_label": "middleware.ts"
     },
     {
@@ -50,7 +50,7 @@
       "source_file": "middleware.ts",
       "source_location": "L4",
       "id": "middleware_middleware",
-      "community": 15,
+      "community": 10,
       "norm_label": "middleware()"
     },
     {
@@ -59,7 +59,7 @@
       "source_file": "next.config.mjs",
       "source_location": "L1",
       "id": "next_config_mjs",
-      "community": 27,
+      "community": 22,
       "norm_label": "next.config.mjs"
     },
     {
@@ -68,7 +68,7 @@
       "source_file": "jest.config.js",
       "source_location": "L1",
       "id": "jest_config_js",
-      "community": 28,
+      "community": 23,
       "norm_label": "jest.config.js"
     },
     {
@@ -77,7 +77,7 @@
       "source_file": "next-env.d.ts",
       "source_location": "L1",
       "id": "next_env_d_ts",
-      "community": 29,
+      "community": 24,
       "norm_label": "next-env.d.ts"
     },
     {
@@ -86,7 +86,7 @@
       "source_file": "playwright.config.ts",
       "source_location": "L1",
       "id": "playwright_config_ts",
-      "community": 30,
+      "community": 25,
       "norm_label": "playwright.config.ts"
     },
     {
@@ -95,7 +95,7 @@
       "source_file": "postcss.config.js",
       "source_location": "L1",
       "id": "postcss_config_js",
-      "community": 31,
+      "community": 26,
       "norm_label": "postcss.config.js"
     },
     {
@@ -104,7 +104,7 @@
       "source_file": "types/recipe.ts",
       "source_location": "L1",
       "id": "types_recipe_ts",
-      "community": 32,
+      "community": 27,
       "norm_label": "recipe.ts"
     },
     {
@@ -113,7 +113,7 @@
       "source_file": "types/global.d.ts",
       "source_location": "L1",
       "id": "types_global_d_ts",
-      "community": 33,
+      "community": 28,
       "norm_label": "global.d.ts"
     },
     {
@@ -122,7 +122,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L1",
       "id": "app_layout_tsx",
-      "community": 16,
+      "community": 13,
       "norm_label": "layout.tsx"
     },
     {
@@ -131,7 +131,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L31",
       "id": "layout_rootlayout",
-      "community": 16,
+      "community": 13,
       "norm_label": "rootlayout()"
     },
     {
@@ -140,7 +140,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L1",
       "id": "app_page_tsx",
-      "community": 17,
+      "community": 14,
       "norm_label": "page.tsx"
     },
     {
@@ -149,7 +149,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L3",
       "id": "page_rootpage",
-      "community": 17,
+      "community": 14,
       "norm_label": "rootpage()"
     },
     {
@@ -176,7 +176,7 @@
       "source_file": "app/(app)/recipes/page.tsx",
       "source_location": "L1",
       "id": "app_app_recipes_page_tsx",
-      "community": 34,
+      "community": 29,
       "norm_label": "page.tsx"
     },
     {
@@ -185,7 +185,7 @@
       "source_file": "app/(app)/recipes/print/PrintAutoTrigger.tsx",
       "source_location": "L1",
       "id": "app_app_recipes_print_printautotrigger_tsx",
-      "community": 18,
+      "community": 15,
       "norm_label": "printautotrigger.tsx"
     },
     {
@@ -194,7 +194,7 @@
       "source_file": "app/(app)/recipes/print/PrintAutoTrigger.tsx",
       "source_location": "L5",
       "id": "printautotrigger_printautotrigger",
-      "community": 18,
+      "community": 15,
       "norm_label": "printautotrigger()"
     },
     {
@@ -203,7 +203,7 @@
       "source_file": "app/(app)/recipes/print/page.tsx",
       "source_location": "L1",
       "id": "app_app_recipes_print_page_tsx",
-      "community": 19,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -212,7 +212,7 @@
       "source_file": "app/(app)/recipes/print/page.tsx",
       "source_location": "L12",
       "id": "page_formatamount",
-      "community": 19,
+      "community": 16,
       "norm_label": "formatamount()"
     },
     {
@@ -221,7 +221,7 @@
       "source_file": "app/(app)/recipes/new/page.tsx",
       "source_location": "L1",
       "id": "app_app_recipes_new_page_tsx",
-      "community": 6,
+      "community": 12,
       "norm_label": "page.tsx"
     },
     {
@@ -230,7 +230,7 @@
       "source_file": "app/(app)/recipes/new/page.tsx",
       "source_location": "L14",
       "id": "page_parsedtoinitial",
-      "community": 6,
+      "community": 12,
       "norm_label": "parsedtoinitial()"
     },
     {
@@ -239,7 +239,7 @@
       "source_file": "app/(app)/recipes/new/page.tsx",
       "source_location": "L44",
       "id": "page_handleimport",
-      "community": 6,
+      "community": 12,
       "norm_label": "handleimport()"
     },
     {
@@ -338,7 +338,7 @@
       "source_file": "app/actions/bulk-recipes.ts",
       "source_location": "L1",
       "id": "app_actions_bulk_recipes_ts",
-      "community": 3,
+      "community": 2,
       "norm_label": "bulk-recipes.ts"
     },
     {
@@ -347,7 +347,7 @@
       "source_file": "app/actions/bulk-recipes.ts",
       "source_location": "L10",
       "id": "bulk_recipes_overlimit",
-      "community": 3,
+      "community": 2,
       "norm_label": "overlimit()"
     },
     {
@@ -356,7 +356,7 @@
       "source_file": "app/actions/bulk-recipes.ts",
       "source_location": "L17",
       "id": "bulk_recipes_bulkdeleterecipes",
-      "community": 3,
+      "community": 2,
       "norm_label": "bulkdeleterecipes()"
     },
     {
@@ -365,7 +365,7 @@
       "source_file": "app/actions/bulk-recipes.ts",
       "source_location": "L54",
       "id": "bulk_recipes_bulkduplicaterecipes",
-      "community": 3,
+      "community": 2,
       "norm_label": "bulkduplicaterecipes()"
     },
     {
@@ -374,7 +374,7 @@
       "source_file": "app/actions/bulk-recipes.ts",
       "source_location": "L104",
       "id": "bulk_recipes_bulkupdatetags",
-      "community": 3,
+      "community": 2,
       "norm_label": "bulkupdatetags()"
     },
     {
@@ -410,7 +410,7 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L1",
       "id": "app_auth_layout_tsx",
-      "community": 20,
+      "community": 17,
       "norm_label": "layout.tsx"
     },
     {
@@ -419,7 +419,7 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L1",
       "id": "layout_authlayout",
-      "community": 20,
+      "community": 17,
       "norm_label": "authlayout()"
     },
     {
@@ -428,7 +428,7 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L1",
       "id": "app_auth_login_page_tsx",
-      "community": 21,
+      "community": 18,
       "norm_label": "page.tsx"
     },
     {
@@ -437,7 +437,7 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L6",
       "id": "page_loginpage",
-      "community": 21,
+      "community": 18,
       "norm_label": "loginpage()"
     },
     {
@@ -446,7 +446,7 @@
       "source_file": "tests/e2e/auth.spec.ts",
       "source_location": "L1",
       "id": "tests_e2e_auth_spec_ts",
-      "community": 35,
+      "community": 30,
       "norm_label": "auth.spec.ts"
     },
     {
@@ -572,7 +572,7 @@
       "source_file": "tests/e2e/global.setup.ts",
       "source_location": "L1",
       "id": "tests_e2e_global_setup_ts",
-      "community": 36,
+      "community": 31,
       "norm_label": "global.setup.ts"
     },
     {
@@ -581,7 +581,7 @@
       "source_file": "components/ui/ConfirmDialog.tsx",
       "source_location": "L1",
       "id": "components_ui_confirmdialog_tsx",
-      "community": 37,
+      "community": 32,
       "norm_label": "confirmdialog.tsx"
     },
     {
@@ -590,7 +590,7 @@
       "source_file": "components/ui/ToastContainer.tsx",
       "source_location": "L1",
       "id": "components_ui_toastcontainer_tsx",
-      "community": 38,
+      "community": 33,
       "norm_label": "toastcontainer.tsx"
     },
     {
@@ -599,7 +599,7 @@
       "source_file": "components/ui/ToastContext.tsx",
       "source_location": "L1",
       "id": "components_ui_toastcontext_tsx",
-      "community": 13,
+      "community": 8,
       "norm_label": "toastcontext.tsx"
     },
     {
@@ -608,7 +608,7 @@
       "source_file": "components/ui/ToastContext.tsx",
       "source_location": "L28",
       "id": "toastcontext_usetoast",
-      "community": 13,
+      "community": 8,
       "norm_label": "usetoast()"
     },
     {
@@ -617,7 +617,7 @@
       "source_file": "components/ui/ToastContext.tsx",
       "source_location": "L36",
       "id": "toastcontext_toastprovider",
-      "community": 13,
+      "community": 8,
       "norm_label": "toastprovider()"
     },
     {
@@ -626,7 +626,7 @@
       "source_file": "components/ui/AppProviders.tsx",
       "source_location": "L1",
       "id": "components_ui_appproviders_tsx",
-      "community": 22,
+      "community": 19,
       "norm_label": "appproviders.tsx"
     },
     {
@@ -635,7 +635,7 @@
       "source_file": "components/ui/AppProviders.tsx",
       "source_location": "L7",
       "id": "appproviders_appproviders",
-      "community": 22,
+      "community": 19,
       "norm_label": "appproviders()"
     },
     {
@@ -644,7 +644,7 @@
       "source_file": "components/auth/LoginForm.tsx",
       "source_location": "L1",
       "id": "components_auth_loginform_tsx",
-      "community": 39,
+      "community": 34,
       "norm_label": "loginform.tsx"
     },
     {
@@ -653,7 +653,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L1",
       "id": "components_recipes_recipelistclient_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "recipelistclient.tsx"
     },
     {
@@ -662,7 +662,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L9",
       "id": "recipelistclient_normalise",
-      "community": 7,
+      "community": 4,
       "norm_label": "normalise()"
     },
     {
@@ -671,7 +671,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L70",
       "id": "recipelistclient_updateparams",
-      "community": 7,
+      "community": 4,
       "norm_label": "updateparams()"
     },
     {
@@ -680,7 +680,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L82",
       "id": "recipelistclient_handlesearchchange",
-      "community": 7,
+      "community": 4,
       "norm_label": "handlesearchchange()"
     },
     {
@@ -689,7 +689,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L88",
       "id": "recipelistclient_toggletag",
-      "community": 7,
+      "community": 4,
       "norm_label": "toggletag()"
     },
     {
@@ -698,7 +698,7 @@
       "source_file": "components/recipes/RecipeListClient.tsx",
       "source_location": "L95",
       "id": "recipelistclient_clearfilters",
-      "community": 7,
+      "community": 4,
       "norm_label": "clearfilters()"
     },
     {
@@ -707,7 +707,7 @@
       "source_file": "components/recipes/RecipeCard.tsx",
       "source_location": "L1",
       "id": "components_recipes_recipecard_tsx",
-      "community": 40,
+      "community": 35,
       "norm_label": "recipecard.tsx"
     },
     {
@@ -716,7 +716,7 @@
       "source_file": "components/recipes/IngredientRow.tsx",
       "source_location": "L1",
       "id": "components_recipes_ingredientrow_tsx",
-      "community": 23,
+      "community": 20,
       "norm_label": "ingredientrow.tsx"
     },
     {
@@ -725,7 +725,7 @@
       "source_file": "components/recipes/IngredientRow.tsx",
       "source_location": "L26",
       "id": "ingredientrow_set",
-      "community": 23,
+      "community": 20,
       "norm_label": "set()"
     },
     {
@@ -734,7 +734,7 @@
       "source_file": "components/recipes/MarkdownImport.tsx",
       "source_location": "L1",
       "id": "components_recipes_markdownimport_tsx",
-      "community": 6,
+      "community": 11,
       "norm_label": "markdownimport.tsx"
     },
     {
@@ -743,7 +743,7 @@
       "source_file": "components/recipes/MarkdownImport.tsx",
       "source_location": "L9",
       "id": "markdownimport_esc",
-      "community": 6,
+      "community": 11,
       "norm_label": "esc()"
     },
     {
@@ -752,7 +752,7 @@
       "source_file": "components/recipes/MarkdownImport.tsx",
       "source_location": "L16",
       "id": "markdownimport_inline",
-      "community": 6,
+      "community": 11,
       "norm_label": "inline()"
     },
     {
@@ -761,7 +761,7 @@
       "source_file": "components/recipes/MarkdownImport.tsx",
       "source_location": "L20",
       "id": "markdownimport_markdowntohtml",
-      "community": 6,
+      "community": 11,
       "norm_label": "markdowntohtml()"
     },
     {
@@ -770,7 +770,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L1",
       "id": "components_recipes_recipedetailclient_tsx",
-      "community": 8,
+      "community": 5,
       "norm_label": "recipedetailclient.tsx"
     },
     {
@@ -779,7 +779,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L24",
       "id": "recipedetailclient_snapfraction",
-      "community": 8,
+      "community": 5,
       "norm_label": "snapfraction()"
     },
     {
@@ -788,7 +788,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L32",
       "id": "recipedetailclient_formatamount",
-      "community": 8,
+      "community": 5,
       "norm_label": "formatamount()"
     },
     {
@@ -797,7 +797,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L75",
       "id": "recipedetailclient_convertunit",
-      "community": 8,
+      "community": 5,
       "norm_label": "convertunit()"
     },
     {
@@ -806,7 +806,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L93",
       "id": "recipedetailclient_processingredients",
-      "community": 8,
+      "community": 5,
       "norm_label": "processingredients()"
     },
     {
@@ -815,7 +815,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L116",
       "id": "recipedetailclient_formattime",
-      "community": 8,
+      "community": 5,
       "norm_label": "formattime()"
     },
     {
@@ -824,7 +824,7 @@
       "source_file": "components/recipes/RecipeDetailClient.tsx",
       "source_location": "L136",
       "id": "recipedetailclient_toggleunitsystem",
-      "community": 8,
+      "community": 5,
       "norm_label": "toggleunitsystem()"
     },
     {
@@ -833,7 +833,7 @@
       "source_file": "components/recipes/DeleteRecipeButton.tsx",
       "source_location": "L1",
       "id": "components_recipes_deleterecipebutton_tsx",
-      "community": 13,
+      "community": 8,
       "norm_label": "deleterecipebutton.tsx"
     },
     {
@@ -842,7 +842,7 @@
       "source_file": "components/recipes/DeleteRecipeButton.tsx",
       "source_location": "L13",
       "id": "deleterecipebutton_deleterecipebutton",
-      "community": 13,
+      "community": 8,
       "norm_label": "deleterecipebutton()"
     },
     {
@@ -851,7 +851,7 @@
       "source_file": "components/recipes/StepRow.tsx",
       "source_location": "L1",
       "id": "components_recipes_steprow_tsx",
-      "community": 7,
+      "community": 4,
       "norm_label": "steprow.tsx"
     },
     {
@@ -860,7 +860,7 @@
       "source_file": "components/recipes/StepRow.tsx",
       "source_location": "L17",
       "id": "steprow_set",
-      "community": 7,
+      "community": 4,
       "norm_label": "set()"
     },
     {
@@ -869,7 +869,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L1",
       "id": "components_recipes_bulktagdialog_tsx",
-      "community": 9,
+      "community": 6,
       "norm_label": "bulktagdialog.tsx"
     },
     {
@@ -878,7 +878,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L42",
       "id": "bulktagdialog_toggleadd",
-      "community": 9,
+      "community": 6,
       "norm_label": "toggleadd()"
     },
     {
@@ -887,7 +887,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L47",
       "id": "bulktagdialog_toggleremove",
-      "community": 9,
+      "community": 6,
       "norm_label": "toggleremove()"
     },
     {
@@ -896,7 +896,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L52",
       "id": "bulktagdialog_commitnewtag",
-      "community": 9,
+      "community": 6,
       "norm_label": "commitnewtag()"
     },
     {
@@ -905,7 +905,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L59",
       "id": "bulktagdialog_reset",
-      "community": 9,
+      "community": 6,
       "norm_label": "reset()"
     },
     {
@@ -914,7 +914,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L65",
       "id": "bulktagdialog_handleapply",
-      "community": 9,
+      "community": 6,
       "norm_label": "handleapply()"
     },
     {
@@ -923,7 +923,7 @@
       "source_file": "components/recipes/BulkTagDialog.tsx",
       "source_location": "L83",
       "id": "bulktagdialog_handleclose",
-      "community": 9,
+      "community": 6,
       "norm_label": "handleclose()"
     },
     {
@@ -1004,7 +1004,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L1",
       "id": "components_recipes_bulkactionbar_tsx",
-      "community": 3,
+      "community": 2,
       "norm_label": "bulkactionbar.tsx"
     },
     {
@@ -1013,7 +1013,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L43",
       "id": "bulkactionbar_onkey",
-      "community": 3,
+      "community": 2,
       "norm_label": "onkey()"
     },
     {
@@ -1022,7 +1022,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L50",
       "id": "bulkactionbar_handledelete",
-      "community": 3,
+      "community": 2,
       "norm_label": "handledelete()"
     },
     {
@@ -1031,7 +1031,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L73",
       "id": "bulkactionbar_handleduplicate",
-      "community": 3,
+      "community": 2,
       "norm_label": "handleduplicate()"
     },
     {
@@ -1040,7 +1040,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L89",
       "id": "bulkactionbar_handleexportmarkdown",
-      "community": 12,
+      "community": 7,
       "norm_label": "handleexportmarkdown()"
     },
     {
@@ -1049,7 +1049,7 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L100",
       "id": "bulkactionbar_handleexportpdf",
-      "community": 3,
+      "community": 2,
       "norm_label": "handleexportpdf()"
     },
     {
@@ -1058,7 +1058,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L1",
       "id": "components_recipes_recipeform_tsx",
-      "community": 5,
+      "community": 3,
       "norm_label": "recipeform.tsx"
     },
     {
@@ -1067,7 +1067,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L21",
       "id": "recipeform_parseamount",
-      "community": 5,
+      "community": 3,
       "norm_label": "parseamount()"
     },
     {
@@ -1076,7 +1076,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L30",
       "id": "recipeform_formatamount",
-      "community": 5,
+      "community": 3,
       "norm_label": "formatamount()"
     },
     {
@@ -1085,7 +1085,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L41",
       "id": "recipeform_ingredientstofields",
-      "community": 5,
+      "community": 3,
       "norm_label": "ingredientstofields()"
     },
     {
@@ -1094,7 +1094,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L47",
       "id": "recipeform_stepstofields",
-      "community": 5,
+      "community": 3,
       "norm_label": "stepstofields()"
     },
     {
@@ -1103,7 +1103,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L100",
       "id": "recipeform_addingredient",
-      "community": 5,
+      "community": 3,
       "norm_label": "addingredient()"
     },
     {
@@ -1112,7 +1112,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L103",
       "id": "recipeform_removeingredient",
-      "community": 5,
+      "community": 3,
       "norm_label": "removeingredient()"
     },
     {
@@ -1121,7 +1121,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L106",
       "id": "recipeform_addstep",
-      "community": 5,
+      "community": 3,
       "norm_label": "addstep()"
     },
     {
@@ -1130,7 +1130,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L109",
       "id": "recipeform_removestep",
-      "community": 5,
+      "community": 3,
       "norm_label": "removestep()"
     },
     {
@@ -1139,7 +1139,7 @@
       "source_file": "components/recipes/RecipeForm.tsx",
       "source_location": "L112",
       "id": "recipeform_handlesubmit",
-      "community": 5,
+      "community": 3,
       "norm_label": "handlesubmit()"
     },
     {
@@ -1148,7 +1148,7 @@
       "source_file": "lib/utils/parse-recipe-markdown.ts",
       "source_location": "L1",
       "id": "lib_utils_parse_recipe_markdown_ts",
-      "community": 14,
+      "community": 9,
       "norm_label": "parse-recipe-markdown.ts"
     },
     {
@@ -1157,7 +1157,7 @@
       "source_file": "lib/utils/parse-recipe-markdown.ts",
       "source_location": "L28",
       "id": "parse_recipe_markdown_parsetimetominutes",
-      "community": 14,
+      "community": 9,
       "norm_label": "parsetimetominutes()"
     },
     {
@@ -1166,7 +1166,7 @@
       "source_file": "lib/utils/parse-recipe-markdown.ts",
       "source_location": "L53",
       "id": "parse_recipe_markdown_parsesteptimer",
-      "community": 14,
+      "community": 9,
       "norm_label": "parsesteptimer()"
     },
     {
@@ -1175,7 +1175,7 @@
       "source_file": "lib/utils/parse-recipe-markdown.ts",
       "source_location": "L104",
       "id": "parse_recipe_markdown_parseingredient",
-      "community": 14,
+      "community": 9,
       "norm_label": "parseingredient()"
     },
     {
@@ -1184,7 +1184,7 @@
       "source_file": "lib/utils/parse-recipe-markdown.ts",
       "source_location": "L128",
       "id": "parse_recipe_markdown_parserecipemarkdown",
-      "community": 14,
+      "community": 9,
       "norm_label": "parserecipemarkdown()"
     },
     {
@@ -1193,7 +1193,7 @@
       "source_file": "lib/utils/export-recipes.ts",
       "source_location": "L1",
       "id": "lib_utils_export_recipes_ts",
-      "community": 12,
+      "community": 7,
       "norm_label": "export-recipes.ts"
     },
     {
@@ -1202,7 +1202,7 @@
       "source_file": "lib/utils/export-recipes.ts",
       "source_location": "L3",
       "id": "export_recipes_formatamount",
-      "community": 12,
+      "community": 7,
       "norm_label": "formatamount()"
     },
     {
@@ -1211,7 +1211,7 @@
       "source_file": "lib/utils/export-recipes.ts",
       "source_location": "L8",
       "id": "export_recipes_recipetomarkdown",
-      "community": 12,
+      "community": 7,
       "norm_label": "recipetomarkdown()"
     },
     {
@@ -1220,7 +1220,7 @@
       "source_file": "lib/utils/export-recipes.ts",
       "source_location": "L63",
       "id": "export_recipes_recipestomarkdown",
-      "community": 12,
+      "community": 7,
       "norm_label": "recipestomarkdown()"
     },
     {
@@ -1229,7 +1229,7 @@
       "source_file": "lib/utils/export-recipes.ts",
       "source_location": "L69",
       "id": "export_recipes_triggerdownload",
-      "community": 12,
+      "community": 7,
       "norm_label": "triggerdownload()"
     },
     {
@@ -1238,7 +1238,7 @@
       "source_file": "lib/utils/__tests__/parse-recipe-markdown.test.ts",
       "source_location": "L1",
       "id": "lib_utils_tests_parse_recipe_markdown_test_ts",
-      "community": 41,
+      "community": 36,
       "norm_label": "parse-recipe-markdown.test.ts"
     },
     {
@@ -1247,7 +1247,7 @@
       "source_file": "lib/supabase/middleware.ts",
       "source_location": "L1",
       "id": "lib_supabase_middleware_ts",
-      "community": 15,
+      "community": 10,
       "norm_label": "middleware.ts"
     },
     {
@@ -1256,7 +1256,7 @@
       "source_file": "lib/supabase/middleware.ts",
       "source_location": "L4",
       "id": "middleware_updatesession",
-      "community": 15,
+      "community": 10,
       "norm_label": "updatesession()"
     },
     {
@@ -1283,7 +1283,7 @@
       "source_file": "lib/hooks/useUnsavedChanges.ts",
       "source_location": "L1",
       "id": "lib_hooks_useunsavedchanges_ts",
-      "community": 24,
+      "community": 21,
       "norm_label": "useunsavedchanges.ts"
     },
     {
@@ -1292,736 +1292,8 @@
       "source_file": "lib/hooks/useUnsavedChanges.ts",
       "source_location": "L7",
       "id": "useunsavedchanges_useunsavedchanges",
-      "community": 24,
+      "community": 21,
       "norm_label": "useunsavedchanges()"
-    },
-    {
-      "label": "Ingredient interface",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type_ingredient",
-      "community": 4,
-      "norm_label": "ingredient interface"
-    },
-    {
-      "label": "Step interface",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type_step",
-      "community": 4,
-      "norm_label": "step interface"
-    },
-    {
-      "label": "Recipe interface",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type_recipe",
-      "community": 4,
-      "norm_label": "recipe interface"
-    },
-    {
-      "label": "RecipePayload type (Omit auto-fields)",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type_payload",
-      "community": 4,
-      "norm_label": "recipepayload type (omit auto-fields)"
-    },
-    {
-      "label": "BulkActionResult interface",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type_bulkresult",
-      "community": 11,
-      "norm_label": "bulkactionresult interface"
-    },
-    {
-      "label": "Next.js middleware (auth routing via cookie-check)",
-      "file_type": "code",
-      "source_file": "middleware.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "app_middleware",
-      "community": 25,
-      "norm_label": "next.js middleware (auth routing via cookie-check)"
-    },
-    {
-      "label": "Supabase updateSession middleware helper",
-      "file_type": "code",
-      "source_file": "lib/supabase/middleware.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "supabase_middleware",
-      "community": 25,
-      "norm_label": "supabase updatesession middleware helper"
-    },
-    {
-      "label": "RecipesPage server component (fetches all recipes)",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipes_page",
-      "community": 4,
-      "norm_label": "recipespage server component (fetches all recipes)"
-    },
-    {
-      "label": "RecipeDetailPage server component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/[id]/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_detail_page",
-      "community": 4,
-      "norm_label": "recipedetailpage server component"
-    },
-    {
-      "label": "EditRecipePage server component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/[id]/edit/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "edit_recipe_page",
-      "community": 4,
-      "norm_label": "editrecipepage server component"
-    },
-    {
-      "label": "NewRecipePage server component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/new/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "new_recipe_page",
-      "community": 42,
-      "norm_label": "newrecipepage server component"
-    },
-    {
-      "label": "CookPage server component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/[id]/cook/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cook_page",
-      "community": 43,
-      "norm_label": "cookpage server component"
-    },
-    {
-      "label": "PrintPage server component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/print/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "print_page",
-      "community": 26,
-      "norm_label": "printpage server component"
-    },
-    {
-      "label": "PrintAutoTrigger client component",
-      "file_type": "code",
-      "source_file": "app/(app)/recipes/print/PrintAutoTrigger.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "print_auto_trigger",
-      "community": 26,
-      "norm_label": "printautotrigger client component"
-    },
-    {
-      "label": "createRecipe server action",
-      "file_type": "code",
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_create_recipe",
-      "community": 4,
-      "norm_label": "createrecipe server action"
-    },
-    {
-      "label": "updateRecipe server action",
-      "file_type": "code",
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_update_recipe",
-      "community": 4,
-      "norm_label": "updaterecipe server action"
-    },
-    {
-      "label": "deleteRecipe server action",
-      "file_type": "code",
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_delete_recipe",
-      "community": 11,
-      "norm_label": "deleterecipe server action"
-    },
-    {
-      "label": "bulkDeleteRecipes server action",
-      "file_type": "code",
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_bulk_delete",
-      "community": 11,
-      "norm_label": "bulkdeleterecipes server action"
-    },
-    {
-      "label": "bulkDuplicateRecipes server action",
-      "file_type": "code",
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_bulk_duplicate",
-      "community": 11,
-      "norm_label": "bulkduplicaterecipes server action"
-    },
-    {
-      "label": "bulkUpdateTags server action",
-      "file_type": "code",
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "action_bulk_tags",
-      "community": 11,
-      "norm_label": "bulkupdatetags server action"
-    },
-    {
-      "label": "auth server actions (login, logout)",
-      "file_type": "code",
-      "source_file": "app/actions/auth.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "auth_actions",
-      "community": 10,
-      "norm_label": "auth server actions (login, logout)"
-    },
-    {
-      "label": "Auth layout (Next.js route group)",
-      "file_type": "code",
-      "source_file": "app/(auth)/layout.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "auth_layout",
-      "community": 10,
-      "norm_label": "auth layout (next.js route group)"
-    },
-    {
-      "label": "Login page (Next.js server component)",
-      "file_type": "code",
-      "source_file": "app/(auth)/login/page.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "login_page",
-      "community": 10,
-      "norm_label": "login page (next.js server component)"
-    },
-    {
-      "label": "LoginForm client component",
-      "file_type": "code",
-      "source_file": "components/auth/LoginForm.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "login_form",
-      "community": 10,
-      "norm_label": "loginform client component"
-    },
-    {
-      "label": "ConfirmDialog UI component",
-      "file_type": "code",
-      "source_file": "components/ui/ConfirmDialog.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "confirm_dialog",
-      "community": 2,
-      "norm_label": "confirmdialog ui component"
-    },
-    {
-      "label": "ToastContext + ToastProvider + useToast hook",
-      "file_type": "code",
-      "source_file": "components/ui/ToastContext.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "toast_context",
-      "community": 2,
-      "norm_label": "toastcontext + toastprovider + usetoast hook"
-    },
-    {
-      "label": "ToastContainer UI component",
-      "file_type": "code",
-      "source_file": "components/ui/ToastContainer.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "toast_container",
-      "community": 2,
-      "norm_label": "toastcontainer ui component"
-    },
-    {
-      "label": "AppProviders wrapper (ToastProvider + ToastContainer)",
-      "file_type": "code",
-      "source_file": "components/ui/AppProviders.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "app_providers",
-      "community": 2,
-      "norm_label": "appproviders wrapper (toastprovider + toastcontainer)"
-    },
-    {
-      "label": "RecipeListClient (search, filter, sort, select mode)",
-      "file_type": "code",
-      "source_file": "components/recipes/RecipeListClient.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_list_client",
-      "community": 2,
-      "norm_label": "recipelistclient (search, filter, sort, select mode)"
-    },
-    {
-      "label": "RecipeCard component",
-      "file_type": "code",
-      "source_file": "components/recipes/RecipeCard.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_card",
-      "community": 2,
-      "norm_label": "recipecard component"
-    },
-    {
-      "label": "IngredientRow form component",
-      "file_type": "code",
-      "source_file": "components/recipes/IngredientRow.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "ingredient_row",
-      "community": 2,
-      "norm_label": "ingredientrow form component"
-    },
-    {
-      "label": "MarkdownImport component",
-      "file_type": "code",
-      "source_file": "components/recipes/MarkdownImport.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "markdown_import",
-      "community": 6,
-      "norm_label": "markdownimport component"
-    },
-    {
-      "label": "RecipeDetailClient (scaler, unit conversion, cook mode link)",
-      "file_type": "code",
-      "source_file": "components/recipes/RecipeDetailClient.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_detail_client",
-      "community": 2,
-      "norm_label": "recipedetailclient (scaler, unit conversion, cook mode link)"
-    },
-    {
-      "label": "DeleteRecipeButton component",
-      "file_type": "code",
-      "source_file": "components/recipes/DeleteRecipeButton.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "delete_recipe_button",
-      "community": 2,
-      "norm_label": "deleterecipebutton component"
-    },
-    {
-      "label": "BulkActionBar component",
-      "file_type": "code",
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "bulk_action_bar",
-      "community": 2,
-      "norm_label": "bulkactionbar component"
-    },
-    {
-      "label": "parseRecipeMarkdown utility",
-      "file_type": "code",
-      "source_file": "lib/utils/parse-recipe-markdown.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "parse_recipe_markdown",
-      "community": 6,
-      "norm_label": "parserecipemarkdown utility"
-    },
-    {
-      "label": "deleteRecipe server action",
-      "file_type": "code",
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "delete_recipe_action",
-      "community": 2,
-      "norm_label": "deleterecipe server action"
-    },
-    {
-      "label": "Supabase server client (createClient)",
-      "file_type": "code",
-      "source_file": "lib/supabase/server.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "supabase_server_client",
-      "community": 10,
-      "norm_label": "supabase server client (createclient)"
-    },
-    {
-      "label": "Recipe TypeScript type",
-      "file_type": "code",
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_type",
-      "community": 2,
-      "norm_label": "recipe typescript type"
-    },
-    {
-      "label": "E2E auth tests",
-      "file_type": "code",
-      "source_file": "tests/e2e/auth.spec.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_auth_spec",
-      "community": 10,
-      "norm_label": "e2e auth tests"
-    },
-    {
-      "label": "E2E markdown import tests",
-      "file_type": "code",
-      "source_file": "tests/e2e/markdown-import.spec.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_markdown_import_spec",
-      "community": 6,
-      "norm_label": "e2e markdown import tests"
-    },
-    {
-      "label": "E2E bulk operations tests",
-      "file_type": "code",
-      "source_file": "tests/e2e/bulk-ops.spec.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_bulk_ops_spec",
-      "community": 2,
-      "norm_label": "e2e bulk operations tests"
-    },
-    {
-      "label": "E2E recipes CRUD tests",
-      "file_type": "code",
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_recipes_crud_spec",
-      "community": 2,
-      "norm_label": "e2e recipes crud tests"
-    },
-    {
-      "label": "E2E Phase 2 feature tests (search, tag, scaler, cook mode)",
-      "file_type": "code",
-      "source_file": "tests/e2e/phase2.spec.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_phase2_spec",
-      "community": 2,
-      "norm_label": "e2e phase 2 feature tests (search, tag, scaler, cook mode)"
-    },
-    {
-      "label": "Playwright global setup (auth session bootstrap)",
-      "file_type": "code",
-      "source_file": "tests/e2e/global.setup.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "test_global_setup",
-      "community": 10,
-      "norm_label": "playwright global setup (auth session bootstrap)"
-    },
-    {
-      "label": "RecipeForm client component (create/edit)",
-      "file_type": "code",
-      "source_file": "components/recipes/RecipeForm.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "recipe_form",
-      "community": 3,
-      "norm_label": "recipeform client component (create/edit)"
-    },
-    {
-      "label": "CookMode client component (step timer, scaler, unit toggle)",
-      "file_type": "code",
-      "source_file": "components/recipes/CookMode.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "cook_mode",
-      "community": 2,
-      "norm_label": "cookmode client component (step timer, scaler, unit toggle)"
-    },
-    {
-      "label": "BulkTagDialog component (add/remove tags on many recipes)",
-      "file_type": "code",
-      "source_file": "components/recipes/BulkTagDialog.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "bulk_tag_dialog",
-      "community": 11,
-      "norm_label": "bulktagdialog component (add/remove tags on many recipes)"
-    },
-    {
-      "label": "BulkActionBar component (delete/duplicate/tag selected recipes)",
-      "file_type": "code",
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "bulk_action_bar_comp",
-      "community": 11,
-      "norm_label": "bulkactionbar component (delete/duplicate/tag selected recipes)"
-    },
-    {
-      "label": "StepRow form component (step content + timer input)",
-      "file_type": "code",
-      "source_file": "components/recipes/StepRow.tsx",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "step_row",
-      "community": 3,
-      "norm_label": "steprow form component (step content + timer input)"
-    },
-    {
-      "label": "useUnsavedChanges hook (beforeunload guard)",
-      "file_type": "code",
-      "source_file": "lib/hooks/useUnsavedChanges.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "use_unsaved_changes",
-      "community": 3,
-      "norm_label": "useunsavedchanges hook (beforeunload guard)"
-    },
-    {
-      "label": "recipeToMarkdown export utility",
-      "file_type": "code",
-      "source_file": "lib/utils/export-recipes.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "export_recipes",
-      "community": 3,
-      "norm_label": "recipetomarkdown export utility"
-    },
-    {
-      "label": "parseRecipeMarkdown + parseTimeToMinutes utilities",
-      "file_type": "code",
-      "source_file": "lib/utils/parse-recipe-markdown.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "parse_markdown_util",
-      "community": 3,
-      "norm_label": "parserecipemarkdown + parsetimetominutes utilities"
-    },
-    {
-      "label": "Unit tests for parseRecipeMarkdown",
-      "file_type": "code",
-      "source_file": "lib/utils/__tests__/parse-recipe-markdown.test.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "parse_markdown_test",
-      "community": 3,
-      "norm_label": "unit tests for parserecipemarkdown"
-    },
-    {
-      "label": "Supabase server client factory (createClient with cookie store)",
-      "file_type": "code",
-      "source_file": "lib/supabase/server.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "supabase_server",
-      "community": 4,
-      "norm_label": "supabase server client factory (createclient with cookie store)"
-    },
-    {
-      "label": "Supabase updateSession helper (refreshes JWT via cookie)",
-      "file_type": "code",
-      "source_file": "lib/supabase/middleware.ts",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "supabase_middleware_lib",
-      "community": 4,
-      "norm_label": "supabase updatesession helper (refreshes jwt via cookie)"
     },
     {
       "label": "Data model documentation (recipes table schema, RLS)",
@@ -2032,9 +1304,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "data_model_doc",
-      "community": 4,
-      "norm_label": "data model documentation (recipes table schema, rls)"
+      "community": 37,
+      "norm_label": "data model documentation (recipes table schema, rls)",
+      "id": "data_model_doc"
     },
     {
       "label": "Phase 3 spec: recipe hero photos (Supabase Storage, Canvas compression)",
@@ -2045,9 +1317,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "phase3_spec",
-      "community": 4,
-      "norm_label": "phase 3 spec: recipe hero photos (supabase storage, canvas compression)"
+      "community": 38,
+      "norm_label": "phase 3 spec: recipe hero photos (supabase storage, canvas compression)",
+      "id": "phase3_spec"
     },
     {
       "label": "Phase 2 spec: cooking companion design rationale",
@@ -2058,9 +1330,9 @@
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "phase2_spec",
-      "community": 2,
-      "norm_label": "phase 2 spec: cooking companion design rationale"
+      "community": 39,
+      "norm_label": "phase 2 spec: cooking companion design rationale",
+      "id": "phase2_spec"
     }
   ],
   "links": [
@@ -2158,18 +1430,6 @@
       "_tgt": "page_formatamount",
       "source": "app_app_recipes_print_page_tsx",
       "target": "page_formatamount",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "app/(app)/recipes/new/page.tsx",
-      "source_location": "L10",
-      "weight": 1.0,
-      "_src": "app_app_recipes_new_page_tsx",
-      "_tgt": "parse_recipe_markdown",
-      "source": "app_app_recipes_new_page_tsx",
-      "target": "parse_recipe_markdown",
       "confidence_score": 1.0
     },
     {
@@ -2467,8 +1727,8 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L55",
       "weight": 1.0,
-      "_src": "bulkactionbar_handledelete",
-      "_tgt": "bulk_recipes_bulkdeleterecipes",
+      "_src": "bulk_recipes_bulkdeleterecipes",
+      "_tgt": "bulkactionbar_handledelete",
       "source": "bulk_recipes_bulkdeleterecipes",
       "target": "bulkactionbar_handledelete"
     },
@@ -2491,8 +1751,8 @@
       "source_file": "components/recipes/BulkActionBar.tsx",
       "source_location": "L75",
       "weight": 1.0,
-      "_src": "bulkactionbar_handleduplicate",
-      "_tgt": "bulk_recipes_bulkduplicaterecipes",
+      "_src": "bulk_recipes_bulkduplicaterecipes",
+      "_tgt": "bulkactionbar_handleduplicate",
       "source": "bulk_recipes_bulkduplicaterecipes",
       "target": "bulkactionbar_handleduplicate"
     },
@@ -2827,8 +2087,8 @@
       "source_file": "components/recipes/DeleteRecipeButton.tsx",
       "source_location": "L14",
       "weight": 1.0,
-      "_src": "deleterecipebutton_deleterecipebutton",
-      "_tgt": "toastcontext_usetoast",
+      "_src": "toastcontext_usetoast",
+      "_tgt": "deleterecipebutton_deleterecipebutton",
       "source": "toastcontext_usetoast",
       "target": "deleterecipebutton_deleterecipebutton"
     },
@@ -2938,18 +2198,6 @@
       "_tgt": "ingredientrow_set",
       "source": "components_recipes_ingredientrow_tsx",
       "target": "ingredientrow_set",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "components/recipes/MarkdownImport.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_src": "components_recipes_markdownimport_tsx",
-      "_tgt": "parse_recipe_markdown",
-      "source": "components_recipes_markdownimport_tsx",
-      "target": "parse_recipe_markdown",
       "confidence_score": 1.0
     },
     {
@@ -3313,18 +2561,6 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": "L11",
-      "weight": 1.0,
-      "_src": "components_recipes_bulkactionbar_tsx",
-      "_tgt": "export_recipes",
-      "source": "components_recipes_bulkactionbar_tsx",
-      "target": "export_recipes",
-      "confidence_score": 1.0
-    },
-    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "components/recipes/BulkActionBar.tsx",
@@ -3407,18 +2643,6 @@
       "_tgt": "export_recipes_triggerdownload",
       "source": "bulkactionbar_handleexportmarkdown",
       "target": "export_recipes_triggerdownload"
-    },
-    {
-      "relation": "imports_from",
-      "confidence": "EXTRACTED",
-      "source_file": "components/recipes/RecipeForm.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "_src": "components_recipes_recipeform_tsx",
-      "_tgt": "parse_recipe_markdown",
-      "source": "components_recipes_recipeform_tsx",
-      "target": "parse_recipe_markdown",
-      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -3731,822 +2955,6 @@
       "source": "lib_hooks_useunsavedchanges_ts",
       "target": "useunsavedchanges_useunsavedchanges",
       "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_type_recipe",
-      "_tgt": "recipe_type_ingredient",
-      "source": "recipe_type_ingredient",
-      "target": "recipe_type_recipe"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_type_recipe",
-      "_tgt": "recipe_type_step",
-      "source": "recipe_type_step",
-      "target": "recipe_type_recipe"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(app)/recipes/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipes_page",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "recipes_page"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(app)/recipes/[id]/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_detail_page",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "recipe_detail_page"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(app)/recipes/[id]/edit/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "edit_recipe_page",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "edit_recipe_page"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "types/recipe.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_type_payload",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "recipe_type_payload"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "docs/data-model.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "data_model_doc",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "data_model_doc"
-    },
-    {
-      "relation": "rationale_for",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "docs/superpowers/specs/2026-04-13-phase3-photos-design.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "phase3_spec",
-      "_tgt": "recipe_type_recipe",
-      "source": "recipe_type_recipe",
-      "target": "phase3_spec"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_create_recipe",
-      "_tgt": "recipe_type_payload",
-      "source": "recipe_type_payload",
-      "target": "action_create_recipe"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_update_recipe",
-      "_tgt": "recipe_type_payload",
-      "source": "recipe_type_payload",
-      "target": "action_update_recipe"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_bulk_delete",
-      "_tgt": "recipe_type_bulkresult",
-      "source": "recipe_type_bulkresult",
-      "target": "action_bulk_delete"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_bulk_duplicate",
-      "_tgt": "recipe_type_bulkresult",
-      "source": "recipe_type_bulkresult",
-      "target": "action_bulk_duplicate"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_bulk_tags",
-      "_tgt": "recipe_type_bulkresult",
-      "source": "recipe_type_bulkresult",
-      "target": "action_bulk_tags"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "middleware.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "app_middleware",
-      "_tgt": "supabase_middleware",
-      "source": "app_middleware",
-      "target": "supabase_middleware"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(app)/recipes/[id]/edit/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "edit_recipe_page",
-      "_tgt": "action_update_recipe",
-      "source": "edit_recipe_page",
-      "target": "action_update_recipe"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(app)/recipes/print/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "print_page",
-      "_tgt": "print_auto_trigger",
-      "source": "print_page",
-      "target": "print_auto_trigger"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "app/actions/recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_create_recipe",
-      "_tgt": "action_delete_recipe",
-      "source": "action_create_recipe",
-      "target": "action_delete_recipe"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "app/actions/bulk-recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "action_bulk_delete",
-      "_tgt": "action_delete_recipe",
-      "source": "action_delete_recipe",
-      "target": "action_bulk_delete"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "bulk_action_bar_comp",
-      "_tgt": "action_bulk_delete",
-      "source": "action_bulk_delete",
-      "target": "bulk_action_bar_comp"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "bulk_action_bar_comp",
-      "_tgt": "action_bulk_duplicate",
-      "source": "action_bulk_duplicate",
-      "target": "bulk_action_bar_comp"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/BulkTagDialog.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "bulk_tag_dialog",
-      "_tgt": "action_bulk_tags",
-      "source": "action_bulk_tags",
-      "target": "bulk_tag_dialog"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/auth/LoginForm.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "login_form",
-      "_tgt": "auth_actions",
-      "source": "auth_actions",
-      "target": "login_form"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/actions/auth.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "auth_actions",
-      "_tgt": "supabase_server_client",
-      "source": "auth_actions",
-      "target": "supabase_server_client"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "tests/e2e/auth.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_auth_spec",
-      "_tgt": "auth_actions",
-      "source": "auth_actions",
-      "target": "test_auth_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "tests/e2e/global.setup.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_global_setup",
-      "_tgt": "auth_actions",
-      "source": "auth_actions",
-      "target": "test_global_setup"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "app/(auth)/layout.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "auth_layout",
-      "_tgt": "login_page",
-      "source": "auth_layout",
-      "target": "login_page"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/(auth)/login/page.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "login_page",
-      "_tgt": "login_form",
-      "source": "login_page",
-      "target": "login_form"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/auth.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_auth_spec",
-      "_tgt": "login_page",
-      "source": "login_page",
-      "target": "test_auth_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/auth.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_auth_spec",
-      "_tgt": "login_form",
-      "source": "login_form",
-      "target": "test_auth_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/global.setup.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_global_setup",
-      "_tgt": "login_form",
-      "source": "login_form",
-      "target": "test_global_setup"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/DeleteRecipeButton.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "delete_recipe_button",
-      "_tgt": "confirm_dialog",
-      "source": "confirm_dialog",
-      "target": "delete_recipe_button"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "tests/e2e/bulk-ops.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_bulk_ops_spec",
-      "_tgt": "confirm_dialog",
-      "source": "confirm_dialog",
-      "target": "test_bulk_ops_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_recipes_crud_spec",
-      "_tgt": "confirm_dialog",
-      "source": "confirm_dialog",
-      "target": "test_recipes_crud_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/ui/AppProviders.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "app_providers",
-      "_tgt": "toast_context",
-      "source": "toast_context",
-      "target": "app_providers"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/ui/ToastContext.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "toast_context",
-      "_tgt": "toast_container",
-      "source": "toast_context",
-      "target": "toast_container"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeDetailClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_detail_client",
-      "_tgt": "toast_context",
-      "source": "toast_context",
-      "target": "recipe_detail_client"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/DeleteRecipeButton.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "delete_recipe_button",
-      "_tgt": "toast_context",
-      "source": "toast_context",
-      "target": "delete_recipe_button"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/ui/AppProviders.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "app_providers",
-      "_tgt": "toast_container",
-      "source": "toast_container",
-      "target": "app_providers"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeListClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_list_client",
-      "_tgt": "recipe_card",
-      "source": "recipe_list_client",
-      "target": "recipe_card"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeListClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_list_client",
-      "_tgt": "bulk_action_bar",
-      "source": "recipe_list_client",
-      "target": "bulk_action_bar"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeListClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_list_client",
-      "_tgt": "recipe_type",
-      "source": "recipe_list_client",
-      "target": "recipe_type"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/bulk-ops.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_bulk_ops_spec",
-      "_tgt": "recipe_list_client",
-      "source": "recipe_list_client",
-      "target": "test_bulk_ops_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_recipes_crud_spec",
-      "_tgt": "recipe_list_client",
-      "source": "recipe_list_client",
-      "target": "test_recipes_crud_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/phase2.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_phase2_spec",
-      "_tgt": "recipe_list_client",
-      "source": "recipe_list_client",
-      "target": "test_phase2_spec"
-    },
-    {
-      "relation": "rationale_for",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "docs/superpowers/specs/2026-04-12-phase2-cooking-companion-design.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "phase2_spec",
-      "_tgt": "recipe_list_client",
-      "source": "recipe_list_client",
-      "target": "phase2_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeCard.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_card",
-      "_tgt": "recipe_type",
-      "source": "recipe_card",
-      "target": "recipe_type"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_recipes_crud_spec",
-      "_tgt": "ingredient_row",
-      "source": "ingredient_row",
-      "target": "test_recipes_crud_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "tests/e2e/phase2.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_phase2_spec",
-      "_tgt": "ingredient_row",
-      "source": "ingredient_row",
-      "target": "test_phase2_spec"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/MarkdownImport.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "markdown_import",
-      "_tgt": "parse_recipe_markdown",
-      "source": "markdown_import",
-      "target": "parse_recipe_markdown"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/markdown-import.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_markdown_import_spec",
-      "_tgt": "markdown_import",
-      "source": "markdown_import",
-      "target": "test_markdown_import_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeDetailClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_detail_client",
-      "_tgt": "recipe_type",
-      "source": "recipe_detail_client",
-      "target": "recipe_type"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_recipes_crud_spec",
-      "_tgt": "recipe_detail_client",
-      "source": "recipe_detail_client",
-      "target": "test_recipes_crud_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/phase2.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_phase2_spec",
-      "_tgt": "recipe_detail_client",
-      "source": "recipe_detail_client",
-      "target": "test_phase2_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "components/recipes/RecipeDetailClient.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_detail_client",
-      "_tgt": "delete_recipe_button",
-      "source": "recipe_detail_client",
-      "target": "delete_recipe_button"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/DeleteRecipeButton.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "delete_recipe_button",
-      "_tgt": "delete_recipe_action",
-      "source": "delete_recipe_button",
-      "target": "delete_recipe_action"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "tests/e2e/recipes-crud.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_recipes_crud_spec",
-      "_tgt": "delete_recipe_button",
-      "source": "delete_recipe_button",
-      "target": "test_recipes_crud_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tests/e2e/bulk-ops.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_bulk_ops_spec",
-      "_tgt": "bulk_action_bar",
-      "source": "bulk_action_bar",
-      "target": "test_bulk_ops_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "tests/e2e/markdown-import.spec.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "test_markdown_import_spec",
-      "_tgt": "parse_recipe_markdown",
-      "source": "parse_recipe_markdown",
-      "target": "test_markdown_import_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeForm.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_form",
-      "_tgt": "step_row",
-      "source": "recipe_form",
-      "target": "step_row"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeForm.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_form",
-      "_tgt": "use_unsaved_changes",
-      "source": "recipe_form",
-      "target": "use_unsaved_changes"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/recipes/RecipeForm.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "recipe_form",
-      "_tgt": "parse_markdown_util",
-      "source": "recipe_form",
-      "target": "parse_markdown_util"
-    },
-    {
-      "relation": "rationale_for",
-      "confidence": "INFERRED",
-      "confidence_score": 0.9,
-      "source_file": "docs/superpowers/specs/2026-04-12-phase2-cooking-companion-design.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "phase2_spec",
-      "_tgt": "cook_mode",
-      "source": "cook_mode",
-      "target": "phase2_spec"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "components/recipes/BulkActionBar.tsx",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "bulk_action_bar_comp",
-      "_tgt": "bulk_tag_dialog",
-      "source": "bulk_tag_dialog",
-      "target": "bulk_action_bar_comp"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "lib/utils/export-recipes.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "export_recipes",
-      "_tgt": "parse_markdown_util",
-      "source": "export_recipes",
-      "target": "parse_markdown_util"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/utils/__tests__/parse-recipe-markdown.test.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "parse_markdown_test",
-      "_tgt": "parse_markdown_util",
-      "source": "parse_markdown_util",
-      "target": "parse_markdown_test"
-    },
-    {
-      "relation": "rationale_for",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "docs/data-model.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "data_model_doc",
-      "_tgt": "supabase_server",
-      "source": "supabase_server",
-      "target": "data_model_doc"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "docs/superpowers/specs/2026-04-13-phase3-photos-design.md",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "phase3_spec",
-      "_tgt": "supabase_server",
-      "source": "supabase_server",
-      "target": "phase3_spec"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.7,
-      "source_file": "lib/supabase/middleware.ts",
-      "source_location": null,
-      "weight": 1.0,
-      "_src": "supabase_middleware_lib",
-      "_tgt": "supabase_server",
-      "source": "supabase_server",
-      "target": "supabase_middleware_lib"
     }
   ],
   "hyperedges": [
