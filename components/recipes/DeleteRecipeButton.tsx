@@ -35,7 +35,7 @@ export default function DeleteRecipeButton({ id, name }: Props) {
       <ConfirmDialog
         open={open}
         title="Delete recipe"
-        description={`¿Eliminar "${name}"? Esta acción no se puede deshacer.`}
+        description={`Delete "${name}"? This cannot be undone.`}
         confirmLabel={pending ? 'Deleting…' : 'Delete'}
         onConfirm={handleConfirm}
         onCancel={() => setOpen(false)}

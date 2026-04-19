@@ -38,7 +38,7 @@ export default async function PrintPage({ searchParams }: PageProps) {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-6 py-8 text-sm" style={{ color: 'var(--color-terracotta)' }}>
-        Error al cargar: {error.message}
+        Error loading: {error.message}
       </div>
     );
   }
@@ -71,13 +71,13 @@ export default async function PrintPage({ searchParams }: PageProps) {
             )}
 
             <div className="font-label text-sm tracking-wide mb-6" style={{ color: 'var(--text-2)' }}>
-              {recipe.servings} {recipe.servings !== 1 ? 'porciones' : 'porción'}
+              {recipe.servings} {recipe.servings !== 1 ? 'servings' : 'serving'}
               {totalTime > 0 && <> · {totalTime} min</>}
               {recipe.tags && recipe.tags.length > 0 && <> · {recipe.tags.join(', ')}</>}
             </div>
 
             <h2 className="font-display text-xl font-semibold mb-3" style={{ color: 'var(--text-1)' }}>
-              Ingredientes
+              Ingredients
             </h2>
             <ul className="font-body text-base mb-6 pl-5 list-disc" style={{ color: 'var(--text-1)' }}>
               {recipe.ingredients.map((ing, i) => (
@@ -89,7 +89,7 @@ export default async function PrintPage({ searchParams }: PageProps) {
             </ul>
 
             <h2 className="font-display text-xl font-semibold mb-3" style={{ color: 'var(--text-1)' }}>
-              Pasos
+              Steps
             </h2>
             <ol className="font-body text-base pl-5 list-decimal" style={{ color: 'var(--text-1)' }}>
               {steps.map((step, i) => (
@@ -102,7 +102,7 @@ export default async function PrintPage({ searchParams }: PageProps) {
             {recipe.notes && (
               <>
                 <h2 className="font-display text-xl font-semibold mt-6 mb-3" style={{ color: 'var(--text-1)' }}>
-                  Notas
+                  Notes
                 </h2>
                 <p className="font-body text-base whitespace-pre-wrap" style={{ color: 'var(--text-1)' }}>
                   {recipe.notes}

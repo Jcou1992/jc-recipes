@@ -16,7 +16,7 @@ export default async function RecipesPage() {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8 text-sm" style={{ color: 'var(--color-terracotta)' }}>
-        Error al cargar recetas: {error.message}
+        Error loading recipes: {error.message}
       </div>
     );
   }
@@ -43,7 +43,7 @@ export default async function RecipesPage() {
             No recipes yet
           </p>
           <p className="font-body text-base mb-8" style={{ color: 'var(--text-3)' }}>
-            Añade tu primera receta para empezar.
+            Add your first recipe to get started.
           </p>
           <Link href="/recipes/new" className="btn-primary">
             Create your first recipe

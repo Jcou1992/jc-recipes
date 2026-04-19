@@ -196,7 +196,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
               {multiplier < 1
                 ? `×${Math.round(multiplier * 100) / 100}`
                 : `×${Math.round(multiplier * 10) / 10}`
-              } Resetear
+              } Reset
             </button>
           )}
         </div>
@@ -209,7 +209,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
         )}
         {recipe.cook_time != null && (
           <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-            Cocción: {formatTime(recipe.cook_time)}
+            Cook: {formatTime(recipe.cook_time)}
           </span>
         )}
         {totalTime > 0 && recipe.prep_time != null && recipe.cook_time != null && (
@@ -236,7 +236,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
               aria-pressed={unitSystem === sys}
               data-testid={`unit-${sys}`}
             >
-              {sys === 'metric' ? 'Métrico' : 'Imperial'}
+              {sys === 'metric' ? 'Metric' : 'Imperial'}
             </button>
           ))}
         </div>
@@ -250,7 +250,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
           <aside className="md:sticky md:top-20 mb-10 md:mb-0">
             {recipe.ingredients.length > 0 && (
               <section data-testid="ingredients-section">
-                <h2 className="section-label mb-4">Ingredientes</h2>
+                <h2 className="section-label mb-4">Ingredients</h2>
                 <ul className="space-y-2.5">
                   {displayedIngredients.map((ing, i) => (
                     <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
@@ -280,15 +280,15 @@ export default function RecipeDetailClient({ recipe }: Props) {
                       .join('\n');
                     try {
                       await navigator.clipboard.writeText(text);
-                      showToast('Ingredientes copiados', 'success');
+                      showToast('Ingredients copied', 'success');
                     } catch {
-                      showToast('No se pudo copiar al portapapeles', 'error');
+                      showToast('Failed to copy to clipboard', 'error');
                     }
                   }}
                   className="btn-ghost text-sm"
                   data-testid="copy-ingredients-btn"
                 >
-                  Copiar ingredientes
+                  Copy ingredients
                 </button>
               </div>
             )}
@@ -301,7 +301,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
                   className="btn-primary w-full text-center"
                   data-testid="cook-mode-btn-desktop"
                 >
-                  Cocinar
+                  Cook
                 </Link>
               </div>
             )}
@@ -312,7 +312,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
         <div>
           {recipe.steps.length > 0 && (
             <section className="mb-10">
-              <h2 className="section-label mb-4">Preparación</h2>
+              <h2 className="section-label mb-4">Preparation</h2>
               <ol className="space-y-6">
                 {[...recipe.steps]
                   .sort((a, b) => a.order - b.order)
@@ -348,7 +348,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
               className="rounded-xl p-5"
               style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}
             >
-              <h2 className="section-label mb-3">Notas</h2>
+              <h2 className="section-label mb-3">Notes</h2>
               <p className="font-body text-base whitespace-pre-line" style={{ color: 'var(--text-2)' }}>
                 {recipe.notes}
               </p>
@@ -375,7 +375,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             className="btn-primary w-full text-center block"
             data-testid="cook-mode-btn"
           >
-            Cocinar
+            Cook
           </Link>
         </div>
       )}

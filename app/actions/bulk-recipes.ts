@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import type { BulkActionResult } from '@/types/recipe';
 
 const BATCH_LIMIT = 100;
+const DELETE_CHUNK_SIZE = 100;
 
 function overLimit(ids: string[]): BulkActionResult {
   return {
@@ -15,28 +16,38 @@ function overLimit(ids: string[]): BulkActionResult {
 
 export async function bulkDeleteRecipes(ids: string[]): Promise<BulkActionResult> {
   if (ids.length === 0) return { succeeded: [], failed: [] };
-  if (ids.length > BATCH_LIMIT) return overLimit(ids);
 
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect('/login');
 
-  const { data, error } = await supabase
-    .from('recipes')
-    .delete()
-    .in('id', ids)
-    .eq('user_id', session.user.id)
-    .select('id');
+  const chunks: string[][] = [];
+  for (let i = 0; i < ids.length; i += DELETE_CHUNK_SIZE)
+    chunks.push(ids.slice(i, i + DELETE_CHUNK_SIZE));
 
-  if (error) {
-    return { succeeded: [], failed: ids.map(id => ({ id, error: error.message })) };
+  const results = await Promise.all(
+    chunks.map(chunk =>
+      supabase
+        .from('recipes')
+        .delete()
+        .in('id', chunk)
+        .eq('user_id', session.user.id)
+        .select('id')
+    )
+  );
+
+  const succeeded: string[] = [];
+  const allErrors: string[] = [];
+  for (const { data, error } of results) {
+    if (error) { allErrors.push(error.message); continue; }
+    (data ?? []).forEach(r => succeeded.push(r.id));
   }
 
-  const succeeded = (data ?? []).map(r => r.id);
   const succeededSet = new Set(succeeded);
   const failed = ids
     .filter(id => !succeededSet.has(id))
-    .map(id => ({ id, error: 'Not found' }));
+    .map(id => ({ id, error: allErrors[0] ?? 'Not found' }));
+
   return { succeeded, failed };
 }
 

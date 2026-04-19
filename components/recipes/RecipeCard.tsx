@@ -24,7 +24,7 @@ export default function RecipeCard({
   const metaRow = (
     <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
       <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-        {recipe.servings} {recipe.servings !== 1 ? 'porciones' : 'porción'}
+        {recipe.servings} {recipe.servings !== 1 ? 'servings' : 'serving'}
       </span>
       {totalTime > 0 && (
         <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
@@ -33,7 +33,7 @@ export default function RecipeCard({
       )}
       {recipe.ingredients.length > 0 && (
         <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-          {recipe.ingredients.length} ingredientes
+          {recipe.ingredients.length} ingredients
         </span>
       )}
     </div>
@@ -69,15 +69,17 @@ export default function RecipeCard({
     <>
       {selectMode && (
         <div
-          className="absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+          className={`absolute top-2 left-2 w-4 h-4 rounded flex items-center justify-center transition-all pointer-events-none ${
+            selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+          }`}
           style={{
-            background: selected ? 'var(--color-terracotta)' : 'rgba(0,0,0,0.35)',
-            border: `2px solid ${selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.4)'}`,
+            background: selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.9)',
+            border: `1.5px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
           }}
           aria-hidden="true"
         >
           {selected && (
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
+            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           )}
@@ -104,11 +106,9 @@ export default function RecipeCard({
     };
     return (
       <div
-        className={`relative block rounded-xl ${padClass} transition-colors cursor-pointer select-none`}
+        className={`group relative block rounded-xl ${padClass} transition-colors cursor-pointer select-none`}
         style={{
-          background: selected
-            ? 'color-mix(in srgb, var(--color-terracotta) 10%, var(--bg-card))'
-            : 'var(--bg-card)',
+          background: 'var(--bg-card)',
           border: `2px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
           boxShadow: 'var(--shadow-card)',
         }}

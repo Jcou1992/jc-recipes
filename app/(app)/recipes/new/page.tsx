@@ -45,7 +45,7 @@ export default function NewRecipePage() {
     setInitial(parsedToInitial(parsed));
     setFormKey(k => k + 1);
     setTab('manual');
-    showToast('Receta importada desde Markdown', 'success');
+    showToast('Recipe imported from Markdown', 'success');
   };
 
   const isMarkdown = tab === 'markdown';
@@ -57,13 +57,13 @@ export default function NewRecipePage() {
         className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
         style={{ color: 'var(--text-3)' }}
       >
-        ← Volver
+        ← Back
       </Link>
       <h1
         className="font-display text-3xl font-bold mb-6"
         style={{ color: 'var(--text-1)' }}
       >
-        Nueva receta
+        New recipe
       </h1>
 
       {/* Tabs */}

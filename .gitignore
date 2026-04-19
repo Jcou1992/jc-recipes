@@ -5,3 +5,4 @@ data/
 .env.local
 *.log
 tests/e2e/.auth/
+*.tsbuildinfo

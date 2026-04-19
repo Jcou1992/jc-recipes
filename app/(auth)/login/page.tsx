@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import LoginForm from '@/components/auth/LoginForm';
 
-export const metadata: Metadata = { title: 'Acceder - jc-recipes' };
+export const metadata: Metadata = { title: 'Log in - jc-recipes' };
 
 export default function LoginPage() {
   return (
@@ -23,7 +23,7 @@ export default function LoginPage() {
           className="font-label text-xs tracking-widest uppercase mb-8"
           style={{ color: 'var(--text-3)' }}
         >
-          Accede a tu colección
+          Your recipe collection
         </p>
         <LoginForm />
       </div>
