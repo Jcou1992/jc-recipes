@@ -120,7 +120,7 @@ export default function BulkActionBar({
             style={{ color: 'var(--text-1)' }}
             data-testid="bulk-count"
           >
-            {count} {count === 1 ? 'selected' : 'selected'}
+            {count} {count === 1 ? 'recipe selected' : 'recipes selected'}
           </span>
 
           <button
