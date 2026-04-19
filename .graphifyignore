@@ -1,0 +1,9 @@
+node_modules/
+.next/
+dist/
+data/
+tests/e2e/.auth/
+graphify-out/
+.claude/worktrees/
+*.tsbuildinfo
+*.log
