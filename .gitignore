@@ -6,3 +6,4 @@ data/
 *.log
 tests/e2e/.auth/
 *.tsbuildinfo
+graphify-out/cache/
