@@ -69,10 +69,10 @@ export default function RecipeCard({
     <>
       {selectMode && (
         <div
-          className="absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors"
+          className="absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
           style={{
-            background: selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.9)',
-            border: `2px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
+            background: selected ? 'var(--color-terracotta)' : 'rgba(0,0,0,0.35)',
+            border: `2px solid ${selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.4)'}`,
           }}
           aria-hidden="true"
         >
@@ -104,11 +104,13 @@ export default function RecipeCard({
     };
     return (
       <div
-        className={`recipe-card relative block rounded-xl ${padClass} transition-all cursor-pointer select-none`}
+        className={`relative block rounded-xl ${padClass} transition-colors cursor-pointer select-none`}
         style={{
-          background: 'var(--bg-card)',
-          boxShadow: selected ? '0 0 0 2px var(--color-terracotta)' : 'var(--shadow-card)',
-          opacity: selected ? 1 : 0.85,
+          background: selected
+            ? 'color-mix(in srgb, var(--color-terracotta) 10%, var(--bg-card))'
+            : 'var(--bg-card)',
+          border: `2px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
+          boxShadow: 'var(--shadow-card)',
         }}
         onClick={handleClick}
         role="button"

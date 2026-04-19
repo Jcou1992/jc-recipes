@@ -12,21 +12,16 @@ export function recipeToMarkdown(recipe: Recipe): string {
   lines.push('');
 
   if (recipe.description) {
-    lines.push(recipe.description);
+    lines.push(`> ${recipe.description}`);
     lines.push('');
   }
 
-  const meta: string[] = [];
-  meta.push(`**Porciones:** ${recipe.servings}`);
-  if (recipe.prep_time != null) meta.push(`**Prep:** ${recipe.prep_time} min`);
-  if (recipe.cook_time != null) meta.push(`**Cocción:** ${recipe.cook_time} min`);
-  if (recipe.tags && recipe.tags.length > 0) {
-    meta.push(`**Tags:** ${recipe.tags.join(', ')}`);
-  }
-  lines.push(meta.join('  \n'));
+  if (recipe.prep_time != null) lines.push(`**Prep time:** ${recipe.prep_time} min`);
+  if (recipe.cook_time != null) lines.push(`**Cook time:** ${recipe.cook_time} min`);
+  lines.push(`**Servings:** ${recipe.servings}`);
   lines.push('');
 
-  lines.push('## Ingredientes');
+  lines.push('## Ingredients');
   lines.push('');
   for (const ing of recipe.ingredients) {
     const amount = formatAmount(ing.amount);
@@ -35,22 +30,30 @@ export function recipeToMarkdown(recipe: Recipe): string {
   }
   lines.push('');
 
-  lines.push('## Pasos');
+  lines.push('## Steps');
   lines.push('');
   const steps = [...recipe.steps].sort((a, b) => a.order - b.order);
   steps.forEach((step, idx) => {
-    lines.push(`${idx + 1}. ${step.content}`);
     if (step.timer_seconds != null) {
       const mins = Math.round(step.timer_seconds / 60);
-      lines.push(`   *(Timer: ${mins} min)*`);
+      lines.push(`${idx + 1}. ${step.content} [timer: ${mins}min]`);
+    } else {
+      lines.push(`${idx + 1}. ${step.content}`);
     }
   });
   lines.push('');
 
   if (recipe.notes) {
-    lines.push('## Notas');
+    lines.push('## Notes');
     lines.push('');
     lines.push(recipe.notes);
+    lines.push('');
+  }
+
+  if (recipe.tags && recipe.tags.length > 0) {
+    lines.push('## Tags');
+    lines.push('');
+    lines.push(recipe.tags.join(', '));
     lines.push('');
   }
 
