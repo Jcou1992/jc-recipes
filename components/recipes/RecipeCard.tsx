@@ -46,9 +46,9 @@ export default function RecipeCard({
           key={tag}
           className="font-label text-xs tracking-wider uppercase px-2 py-0.5 rounded-full"
           style={{
-            background: 'rgba(237,209,142,0.1)',
+            background: 'rgba(237,209,142,0.15)',
             color: 'var(--color-gold)',
-            border: '1px solid rgba(237,209,142,0.15)',
+            border: '1px solid rgba(237,209,142,0.3)',
           }}
         >
           {tag}
@@ -129,8 +129,10 @@ export default function RecipeCard({
       href={`/recipes/${recipe.id}`}
       className={`recipe-card relative block rounded-xl ${padClass} transition-all`}
       style={{
-        background: 'var(--bg-card)',
-        boxShadow: 'var(--shadow-card)',
+        background: featured ? 'var(--bg-raised)' : 'var(--bg-card)',
+        boxShadow: featured
+          ? '0 0 0 1px rgba(255,255,255,0.07), 0 4px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)'
+          : 'var(--shadow-card)',
       }}
       data-testid={`recipe-card-${recipe.id}`}
     >

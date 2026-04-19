@@ -275,6 +275,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           onChange={e => handleSearchChange(e.target.value)}
           placeholder="Search recipes…"
           className="input-base w-full pl-10 pr-10"
+          style={{ borderRadius: '9999px' }}
           aria-label="Search recipes"
           data-testid="recipe-search"
         />
@@ -344,10 +345,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           {allTags.length > 0 && (() => {
             const visibleTags = allTags.filter(t => normalise(t).includes(normalise(tagSearch)));
             return visibleTags.length > 0 ? (
-              <div
-                className="flex gap-2 overflow-x-auto flex-1 pb-1"
-                style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
-              >
+              <div className="relative flex-1 min-w-0">
+                <div
+                  className="flex gap-2 overflow-x-auto pb-1"
+                  style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
+                >
                 {visibleTags.map(tag => {
                   const active = activeTags.includes(tag);
                   return (
@@ -366,6 +368,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                     </button>
                   );
                 })}
+                </div>
+                <div
+                  className="pointer-events-none absolute right-0 top-0 bottom-1 w-10"
+                  style={{ background: 'linear-gradient(to right, transparent, var(--bg))' }}
+                />
               </div>
             ) : (
               <p className="font-label text-xs tracking-wide py-2 flex-1" style={{ color: 'var(--text-3)' }}>
@@ -450,12 +457,17 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
       {filtered.length === 0 ? (
         <div className="text-center py-20" data-testid="filtered-empty-state">
           <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
-            No matching recipes
+            Nothing here
           </p>
           {hasFilters && (
-            <button onClick={clearFilters} className="btn-ghost mt-4" data-testid="clear-filters-btn">
-              Clear filters
-            </button>
+            <>
+              <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
+                Try different tags or clear your search.
+              </p>
+              <button onClick={clearFilters} className="btn-ghost" data-testid="clear-filters-btn">
+                Clear filters
+              </button>
+            </>
           )}
         </div>
       ) : (

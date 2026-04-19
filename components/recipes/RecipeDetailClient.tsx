@@ -158,7 +158,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
         <div className="flex items-center gap-2" data-testid="serving-scaler">
           <button
             onClick={() => setTargetServings(s => Math.max(1, s - 1))}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors font-label font-bold text-lg"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
             aria-label="Decrease servings"
             data-testid="scaler-decrease"
@@ -174,7 +174,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
           </span>
           <button
             onClick={() => setTargetServings(s => s + 1)}
-            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg transition-colors font-label font-bold text-lg"
+            className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
             aria-label="Increase servings"
             data-testid="scaler-increase"
@@ -256,7 +256,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
                     <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
                       <span
                         className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right"
-                        style={{ color: 'var(--color-terracotta)' }}
+                        style={{ color: 'var(--color-gold)' }}
                         data-testid={`ingredient-amount-${i}`}
                       >
                         {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
@@ -319,8 +319,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
                   .map(step => (
                     <li key={step.order} className="flex gap-4 items-start">
                       <span
-                        className="font-label flex-shrink-0"
-                        style={{ fontSize: '2.5rem', lineHeight: 1, color: 'var(--color-terracotta)', minWidth: '2.5rem' }}
+                        className="font-label flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base font-semibold"
+                        style={{
+                          color: 'var(--color-gold)',
+                          background: 'rgba(237,209,142,0.08)',
+                          border: '1px solid rgba(237,209,142,0.18)',
+                          minWidth: '2.25rem',
+                        }}
                       >
                         {step.order}
                       </span>
