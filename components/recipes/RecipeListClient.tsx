@@ -43,6 +43,19 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const [tagSearchOpen, setTagSearchOpen] = useState(false);
   const [showSortSheet, setShowSortSheet] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tagSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!tagSearchOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (tagSearchRef.current && !tagSearchRef.current.contains(e.target as Node)) {
+        setTagSearch('');
+        setTagSearchOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [tagSearchOpen]);
 
   // Selection state
   const [selectMode, setSelectMode] = useState(false);
@@ -293,7 +306,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           {/* Inline tag search toggle */}
           {allTags.length > 0 && (
             tagSearchOpen ? (
-              <div className="relative flex-shrink-0 flex items-center" style={{ width: '148px' }}>
+              <div ref={tagSearchRef} className="relative flex-shrink-0 flex items-center" style={{ width: '148px' }}>
                 <svg className="absolute left-2.5 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -304,21 +317,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                   onChange={e => setTagSearch(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Escape') { setTagSearch(''); setTagSearchOpen(false); } }}
                   placeholder="Filter tags…"
-                  className="w-full pl-7 pr-7 py-1.5 rounded-full text-xs font-label tracking-wide"
+                  className="w-full pl-7 pr-3 py-1.5 rounded-full text-xs font-label tracking-wide"
                   style={{ background: 'var(--bg-raised)', border: '1px solid var(--color-terracotta)', color: 'var(--text-1)', outline: 'none' }}
                   aria-label="Filter tags"
                   data-testid="tag-search"
                 />
-                <button
-                  type="button"
-                  onClick={() => { setTagSearch(''); setTagSearchOpen(false); }}
-                  className="absolute right-2 flex items-center justify-center min-h-[44px] min-w-[44px]"
-                  aria-label="Close tag search"
-                >
-                  <svg className="w-3 h-3" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
               </div>
             ) : (
               <button
