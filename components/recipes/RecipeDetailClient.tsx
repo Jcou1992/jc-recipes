@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Recipe, Ingredient } from '@/types/recipe';
 import { useToast } from '@/components/ui/ToastContext';
+import { recipeToMarkdown, triggerDownload } from '@/lib/utils/export-recipes';
 
 // ── Fraction rendering ────────────────────────────────────────────────────────
 
@@ -138,6 +139,16 @@ export default function RecipeDetailClient({ recipe }: Props) {
     try { localStorage.setItem('preferred-unit-system', next); } catch {}
   }
 
+  function handleExportMd() {
+    const md = recipeToMarkdown(recipe);
+    const filename = recipe.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.md';
+    triggerDownload(md, filename, 'text/markdown');
+  }
+
+  function handleExportPdf() {
+    window.open(`/recipes/print?ids=${recipe.id}`, '_blank');
+  }
+
   const multiplier = targetServings / recipe.servings;
   const isScaled = multiplier !== 1;
 
@@ -218,9 +229,27 @@ export default function RecipeDetailClient({ recipe }: Props) {
           </span>
         )}
 
+        {/* Export buttons */}
+        <div className="flex items-center gap-1 ml-auto">
+          <button
+            onClick={handleExportMd}
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
+            data-testid="recipe-export-md"
+          >
+            MD
+          </button>
+          <button
+            onClick={handleExportPdf}
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
+            data-testid="recipe-export-pdf"
+          >
+            PDF
+          </button>
+        </div>
+
         {/* Unit toggle */}
         <div
-          className="flex items-center rounded-lg overflow-hidden ml-auto"
+          className="flex items-center rounded-lg overflow-hidden"
           style={{ border: '1px solid var(--border)' }}
           data-testid="unit-toggle"
         >
