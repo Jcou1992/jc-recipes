@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import type { Recipe, Step } from '@/types/recipe';
 
@@ -148,6 +148,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     return () => clearInterval(id);
   }, []);
 
+  // AudioContext cleanup
+  useEffect(() => {
+    return () => {
+      audioCtxRef.current?.close().catch(() => {});
+    };
+  }, []);
+
   function goTo(i: number) {
     if (i < 0 || i >= totalSteps) return;
     setCompletedSteps(prev => new Set([...prev, currentIndex]));
@@ -170,7 +177,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   function resetTimer(stepIdx: number) {
     setTimers(prev => {
       const next = new Map(prev);
-      const original = sortedSteps[stepIdx].timer_seconds!;
+      const original = sortedSteps[stepIdx].timer_seconds ?? 0;
       next.set(stepIdx, { remaining: original, running: false });
       return next;
     });
@@ -192,8 +199,6 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
   const currentStep = sortedSteps[currentIndex];
   const currentTimer = timers.get(currentIndex);
-  const activeTimers = [...timers.entries()].filter(([, t]) => t.remaining > 0 && (t.running || t.remaining < (sortedSteps[0].timer_seconds ?? 0)));
-  const runningTimers = [...timers.entries()].filter(([, t]) => t.running || (t.remaining > 0 && t.remaining < (sortedSteps[timers.keys().next().value ?? 0]?.timer_seconds ?? Infinity)));
 
   // Displayed ingredients (scaled + converted)
   const displayedIngredients = recipe.ingredients.map(ing => {
@@ -201,9 +206,6 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     const { amount: converted, unit } = convertUnit(scaled, ing.unit, unitSystem);
     return { ...ing, displayAmount: formatAmount(converted), displayUnit: unit };
   });
-
-  // Running timers pills (all timers that are running or at zero)
-  const timerPills = [...timers.entries()].filter(([, t]) => t.running || (t.remaining === 0 && sortedSteps[0].timer_seconds != null));
 
   return (
     <div
@@ -213,14 +215,14 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     >
       {/* Active timer pills */}
       {[...timers.entries()].filter(([, t]) => t.running || t.remaining === 0).length > 0 && (
-        <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5 pointer-events-none">
+        <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5">
           {[...timers.entries()]
             .filter(([, t]) => t.running || t.remaining === 0)
             .map(([idx, t]) => (
               <button
                 key={idx}
                 onClick={() => t.remaining === 0 ? resetTimer(idx) : toggleTimer(idx)}
-                className={`font-label text-xs tracking-wider px-3 py-1.5 rounded-full pointer-events-auto transition-all ${
+                className={`font-label text-xs tracking-wider px-3 py-1.5 rounded-full transition-all ${
                   t.remaining === 0 ? 'animate-pulse' : ''
                 }`}
                 style={{
