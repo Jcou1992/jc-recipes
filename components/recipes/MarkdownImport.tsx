@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { parseRecipeMarkdown } from '@/lib/utils/parse-recipe-markdown';
 import type { ParsedRecipe } from '@/lib/utils/parse-recipe-markdown';
 
@@ -89,6 +89,20 @@ interface Props {
 
 export default function MarkdownImport({ onImport }: Props) {
   const [markdown, setMarkdown] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (markdown.trim() && !window.confirm('Replace current content?')) {
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = evt => setMarkdown((evt.target?.result as string) ?? '');
+    reader.readAsText(file);
+    e.target.value = '';
+  }
 
   const previewHtml = useMemo(() => markdownToHtml(markdown), [markdown]);
 
@@ -103,6 +117,24 @@ export default function MarkdownImport({ onImport }: Props) {
           >
             Markdown
           </label>
+          <div className="flex items-center gap-2 mb-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".md,.txt"
+              className="sr-only"
+              data-testid="md-file-upload-input"
+              onChange={handleFileSelect}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
+              data-testid="md-file-upload-btn"
+            >
+              Upload .md file
+            </button>
+          </div>
           <textarea
             data-testid="markdown-input"
             value={markdown}
