@@ -100,6 +100,7 @@ export default function MarkdownImport({ onImport }: Props) {
     }
     const reader = new FileReader();
     reader.onload = evt => setMarkdown((evt.target?.result as string) ?? '');
+    reader.onerror = () => { window.alert('Failed to read file.'); };
     reader.readAsText(file);
     e.target.value = '';
   }
