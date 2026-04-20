@@ -222,9 +222,57 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   return (
     <div className={selectMode && selectedCount > 0 ? 'pb-24' : ''}>
-      {/* Top row: select toggle */}
-      <div className="flex items-center justify-between mb-3">
-        {selectMode && filtered.length > 0 ? (
+      {/* Search bar + Select button */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="relative flex-1">
+          <input
+            type="search"
+            value={searchInput}
+            onChange={e => handleSearchChange(e.target.value)}
+            placeholder="Search recipes…"
+            className="input-base w-full pl-10 pr-10"
+            style={{ borderRadius: '9999px' }}
+            aria-label="Search recipes"
+            data-testid="recipe-search"
+          />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+            style={{ color: 'var(--text-3)' }}
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {searchInput && (
+            <button
+              onClick={() => handleSearchChange('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Clear search"
+            >
+              <svg className="w-4 h-4" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={selectMode ? exitSelectMode : enterSelectMode}
+          className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-4 rounded-full min-h-[44px] flex items-center gap-1.5 transition-all"
+          style={selectMode
+            ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+            : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
+          }
+          data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
+        >
+          {selectMode ? 'Done' : 'Select'}
+        </button>
+      </div>
+
+      {/* Select-all + hint row (only in select mode) */}
+      {selectMode && filtered.length > 0 && (
+        <div className="flex items-center justify-between mb-3">
           <button
             type="button"
             onClick={selectAllVisible}
@@ -248,58 +296,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             </span>
             {allSelected ? 'Deselect all' : `Select all (${filtered.length})`}
           </button>
-        ) : (
-          <span />
-        )}
-        <button
-          type="button"
-          onClick={selectMode ? exitSelectMode : enterSelectMode}
-          className="font-label text-xs tracking-wider uppercase min-h-[44px] px-2 flex items-center gap-1.5"
-          style={{ color: 'var(--text-2)' }}
-          data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
-        >
-          {!selectMode && (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <rect x="3" y="3" width="18" height="18" rx="4" strokeWidth={2} />
-            </svg>
-          )}
-          {selectMode ? 'Done' : 'Select'}
-        </button>
-      </div>
-
-      {/* Search bar */}
-      <div className="relative mb-4">
-        <input
-          type="search"
-          value={searchInput}
-          onChange={e => handleSearchChange(e.target.value)}
-          placeholder="Search recipes…"
-          className="input-base w-full pl-10 pr-10"
-          style={{ borderRadius: '9999px' }}
-          aria-label="Search recipes"
-          data-testid="recipe-search"
-        />
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-          style={{ color: 'var(--text-3)' }}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        {searchInput && (
-          <button
-            onClick={() => handleSearchChange('')}
-            className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center"
-            aria-label="Clear search"
-          >
-            <svg className="w-4 h-4" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
+          <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
+            {selectedCount > 0 ? `${selectedCount} selected` : 'Tap to select'}
+          </span>
+        </div>
+      )}
 
       {/* Tag strip + sort row */}
       {(allTags.length > 0 || sort !== 'newest') && (

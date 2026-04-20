@@ -70,7 +70,7 @@ export default function RecipeCard({
       {selectMode && (
         <div
           className={`absolute top-2 left-2 w-4 h-4 rounded flex items-center justify-center transition-all pointer-events-none ${
-            selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            selected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
           }`}
           style={{
             background: selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.9)',

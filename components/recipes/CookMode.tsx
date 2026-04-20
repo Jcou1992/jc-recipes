@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import type { Recipe, Step } from '@/types/recipe';
 
@@ -12,6 +12,23 @@ interface TimerState {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+function playBeeps(ctx: AudioContext) {
+  const now = ctx.currentTime;
+  for (let i = 0; i < 3; i++) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 440;
+    osc.type = 'sine';
+    const t = now + i * 0.4;
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+    osc.start(t);
+    osc.stop(t + 0.3);
+  }
+}
 
 function formatSeconds(s: number): string {
   const m = Math.floor(s / 60);
@@ -93,6 +110,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   });
   const [sheetOpen, setSheetOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   // Wake lock
   useEffect(() => {
@@ -119,6 +137,8 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             changed = true;
             if (t.remaining - 1 === 0) {
               try { navigator.vibrate?.([200, 100, 200]); } catch {}
+              const ctx = audioCtxRef.current;
+              if (ctx) playBeeps(ctx);
             }
           }
         }
@@ -128,6 +148,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     return () => clearInterval(id);
   }, []);
 
+  // AudioContext cleanup
+  useEffect(() => {
+    return () => {
+      audioCtxRef.current?.close().catch(() => {});
+    };
+  }, []);
+
   function goTo(i: number) {
     if (i < 0 || i >= totalSteps) return;
     setCompletedSteps(prev => new Set([...prev, currentIndex]));
@@ -135,17 +162,23 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   }
 
   function toggleTimer(stepIdx: number) {
+    if (!audioCtxRef.current && typeof window !== 'undefined') {
+      try { audioCtxRef.current = new AudioContext(); } catch {}
+    }
     setTimers(prev => {
       const t = prev.get(stepIdx);
-      if (!t) return prev;
+      if (!t || t.remaining === 0) return prev;
       const next = new Map(prev);
-      if (t.remaining === 0) {
-        // Reset
-        const original = sortedSteps[stepIdx].timer_seconds!;
-        next.set(stepIdx, { remaining: original, running: false });
-      } else {
-        next.set(stepIdx, { ...t, running: !t.running });
-      }
+      next.set(stepIdx, { ...t, running: !t.running });
+      return next;
+    });
+  }
+
+  function resetTimer(stepIdx: number) {
+    setTimers(prev => {
+      const next = new Map(prev);
+      const original = sortedSteps[stepIdx].timer_seconds ?? 0;
+      next.set(stepIdx, { remaining: original, running: false });
       return next;
     });
   }
@@ -166,8 +199,6 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
   const currentStep = sortedSteps[currentIndex];
   const currentTimer = timers.get(currentIndex);
-  const activeTimers = [...timers.entries()].filter(([, t]) => t.remaining > 0 && (t.running || t.remaining < (sortedSteps[0].timer_seconds ?? 0)));
-  const runningTimers = [...timers.entries()].filter(([, t]) => t.running || (t.remaining > 0 && t.remaining < (sortedSteps[timers.keys().next().value ?? 0]?.timer_seconds ?? Infinity)));
 
   // Displayed ingredients (scaled + converted)
   const displayedIngredients = recipe.ingredients.map(ing => {
@@ -175,9 +206,6 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     const { amount: converted, unit } = convertUnit(scaled, ing.unit, unitSystem);
     return { ...ing, displayAmount: formatAmount(converted), displayUnit: unit };
   });
-
-  // Running timers pills (all timers that are running or at zero)
-  const timerPills = [...timers.entries()].filter(([, t]) => t.running || (t.remaining === 0 && sortedSteps[0].timer_seconds != null));
 
   return (
     <div
@@ -187,14 +215,14 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     >
       {/* Active timer pills */}
       {[...timers.entries()].filter(([, t]) => t.running || t.remaining === 0).length > 0 && (
-        <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5 pointer-events-none">
+        <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5">
           {[...timers.entries()]
             .filter(([, t]) => t.running || t.remaining === 0)
             .map(([idx, t]) => (
               <button
                 key={idx}
-                onClick={() => toggleTimer(idx)}
-                className={`font-label text-xs tracking-wider px-3 py-1.5 rounded-full pointer-events-auto transition-all ${
+                onClick={() => t.remaining === 0 ? resetTimer(idx) : toggleTimer(idx)}
+                className={`font-label text-xs tracking-wider px-3 py-1.5 rounded-full transition-all ${
                   t.remaining === 0 ? 'animate-pulse' : ''
                 }`}
                 style={{
@@ -202,10 +230,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   color: '#fff',
                   backdropFilter: 'blur(8px)',
                 }}
-                aria-label={`Timer for step ${idx + 1}`}
-                data-testid={`timer-pill-${idx}`}
+                aria-label={t.remaining === 0 ? `Reset timer for step ${idx + 1}` : `Timer for step ${idx + 1}`}
+                data-testid={t.remaining === 0 ? `cook-timer-reset-${idx}` : `timer-pill-${idx}`}
               >
-                Paso {idx + 1} — {formatSeconds(t.remaining)}
+                {t.remaining === 0 ? `Paso ${idx + 1} — Reiniciar` : `Paso ${idx + 1} — ${formatSeconds(t.remaining)}`}
               </button>
             ))}
         </div>
@@ -260,18 +288,23 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 >
                   {formatSeconds(currentTimer.remaining)}
                 </span>
-                <button
-                  onClick={() => toggleTimer(currentIndex)}
-                  className="btn-primary"
-                  data-testid="cook-timer-btn"
-                >
-                  {currentTimer.remaining === 0
-                    ? 'Reiniciar'
-                    : currentTimer.running
-                    ? 'Pausar'
-                    : 'Iniciar'
-                  }
-                </button>
+                {currentTimer.remaining === 0 ? (
+                  <button
+                    onClick={() => resetTimer(currentIndex)}
+                    className="btn-primary"
+                    data-testid={`cook-timer-reset-${currentIndex}`}
+                  >
+                    Reiniciar
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => toggleTimer(currentIndex)}
+                    className="btn-primary"
+                    data-testid="cook-timer-btn"
+                  >
+                    {currentTimer.running ? 'Pausar' : 'Iniciar'}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -397,18 +430,23 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               >
                 {formatSeconds(currentTimer.remaining)}
               </span>
-              <button
-                onClick={() => toggleTimer(currentIndex)}
-                className="btn-primary"
-                data-testid="cook-timer-btn-mobile"
-              >
-                {currentTimer.remaining === 0
-                  ? 'Reiniciar'
-                  : currentTimer.running
-                  ? 'Pausar'
-                  : 'Iniciar'
-                }
-              </button>
+              {currentTimer.remaining === 0 ? (
+                <button
+                  onClick={() => resetTimer(currentIndex)}
+                  className="btn-primary"
+                  data-testid={`cook-timer-reset-${currentIndex}`}
+                >
+                  Reiniciar
+                </button>
+              ) : (
+                <button
+                  onClick={() => toggleTimer(currentIndex)}
+                  className="btn-primary"
+                  data-testid="cook-timer-btn-mobile"
+                >
+                  {currentTimer.running ? 'Pausar' : 'Iniciar'}
+                </button>
+              )}
             </div>
           )}
         </div>
