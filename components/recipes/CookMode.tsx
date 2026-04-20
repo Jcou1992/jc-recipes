@@ -228,10 +228,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   color: '#fff',
                   backdropFilter: 'blur(8px)',
                 }}
-                aria-label={`Timer for step ${idx + 1}`}
-                data-testid={`timer-pill-${idx}`}
+                aria-label={t.remaining === 0 ? `Reset timer for step ${idx + 1}` : `Timer for step ${idx + 1}`}
+                data-testid={t.remaining === 0 ? `cook-timer-reset-${idx}` : `timer-pill-${idx}`}
               >
-                Paso {idx + 1} — {formatSeconds(t.remaining)}
+                {t.remaining === 0 ? `Paso ${idx + 1} — Reiniciar` : `Paso ${idx + 1} — ${formatSeconds(t.remaining)}`}
               </button>
             ))}
         </div>
