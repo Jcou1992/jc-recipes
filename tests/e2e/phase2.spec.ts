@@ -134,13 +134,22 @@ test('tag filter shows and filters by tag', async ({ page }) => {
 
   await page.goto('/recipes');
 
-  // The tag chip should be visible
+  // Open filter sheet (button differs on desktop vs mobile)
+  await page.getByTestId('filter-desktop-btn')
+    .or(page.getByTestId('filter-mobile-btn'))
+    .first()
+    .click();
+
+  // Tag chip is inside the sheet
   const tagChip = page.getByTestId(`tag-filter-${tag}`);
   await expect(tagChip).toBeVisible();
 
-  // Click to filter
+  // Click to filter, then close sheet
   await tagChip.click();
-  await expect(tagChip).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Done' }).click();
+
+  // Active strip now shows the tag as pressed
+  await expect(page.getByTestId(`tag-filter-${tag}`)).toHaveAttribute('aria-pressed', 'true');
 
   // Our recipe should still be visible
   await expect(page.getByRole('heading', { name: recipeName, level: 2 })).toBeVisible();
@@ -154,9 +163,15 @@ test('tag filter combined with search', async ({ page }) => {
 
   await page.goto('/recipes');
 
+  // Open filter sheet, select tag, close
+  await page.getByTestId('filter-desktop-btn')
+    .or(page.getByTestId('filter-mobile-btn'))
+    .first()
+    .click();
   const tagChip = page.getByTestId(`tag-filter-${tag}`);
   await expect(tagChip).toBeVisible();
   await tagChip.click();
+  await page.getByRole('button', { name: 'Done' }).click();
 
   const searchInput = page.getByTestId('recipe-search');
   await searchInput.fill(recipeName);

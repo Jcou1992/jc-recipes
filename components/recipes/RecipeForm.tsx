@@ -407,7 +407,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             className="font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--color-terracotta)' }}
           >
-            + Step
+            + Paso
           </button>
         </div>
         <div className="space-y-3">
