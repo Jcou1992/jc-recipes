@@ -17,6 +17,29 @@ Rules:
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
 
+## Design Context
+
+**Brand:** Personal recipe app. May carry the name "Sakai" (JC's restaurant) — design should be worthy of that name whether it appears or not.
+
+**Users:** JC only. Phone on kitchen counter mid-cook. Hands dirty, pace fast. Job: find recipe, scale it, cook it.
+
+**Personality:** precise, proud, functional. Metaphor: restaurant mise en place — everything visible and within reach, no decorative clutter.
+
+**Palette:** Terracotta (#D4703F) + Gold (#EDD18E) + Ink/Bone. Dark default. Keep and polish — do not rethink.
+
+**Typography:** Cormorant Garamond (body) + Noto Serif JP (display) + Barlow Condensed (labels). Keep and tighten hierarchy.
+
+**Principles:**
+1. Every pixel earns its place — no decoration without function
+2. Legibility under pressure — kitchen lighting, wet hands, fast pace
+3. Polish, don't rebuild — refinement over reinvention
+4. Restaurant-grade finish — worthy of the Sakai name
+5. Speed over everything — optimistic UI, no waiting
+
+**Anti-references:** AllRecipes/Yummly consumer UX, lifestyle cooking blogs, generic notes apps
+
+Full context: `.impeccable.md`
+
 ## Context Navigation:
 When you need to understand the codebase, docs, or any files in this project:
 1. ALWAYS query the knowledge graph first: `/graphify query "your question"`

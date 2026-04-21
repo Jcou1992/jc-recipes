@@ -12,3 +12,4 @@ graphify-out/.graphify_uncached.txt
 .obsidian/
 .claude/worktrees/
 .worktrees/
+test-results/
