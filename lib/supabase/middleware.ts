@@ -35,8 +35,8 @@ export async function updateSession(request: NextRequest) {
           getAll() { return request.cookies.getAll(); },
           setAll(cookiesToSet) {
             // Propagate cookie mutations (including deletions) to the response.
-            cookiesToSet.forEach(({ name, value, options }) =>
-              request.cookies.set(name, value, options)
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
             );
             response = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>

@@ -91,6 +91,15 @@ interface Props {
   unitSystem: string;
 }
 
+function formatElapsed(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
+  return `${s}s`;
+}
+
 export default function CookMode({ recipe, initialServings, unitSystem }: Props) {
   const sortedSteps: Step[] = [...recipe.steps].sort((a, b) => a.order - b.order);
   const totalSteps = sortedSteps.length;
@@ -109,8 +118,11 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     return m;
   });
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const cookStartRef = useRef<number>(Date.now());
 
   // Wake lock
   useEffect(() => {
@@ -156,9 +168,34 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   }, []);
 
   function goTo(i: number) {
-    if (i < 0 || i >= totalSteps) return;
+    if (i < 0) return;
+    if (i >= totalSteps) {
+      // Advancing past the last step — show completion screen
+      setCompletedSteps(prev => new Set([...prev, currentIndex]));
+      setElapsedSeconds(Math.round((Date.now() - cookStartRef.current) / 1000));
+      setFinished(true);
+      return;
+    }
     setCompletedSteps(prev => new Set([...prev, currentIndex]));
     setCurrentIndex(i);
+  }
+
+  function startAgain() {
+    setFinished(false);
+    setCurrentIndex(0);
+    setCompletedSteps(new Set());
+    setCheckedIngredients(new Set());
+    // Reset all timers to original values
+    setTimers(() => {
+      const m = new Map<number, TimerState>();
+      sortedSteps.forEach((step, i) => {
+        if (step.timer_seconds != null) {
+          m.set(i, { remaining: step.timer_seconds, running: false });
+        }
+      });
+      return m;
+    });
+    cookStartRef.current = Date.now();
   }
 
   function toggleTimer(stepIdx: number) {
@@ -213,6 +250,102 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       style={{ background: 'var(--bg)', color: 'var(--text-1)' }}
       data-testid="cook-mode"
     >
+      {/* Completion screen */}
+      {finished && (
+        <div
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center px-8 animate-scale-in"
+          style={{ background: 'var(--bg)' }}
+          data-testid="cook-completion-screen"
+        >
+          {/* Close / exit button (top-right, same as existing pattern) */}
+          <Link
+            href={`/recipes/${recipe.id}`}
+            className="absolute top-4 right-5 font-label text-xs tracking-widest uppercase transition-colors"
+            style={{ color: 'var(--text-3)' }}
+            aria-label="Salir"
+          >
+            ✕
+          </Link>
+
+          {/* Content block */}
+          <div className="w-full max-w-md flex flex-col gap-10">
+            {/* Completion message */}
+            <div className="flex flex-col gap-3">
+              <p
+                className="font-body text-sm"
+                style={{ color: 'var(--color-terracotta)' }}
+              >
+                Listo.
+              </p>
+              <h1
+                className="font-display"
+                style={{ fontSize: '2.5rem', fontWeight: 500, lineHeight: 1.2, color: 'var(--text-1)' }}
+                data-testid="cook-completion-title"
+              >
+                {recipe.name}
+              </h1>
+              <p
+                className="font-label text-sm tracking-wide"
+                style={{ color: 'var(--text-3)' }}
+                data-testid="cook-completion-elapsed"
+              >
+                {elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : '< 1s'} en cocina
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: '1px', background: 'var(--border)' }} />
+
+            {/* Action buttons */}
+            <div className="flex flex-col gap-3">
+              {/* Primary: return to recipe */}
+              <Link
+                href={`/recipes/${recipe.id}`}
+                className="font-label text-sm tracking-widest uppercase text-center py-4 px-6 transition-colors"
+                style={{
+                  background: 'var(--color-terracotta)',
+                  color: '#fff',
+                  letterSpacing: '0.12em',
+                }}
+                data-testid="cook-completion-return"
+              >
+                Volver a la receta
+              </Link>
+
+              {/* Secondary: print */}
+              <Link
+                href={`/recipes/${recipe.id}/print`}
+                className="font-label text-sm tracking-widest uppercase py-4 px-6 text-center transition-colors border"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--text-2)',
+                  borderColor: 'var(--border)',
+                  letterSpacing: '0.12em',
+                }}
+                data-testid="cook-completion-print"
+              >
+                Imprimir receta
+              </Link>
+
+              {/* Tertiary: start again */}
+              <button
+                onClick={startAgain}
+                className="font-label text-sm tracking-widest uppercase py-4 px-6 transition-colors border"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--text-2)',
+                  borderColor: 'var(--border)',
+                  letterSpacing: '0.12em',
+                }}
+                data-testid="cook-completion-restart"
+              >
+                Empezar de nuevo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Active timer pills */}
       {[...timers.entries()].filter(([, t]) => t.running || t.remaining === 0).length > 0 && (
         <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5">
@@ -322,12 +455,11 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             </button>
             <button
               onClick={() => goTo(currentIndex + 1)}
-              disabled={currentIndex === totalSteps - 1}
-              className="font-label text-sm tracking-wider uppercase py-5 transition-colors disabled:opacity-30"
-              style={{ color: 'var(--text-2)' }}
+              className="font-label text-sm tracking-wider uppercase py-5 transition-colors"
+              style={{ color: currentIndex === totalSteps - 1 ? 'var(--color-terracotta)' : 'var(--text-2)' }}
               data-testid="cook-next-btn"
             >
-              Siguiente →
+              {currentIndex === totalSteps - 1 ? 'Finalizar ✓' : 'Siguiente →'}
             </button>
           </div>
         </div>
@@ -468,12 +600,14 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </button>
           <button
             onClick={() => goTo(currentIndex + 1)}
-            disabled={currentIndex === totalSteps - 1}
-            className="font-label text-sm tracking-wider uppercase flex items-center justify-center disabled:opacity-30"
-            style={{ minHeight: '64px', color: 'var(--text-2)' }}
+            className="font-label text-sm tracking-wider uppercase flex items-center justify-center"
+            style={{
+              minHeight: '64px',
+              color: currentIndex === totalSteps - 1 ? 'var(--color-terracotta)' : 'var(--text-2)',
+            }}
             data-testid="cook-next-btn-mobile"
           >
-            Siguiente →
+            {currentIndex === totalSteps - 1 ? 'Finalizar ✓' : 'Siguiente →'}
           </button>
         </div>
 

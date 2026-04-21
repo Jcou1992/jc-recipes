@@ -36,6 +36,8 @@ export default function BulkActionBar({
   const [isPending, startTransition] = useTransition();
   const [showProgress, setShowProgress] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** IDs that failed during the last bulk delete, kept so the user can retry. */
+  const [retryIds, setRetryIds] = useState<string[]>([]);
 
   const count = selectedIds.length;
 
@@ -47,9 +49,10 @@ export default function BulkActionBar({
     return () => window.removeEventListener('keydown', onKey);
   }, [onDone]);
 
-  async function handleDelete() {
+  async function handleDelete(idsToDelete?: string[]) {
     setConfirmOpen(false);
-    const ids = [...selectedIds];
+    setRetryIds([]);
+    const ids = idsToDelete ?? [...selectedIds];
     onOptimisticHide(ids);
     progressTimerRef.current = setTimeout(() => setShowProgress(true), 1000);
     const result = await bulkDeleteRecipes(ids);
@@ -57,12 +60,19 @@ export default function BulkActionBar({
     setShowProgress(false);
     if (result.succeeded.length === 0) {
       onOptimisticRestore(ids);
-      showToast(`Error deleting: ${result.failed[0]?.error ?? 'Unknown'}`, 'error');
+      const reason = result.failed[0]?.error ?? 'Check your connection and try again';
+      setRetryIds(ids);
+      showToast(`Failed to delete — ${reason}`, 'error');
       return;
     }
     if (result.failed.length > 0) {
-      onOptimisticRestore(result.failed.map(f => f.id));
-      showToast(`Deleted ${result.succeeded.length} of ${ids.length}`, 'info');
+      const failedIds = result.failed.map(f => f.id);
+      onOptimisticRestore(failedIds);
+      setRetryIds(failedIds);
+      showToast(
+        `Deleted ${result.succeeded.length} of ${ids.length} — ${result.failed.length} failed. Use Retry below.`,
+        'info',
+      );
     } else {
       showToast(`${result.succeeded.length} deleted`, 'success');
     }
@@ -74,11 +84,12 @@ export default function BulkActionBar({
     const ids = selectedIds;
     const result = await bulkDuplicateRecipes(ids);
     if (result.succeeded.length === 0) {
-      showToast(`Error duplicating: ${result.failed[0]?.error ?? 'Unknown'}`, 'error');
+      const reason = result.failed[0]?.error ?? 'Check your connection and try again';
+      showToast(`Failed to duplicate — ${reason}`, 'error');
       return;
     }
     if (result.failed.length > 0) {
-      showToast(`Duplicated ${result.succeeded.length} of ${ids.length}`, 'info');
+      showToast(`Duplicated ${result.succeeded.length} of ${ids.length} — ${result.failed.length} failed`, 'info');
     } else {
       showToast(`${result.succeeded.length} duplicated`, 'success');
     }
@@ -196,6 +207,23 @@ export default function BulkActionBar({
             Delete
           </button>
 
+          {retryIds.length > 0 && (
+            <button
+              type="button"
+              onClick={() => handleDelete(retryIds)}
+              disabled={isPending}
+              className={btn}
+              style={{
+                background: 'var(--bg-raised)',
+                color: 'var(--color-terracotta)',
+                border: '1px solid var(--color-terracotta)',
+              }}
+              data-testid="bulk-retry"
+            >
+              Retry ({retryIds.length} failed)
+            </button>
+          )}
+
           <button
             type="button"
             onClick={onDone}
@@ -214,12 +242,26 @@ export default function BulkActionBar({
         description={
           count === 1
             ? 'Delete this recipe? This cannot be undone.'
-            : `Delete ${count} recipes? This cannot be undone.`
+            : `Delete these ${count} recipes? This cannot be undone.`
         }
         confirmLabel={isPending ? 'Deleting…' : 'Delete'}
         onConfirm={handleDelete}
         onCancel={() => setConfirmOpen(false)}
-      />
+      >
+        {selectedRecipes.length > 0 && (
+          <ul className="list-none m-0 p-0 space-y-1">
+            {selectedRecipes.map(r => (
+              <li
+                key={r.id}
+                className="font-body text-xs truncate"
+                style={{ color: 'var(--text-2)' }}
+              >
+                {r.name}
+              </li>
+            ))}
+          </ul>
+        )}
+      </ConfirmDialog>
 
       <BulkTagDialog
         open={tagOpen}

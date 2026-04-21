@@ -1,9 +1,14 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 interface Props {
   open: boolean;
   title: string;
   description: string;
+  /** Optional content rendered between the description and the action buttons.
+   *  Use this for scrollable item lists (e.g. recipe names before bulk delete). */
+  children?: ReactNode;
   confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -13,6 +18,7 @@ export default function ConfirmDialog({
   open,
   title,
   description,
+  children,
   confirmLabel = 'Confirm',
   onConfirm,
   onCancel,
@@ -50,13 +56,26 @@ export default function ConfirmDialog({
           {title}
         </h2>
         <p
-          className="font-body text-sm mb-6"
+          className="font-body text-sm"
           style={{ color: 'var(--text-2)' }}
         >
           {description}
         </p>
 
-        <div className="flex gap-3 justify-end">
+        {children && (
+          <div
+            className="mt-3 mb-6 overflow-y-auto rounded-lg px-3 py-2"
+            style={{
+              maxHeight: '9rem',
+              background: 'var(--bg-raised)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            {children}
+          </div>
+        )}
+
+        <div className={`flex gap-3 justify-end ${children ? '' : 'mt-6'}`}>
           <button
             type="button"
             onClick={onCancel}
