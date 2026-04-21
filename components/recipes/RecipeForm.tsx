@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import IngredientRow, { type IngredientField } from './IngredientRow';
 import StepRow, { type StepField } from './StepRow';
@@ -58,6 +58,15 @@ function stepsToFields(steps: Step[]): StepField[] {
 
 const labelStyle: React.CSSProperties = { color: 'var(--text-3)' };
 
+// ── Soft-delete ingredient type ───────────────────────────────────────────────
+
+interface IngredientEntry {
+  field: IngredientField;
+  /** When set, this ingredient is pending deletion — permanently removed after timeout */
+  deletedAt?: number;
+  undoTimer?: ReturnType<typeof setTimeout>;
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props) {
@@ -66,11 +75,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const [loading, setLoading] = useState(false);
 
   // Required fields
-  const [name, setName]             = useState(initialData?.name ?? '');
-  const [servings, setServings]     = useState(String(initialData?.servings ?? 1));
-  const [ingredients, setIngredients] = useState<IngredientField[]>(
-    ingredientsToFields(initialData?.ingredients ?? [])
+  const [name, setName]         = useState(initialData?.name ?? '');
+  const [servings, setServings] = useState(String(initialData?.servings ?? 1));
+
+  // Ingredients with soft-delete support
+  const [ingredientEntries, setIngredientEntries] = useState<IngredientEntry[]>(
+    () => ingredientsToFields(initialData?.ingredients ?? []).map(field => ({ field }))
   );
+
   const [steps, setSteps] = useState<StepField[]>(
     stepsToFields(initialData?.steps ?? [])
   );
@@ -82,9 +94,17 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const [tags, setTags]               = useState((initialData?.tags ?? []).join(', '));
   const [notes, setNotes]             = useState(initialData?.notes ?? '');
 
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; ingredients?: string }>({});
+
+  // Ref to the name input for scrolling to first error
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
   // Dirty tracking — true if any field changed from initial
-  const initialRef = useRef({ name: initialData?.name ?? '', servings: String(initialData?.servings ?? 1) });
   const [isDirty, setIsDirty] = useState(false);
+
+  // Derive the "live" ingredients (not soft-deleted) for dirty check
+  const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
 
   useEffect(() => {
     const dirty =
@@ -97,11 +117,38 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
   useUnsavedChanges(isDirty);
 
-  const addIngredient = () =>
-    setIngredients(prev => [...prev, { amount: '', unit: '', name: '' }]);
+  // ── Ingredient handlers ──────────────────────────────────────────────────────
 
-  const removeIngredient = (i: number) =>
-    setIngredients(prev => prev.filter((_, idx) => idx !== i));
+  const addIngredient = () =>
+    setIngredientEntries(prev => [...prev, { field: { amount: '', unit: '', name: '' } }]);
+
+  const updateIngredient = (i: number, v: IngredientField) =>
+    setIngredientEntries(prev => prev.map((e, idx) => idx === i ? { ...e, field: v } : e));
+
+  const softDeleteIngredient = useCallback((i: number) => {
+    // Start 4-second undo window
+    const timer = setTimeout(() => {
+      setIngredientEntries(prev => prev.filter((_, idx) => idx !== i));
+    }, 4000);
+
+    setIngredientEntries(prev =>
+      prev.map((e, idx) =>
+        idx === i ? { ...e, deletedAt: Date.now(), undoTimer: timer } : e
+      )
+    );
+  }, []);
+
+  const undoDeleteIngredient = useCallback((i: number) => {
+    setIngredientEntries(prev =>
+      prev.map((e, idx) => {
+        if (idx !== i) return e;
+        if (e.undoTimer) clearTimeout(e.undoTimer);
+        return { field: e.field }; // strip deletedAt + undoTimer
+      })
+    );
+  }, []);
+
+  // ── Step handlers ────────────────────────────────────────────────────────────
 
   const addStep = () =>
     setSteps(prev => [...prev, { content: '', timerEnabled: false, timerInput: '' }]);
@@ -109,16 +156,48 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const removeStep = (i: number) =>
     setSteps(prev => prev.filter((_, idx) => idx !== i));
 
+  // ── Validation ───────────────────────────────────────────────────────────────
+
+  const validate = (): boolean => {
+    const errors: typeof fieldErrors = {};
+
+    if (!name.trim()) {
+      errors.name = 'Recipe name is required.';
+    }
+
+    const hasAtLeastOneIngredient = activeIngredients.some(e => e.field.name.trim());
+    if (!hasAtLeastOneIngredient) {
+      errors.ingredients = 'Add at least one ingredient.';
+    }
+
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      // Scroll to first error field
+      if (errors.name && nameInputRef.current) {
+        nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        nameInputRef.current.focus();
+      }
+      return false;
+    }
+    return true;
+  };
+
+  // ── Submit ───────────────────────────────────────────────────────────────────
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     setLoading(true);
 
-    const parsedIngredients: Ingredient[] = ingredients
-      .filter(i => i.name.trim())
-      .map(i => ({
-        amount: parseAmount(i.amount),
-        unit:   i.unit.trim() || null,
-        name:   i.name.trim(),
+    const parsedIngredients: Ingredient[] = activeIngredients
+      .filter(e => e.field.name.trim())
+      .map(e => ({
+        amount: parseAmount(e.field.amount),
+        unit:   e.field.unit.trim() || null,
+        name:   e.field.name.trim(),
       }));
 
     const parsedSteps: Step[] = steps
@@ -157,6 +236,19 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     setIsDirty(false);
   };
 
+  // ── Error message style ──────────────────────────────────────────────────────
+
+  const fieldErrorStyle: React.CSSProperties = {
+    color: 'var(--color-terracotta)',
+    fontSize: '0.75rem',
+    marginTop: '0.375rem',
+    display: 'block',
+  };
+
+  const inputErrorStyle: React.CSSProperties = {
+    borderColor: 'var(--color-terracotta)',
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Name (required) */}
@@ -169,14 +261,23 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           Name <span style={{ color: 'var(--color-terracotta)' }}>*</span>
         </label>
         <input
+          ref={nameInputRef}
           id="name"
           type="text"
           value={name}
-          onChange={e => setName(e.target.value)}
-          required
+          onChange={e => {
+            setName(e.target.value);
+            if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined }));
+          }}
           placeholder="Recipe name"
           className="input-base"
+          style={fieldErrors.name ? inputErrorStyle : undefined}
+          aria-describedby={fieldErrors.name ? 'name-error' : undefined}
+          aria-invalid={!!fieldErrors.name}
         />
+        {fieldErrors.name && (
+          <span id="name-error" style={fieldErrorStyle}>{fieldErrors.name}</span>
+        )}
       </div>
 
       {/* Servings (required) */}
@@ -218,15 +319,54 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           </button>
         </div>
         <div className="space-y-2">
-          {ingredients.map((ing, i) => (
-            <IngredientRow
-              key={i}
-              value={ing}
-              onChange={v => setIngredients(prev => prev.map((x, idx) => idx === i ? v : x))}
-              onRemove={ingredients.length > 1 ? () => removeIngredient(i) : undefined}
-            />
-          ))}
+          {ingredientEntries.map((entry, i) => {
+            const isDeleted = !!entry.deletedAt;
+            const visibleCount = activeIngredients.length;
+
+            if (isDeleted) {
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-2 px-2 py-1 rounded"
+                  style={{
+                    background: 'rgba(212,112,63,0.07)',
+                    border: '1px dashed rgba(212,112,63,0.3)',
+                  }}
+                >
+                  <span
+                    className="font-label text-xs tracking-widest uppercase"
+                    style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
+                  >
+                    {entry.field.name || 'Ingredient'} removed
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => undoDeleteIngredient(i)}
+                    className="font-label text-xs tracking-widest uppercase transition-colors"
+                    style={{ color: 'var(--color-terracotta)' }}
+                  >
+                    Undo
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <IngredientRow
+                key={i}
+                value={entry.field}
+                onChange={v => {
+                  updateIngredient(i, v);
+                  if (fieldErrors.ingredients) setFieldErrors(prev => ({ ...prev, ingredients: undefined }));
+                }}
+                onRemove={visibleCount > 1 ? () => softDeleteIngredient(i) : undefined}
+              />
+            );
+          })}
         </div>
+        {fieldErrors.ingredients && (
+          <span style={fieldErrorStyle}>{fieldErrors.ingredients}</span>
+        )}
       </div>
 
       {/* Steps (required) */}
@@ -371,7 +511,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       </details>
 
       {/* Actions */}
-      <div className="flex gap-3 pt-2">
+      <div className="flex items-center gap-3 pt-2">
         <button type="submit" disabled={loading} className="btn-primary">
           {loading ? 'Saving…' : submitLabel}
         </button>
@@ -385,6 +525,15 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         >
           Cancel
         </button>
+        {isDirty && (
+          <span
+            className="font-label text-xs tracking-widest uppercase"
+            style={{ color: 'var(--color-terracotta)' }}
+            aria-live="polite"
+          >
+            ● Unsaved changes
+          </span>
+        )}
       </div>
     </form>
   );
