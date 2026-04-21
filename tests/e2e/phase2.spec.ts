@@ -126,6 +126,11 @@ test('× button clears search input', async ({ page }) => {
 
 // ── 2A: Tag filter ─────────────────────────────────────────────────────────────
 
+async function openFilterSheet(page: Page) {
+  const isNarrow = ((await page.viewportSize())?.width ?? 1280) < 640;
+  await page.getByTestId(isNarrow ? 'filter-mobile-btn' : 'filter-desktop-btn').click();
+}
+
 test('tag filter shows and filters by tag', async ({ page }) => {
   await signIn(page);
   const tag = `e2etag${Date.now()}`;
@@ -133,12 +138,7 @@ test('tag filter shows and filters by tag', async ({ page }) => {
   await createTestRecipe(page, recipeName, { tags: tag });
 
   await page.goto('/recipes');
-
-  // Open filter sheet (button differs on desktop vs mobile)
-  await page.getByTestId('filter-desktop-btn')
-    .or(page.getByTestId('filter-mobile-btn'))
-    .first()
-    .click();
+  await openFilterSheet(page);
 
   // Tag chip is inside the sheet
   const tagChip = page.getByTestId(`tag-filter-${tag}`);
@@ -148,8 +148,8 @@ test('tag filter shows and filters by tag', async ({ page }) => {
   await tagChip.click();
   await page.getByRole('button', { name: 'Done' }).click();
 
-  // Active strip now shows the tag as pressed
-  await expect(page.getByTestId(`tag-filter-${tag}`)).toHaveAttribute('aria-pressed', 'true');
+  // Active strip shows tag (desktop + mobile strips share testId; .first() avoids strict mode)
+  await expect(page.getByTestId(`tag-filter-${tag}`).first()).toHaveAttribute('aria-pressed', 'true');
 
   // Our recipe should still be visible
   await expect(page.getByRole('heading', { name: recipeName, level: 2 })).toBeVisible();
@@ -164,10 +164,7 @@ test('tag filter combined with search', async ({ page }) => {
   await page.goto('/recipes');
 
   // Open filter sheet, select tag, close
-  await page.getByTestId('filter-desktop-btn')
-    .or(page.getByTestId('filter-mobile-btn'))
-    .first()
-    .click();
+  await openFilterSheet(page);
   const tagChip = page.getByTestId(`tag-filter-${tag}`);
   await expect(tagChip).toBeVisible();
   await tagChip.click();
@@ -364,7 +361,8 @@ test('cooking mode: progress bar reflects current step', async ({ page }) => {
     steps: ['Step A.', 'Step B.', 'Step C.', 'Step D.'],
   });
   await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
+  // force: true works around a Mobile Chrome stacking-context issue when page is tall (4+ steps)
+  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click({ force: true });
 
   const progressBar = page.getByTestId('cook-progress-bar');
   if (await progressBar.isVisible()) {
