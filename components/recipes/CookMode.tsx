@@ -272,27 +272,25 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             {/* Completion message */}
             <div className="flex flex-col gap-3">
               <p
-                className="font-label text-xs tracking-widest uppercase"
+                className="font-body text-sm"
                 style={{ color: 'var(--color-terracotta)' }}
               >
                 Listo.
               </p>
               <h1
-                className="font-body"
+                className="font-display"
                 style={{ fontSize: '2.5rem', fontWeight: 500, lineHeight: 1.2, color: 'var(--text-1)' }}
                 data-testid="cook-completion-title"
               >
                 {recipe.name}
               </h1>
-              {elapsedSeconds > 0 && (
-                <p
-                  className="font-label text-sm tracking-wide"
-                  style={{ color: 'var(--text-3)' }}
-                  data-testid="cook-completion-elapsed"
-                >
-                  {formatElapsed(elapsedSeconds)} en cocina
-                </p>
-              )}
+              <p
+                className="font-label text-sm tracking-wide"
+                style={{ color: 'var(--text-3)' }}
+                data-testid="cook-completion-elapsed"
+              >
+                {elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : '< 1s'} en cocina
+              </p>
             </div>
 
             {/* Divider */}
@@ -314,22 +312,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 Volver a la receta
               </Link>
 
-              {/* Secondary: start again */}
-              <button
-                onClick={startAgain}
-                className="font-label text-sm tracking-widest uppercase py-4 px-6 transition-colors border"
-                style={{
-                  background: 'transparent',
-                  color: 'var(--text-2)',
-                  borderColor: 'var(--border)',
-                  letterSpacing: '0.12em',
-                }}
-                data-testid="cook-completion-restart"
-              >
-                Empezar de nuevo
-              </button>
-
-              {/* Tertiary: print */}
+              {/* Secondary: print */}
               <Link
                 href={`/recipes/${recipe.id}/print`}
                 className="font-label text-sm tracking-widest uppercase py-4 px-6 text-center transition-colors border"
@@ -343,6 +326,21 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               >
                 Imprimir receta
               </Link>
+
+              {/* Tertiary: start again */}
+              <button
+                onClick={startAgain}
+                className="font-label text-sm tracking-widest uppercase py-4 px-6 transition-colors border"
+                style={{
+                  background: 'transparent',
+                  color: 'var(--text-2)',
+                  borderColor: 'var(--border)',
+                  letterSpacing: '0.12em',
+                }}
+                data-testid="cook-completion-restart"
+              >
+                Empezar de nuevo
+              </button>
             </div>
           </div>
         </div>

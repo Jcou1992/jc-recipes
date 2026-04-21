@@ -83,8 +83,15 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     () => ingredientsToFields(initialData?.ingredients ?? []).map(field => ({ field }))
   );
 
-  const [steps, setSteps] = useState<StepField[]>(
-    stepsToFields(initialData?.steps ?? [])
+  // Steps with soft-delete support (mirrors ingredient pattern)
+  interface StepEntry {
+    field: StepField;
+    deletedAt?: number;
+    undoTimer?: ReturnType<typeof setTimeout>;
+  }
+
+  const [stepEntries, setStepEntries] = useState<StepEntry[]>(
+    () => stepsToFields(initialData?.steps ?? []).map(field => ({ field }))
   );
 
   // Optional fields
@@ -103,17 +110,20 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   // Dirty tracking — true if any field changed from initial
   const [isDirty, setIsDirty] = useState(false);
 
-  // Derive the "live" ingredients (not soft-deleted) for dirty check
+  // Derive live (non-deleted) entries for validation + dirty check
   const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
+  const activeSteps = stepEntries.filter(e => !e.deletedAt);
 
   useEffect(() => {
     const dirty =
       name !== (initialData?.name ?? '') ||
       servings !== String(initialData?.servings ?? 1) ||
       description !== (initialData?.description ?? '') ||
-      notes !== (initialData?.notes ?? '');
+      notes !== (initialData?.notes ?? '') ||
+      activeIngredients.length !== (initialData?.ingredients?.length ?? 1) ||
+      activeSteps.length !== (initialData?.steps?.length ?? 1);
     setIsDirty(dirty);
-  }, [name, servings, description, notes, initialData]);
+  }, [name, servings, description, notes, activeIngredients.length, activeSteps.length, initialData]);
 
   useUnsavedChanges(isDirty);
 
@@ -151,10 +161,28 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   // ── Step handlers ────────────────────────────────────────────────────────────
 
   const addStep = () =>
-    setSteps(prev => [...prev, { content: '', timerEnabled: false, timerInput: '' }]);
+    setStepEntries(prev => [...prev, { field: { content: '', timerEnabled: false, timerInput: '' } }]);
 
-  const removeStep = (i: number) =>
-    setSteps(prev => prev.filter((_, idx) => idx !== i));
+  const softDeleteStep = useCallback((i: number) => {
+    const timer = setTimeout(() => {
+      setStepEntries(prev => prev.filter((_, idx) => idx !== i));
+    }, 4000);
+    setStepEntries(prev =>
+      prev.map((e, idx) =>
+        idx === i ? { ...e, deletedAt: Date.now(), undoTimer: timer } : e
+      )
+    );
+  }, []);
+
+  const undoDeleteStep = useCallback((i: number) => {
+    setStepEntries(prev =>
+      prev.map((e, idx) => {
+        if (idx !== i) return e;
+        if (e.undoTimer) clearTimeout(e.undoTimer);
+        return { field: e.field };
+      })
+    );
+  }, []);
 
   // ── Validation ───────────────────────────────────────────────────────────────
 
@@ -200,7 +228,8 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         name:   e.field.name.trim(),
       }));
 
-    const parsedSteps: Step[] = steps
+    const parsedSteps: Step[] = activeSteps
+      .map(e => e.field)
       .filter(s => s.content.trim())
       .map((s, idx) => {
         let timer_seconds: number | null = null;
@@ -236,15 +265,6 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     setIsDirty(false);
   };
 
-  // ── Error message style ──────────────────────────────────────────────────────
-
-  const fieldErrorStyle: React.CSSProperties = {
-    color: 'var(--color-terracotta)',
-    fontSize: '0.75rem',
-    marginTop: '0.375rem',
-    display: 'block',
-  };
-
   const inputErrorStyle: React.CSSProperties = {
     borderColor: 'var(--color-terracotta)',
   };
@@ -276,7 +296,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           aria-invalid={!!fieldErrors.name}
         />
         {fieldErrors.name && (
-          <span id="name-error" style={fieldErrorStyle}>{fieldErrors.name}</span>
+          <span id="name-error" className="field-error">{fieldErrors.name}</span>
         )}
       </div>
 
@@ -327,26 +347,29 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
               return (
                 <div
                   key={i}
-                  className="flex items-center gap-2 px-2 py-1 rounded"
-                  style={{
-                    background: 'rgba(212,112,63,0.07)',
-                    border: '1px dashed rgba(212,112,63,0.3)',
-                  }}
+                  className="rounded overflow-hidden"
+                  style={{ border: '1px dashed rgba(212,112,63,0.3)' }}
                 >
-                  <span
-                    className="font-label text-xs tracking-widest uppercase"
-                    style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
+                  <div
+                    className="flex items-center gap-2 px-2 py-1"
+                    style={{ background: 'rgba(212,112,63,0.07)' }}
                   >
-                    {entry.field.name || 'Ingredient'} removed
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => undoDeleteIngredient(i)}
-                    className="font-label text-xs tracking-widest uppercase transition-colors"
-                    style={{ color: 'var(--color-terracotta)' }}
-                  >
-                    Undo
-                  </button>
+                    <span
+                      className="font-label text-xs tracking-widest uppercase"
+                      style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
+                    >
+                      {entry.field.name || 'Ingredient'} removed
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => undoDeleteIngredient(i)}
+                      className="font-label text-xs tracking-widest uppercase transition-colors"
+                      style={{ color: 'var(--color-terracotta)' }}
+                    >
+                      Undo
+                    </button>
+                  </div>
+                  <div className="drain-bar" />
                 </div>
               );
             }
@@ -365,7 +388,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           })}
         </div>
         {fieldErrors.ingredients && (
-          <span style={fieldErrorStyle}>{fieldErrors.ingredients}</span>
+          <span className="field-error">{fieldErrors.ingredients}</span>
         )}
       </div>
 
@@ -388,15 +411,48 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           </button>
         </div>
         <div className="space-y-3">
-          {steps.map((step, i) => (
-            <StepRow
-              key={i}
-              index={i}
-              value={step}
-              onChange={v => setSteps(prev => prev.map((x, idx) => idx === i ? v : x))}
-              onRemove={steps.length > 1 ? () => removeStep(i) : undefined}
-            />
-          ))}
+          {stepEntries.map((entry, i) => {
+            const isDeleted = !!entry.deletedAt;
+            if (isDeleted) {
+              return (
+                <div
+                  key={i}
+                  className="rounded overflow-hidden"
+                  style={{ border: '1px dashed rgba(212,112,63,0.3)' }}
+                >
+                  <div
+                    className="flex items-center gap-2 px-2 py-1"
+                    style={{ background: 'rgba(212,112,63,0.07)' }}
+                  >
+                    <span
+                      className="font-label text-xs tracking-widest uppercase"
+                      style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
+                    >
+                      Paso {i + 1} removed
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => undoDeleteStep(i)}
+                      className="font-label text-xs tracking-widest uppercase transition-colors"
+                      style={{ color: 'var(--color-terracotta)' }}
+                    >
+                      Undo
+                    </button>
+                  </div>
+                  <div className="drain-bar" />
+                </div>
+              );
+            }
+            return (
+              <StepRow
+                key={i}
+                index={i}
+                value={entry.field}
+                onChange={v => setStepEntries(prev => prev.map((e, idx) => idx === i ? { ...e, field: v } : e))}
+                onRemove={activeSteps.length > 1 ? () => softDeleteStep(i) : undefined}
+              />
+            );
+          })}
         </div>
       </div>
 

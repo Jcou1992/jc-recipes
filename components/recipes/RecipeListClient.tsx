@@ -329,100 +329,77 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         </div>
       )}
 
-      {/* ── Desktop: tag strip + sort row (≥ 640 px) ───────────────────────── */}
+      {/* ── Desktop: sort select + filter button (≥ 640 px) ──────────────── */}
       {(allTags.length > 0 || sort !== 'newest') && (
-        <div className="hidden sm:flex items-center gap-3 mb-6">
-          {/* Inline tag search toggle */}
+        <>
+        <div className="hidden sm:flex items-center gap-3 mb-3">
+          {/* Sort — native select */}
+          <div className="relative flex-shrink-0">
+            <select
+              value={sort}
+              onChange={e => updateParams({ sort: e.target.value as SortKey })}
+              className="font-label text-xs tracking-wider uppercase appearance-none pl-3 pr-8 rounded-full min-h-[36px] transition-all cursor-pointer"
+              style={sort !== 'newest'
+                ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
+              }
+              aria-label="Sort recipes"
+              data-testid="sort-select"
+            >
+              {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+                <option key={k} value={k} data-testid={`sort-option-${k}`}>{SORT_LABELS[k]}</option>
+              ))}
+            </select>
+            <IconChevronDown
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3"
+            />
+          </div>
+
+          {/* Filter button — opens the same sheet as mobile */}
           {allTags.length > 0 && (
-            tagSearchOpen ? (
-              <div ref={tagSearchRef} className="relative flex-shrink-0 flex items-center" style={{ width: '148px' }}>
-                <IconSearch className="absolute left-2.5 w-3.5 h-3.5 pointer-events-none" style={{ color: 'var(--text-3)' } as React.CSSProperties} />
-                <input
-                  autoFocus
-                  type="search"
-                  value={tagSearch}
-                  onChange={e => setTagSearch(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Escape') { setTagSearch(''); setTagSearchOpen(false); } }}
-                  placeholder="Filter tags…"
-                  className="w-full pl-7 pr-3 py-1.5 rounded-full text-xs font-label tracking-wide"
-                  style={{ background: 'var(--bg-raised)', border: '1px solid var(--color-terracotta)', color: 'var(--text-1)', outline: 'none' }}
-                  aria-label="Filter tags"
-                  data-testid="tag-search"
-                />
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setTagSearchOpen(true)}
-                className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                style={{ background: 'var(--bg-raised)', color: 'var(--text-3)', border: '1px solid var(--border)' }}
-                aria-label="Search tags"
-                aria-expanded={false}
-                data-testid="tag-search-toggle"
-              >
-                <IconSearch className="w-4 h-4" />
-              </button>
-            )
-          )}
-
-          {/* Tag strip */}
-          {allTags.length > 0 && (() => {
-            const visibleTags = allTags.filter(t => normalise(t).includes(normalise(tagSearch)));
-            return visibleTags.length > 0 ? (
-              <div className="relative flex-1 min-w-0">
-                <div
-                  className="flex gap-2 overflow-x-auto pb-1"
-                  style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
+            <button
+              type="button"
+              onClick={() => setShowFilterSheet(true)}
+              className="flex-shrink-0 flex items-center gap-2 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] transition-all"
+              style={activeTags.length > 0
+                ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
+              }
+              aria-expanded={showFilterSheet}
+              data-testid="filter-desktop-btn"
+            >
+              Filter
+              {activeTags.length > 0 && (
+                <span
+                  className="font-label text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
                 >
-                  {visibleTags.map(tag => {
-                    const active = activeTags.includes(tag);
-                    return (
-                      <button
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full transition-all min-h-[44px] flex items-center"
-                        style={active
-                          ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
-                          : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-                        }
-                        aria-pressed={active}
-                        data-testid={`tag-filter-${tag}`}
-                      >
-                        {tag}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div
-                  className="pointer-events-none absolute right-0 top-0 bottom-1 w-10"
-                  style={{ background: 'linear-gradient(to right, transparent, var(--bg))' }}
-                />
-              </div>
-            ) : (
-              <p className="font-label text-xs tracking-wide py-2 flex-1" style={{ color: 'var(--text-3)' }}>
-                No tags found
-              </p>
-            );
-          })()}
+                  {activeTags.length}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
 
-          {/* Sort — desktop pill buttons */}
-          <div className="flex flex-shrink-0 gap-1.5" data-testid="sort-select">
-            {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+        {/* Desktop: active tag pills strip */}
+        {activeTags.length > 0 && (
+          <div className="hidden sm:flex flex-wrap gap-2 mb-4">
+            {activeTags.map(tag => (
               <button
-                key={k}
-                onClick={() => updateParams({ sort: k })}
-                className="font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] transition-all"
-                style={sort === k
-                  ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
-                  : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-                }
-                aria-pressed={sort === k}
+                key={tag}
+                onClick={() => toggleTag(tag)}
+                className="flex items-center gap-1.5 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[32px] transition-all"
+                style={{ background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }}
+                aria-pressed={true}
+                data-testid={`tag-filter-${tag}`}
               >
-                {SORT_LABELS[k]}
+                {tag}
+                <IconX className="w-3 h-3" />
               </button>
             ))}
           </div>
-        </div>
+        )}
+        </>
       )}
 
       {/* ── Mobile: Filter button + active-tag strip (< 640 px) ─────────────── */}
