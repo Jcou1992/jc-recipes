@@ -11,5 +11,6 @@ graphify-out/.graphify_python
 graphify-out/.graphify_uncached.txt
 .obsidian/
 .claude/worktrees/
+.claude/skills/
 .worktrees/
 test-results/
