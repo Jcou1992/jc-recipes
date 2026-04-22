@@ -6,10 +6,9 @@ interface Props {
   open: boolean;
   title: string;
   description: string;
-  /** Optional content rendered between the description and the action buttons.
-   *  Use this for scrollable item lists (e.g. recipe names before bulk delete). */
   children?: ReactNode;
   confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -20,6 +19,7 @@ export default function ConfirmDialog({
   description,
   children,
   confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   onConfirm,
   onCancel,
 }: Props) {
@@ -32,7 +32,6 @@ export default function ConfirmDialog({
       aria-labelledby="confirm-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
     >
-      {/* Backdrop */}
       <div
         className="absolute inset-0"
         style={{ background: 'rgba(0,0,0,0.65)' }}
@@ -40,7 +39,6 @@ export default function ConfirmDialog({
         aria-hidden="true"
       />
 
-      {/* Panel */}
       <div
         className="relative rounded-2xl p-6 w-full max-w-sm animate-scale-in"
         style={{
@@ -81,7 +79,7 @@ export default function ConfirmDialog({
             onClick={onCancel}
             className="btn-ghost"
           >
-            Cancel
+            {cancelLabel}
           </button>
           <button
             type="button"

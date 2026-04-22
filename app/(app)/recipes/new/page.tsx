@@ -6,10 +6,9 @@ import RecipeForm from '@/components/recipes/RecipeForm';
 import MarkdownImport from '@/components/recipes/MarkdownImport';
 import { createRecipe } from '@/app/actions/recipes';
 import { useToast } from '@/components/ui/ToastContext';
+import { useT } from '@/components/ui/LanguageContext';
 import type { Recipe } from '@/types/recipe';
 import type { ParsedRecipe } from '@/lib/utils/parse-recipe-markdown';
-
-// ── Markdown → form data mapping ─────────────────────────────────────────────
 
 function parsedToInitial(parsed: ParsedRecipe): Partial<Recipe> {
   return {
@@ -33,10 +32,9 @@ function parsedToInitial(parsed: ParsedRecipe): Partial<Recipe> {
   };
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────────
-
 export default function NewRecipePage() {
   const { showToast } = useToast();
+  const t = useT();
   const [tab, setTab]             = useState<'manual' | 'markdown'>('manual');
   const [formKey, setFormKey]     = useState(0);
   const [initialData, setInitial] = useState<Partial<Recipe> | undefined>(undefined);
@@ -45,7 +43,7 @@ export default function NewRecipePage() {
     setInitial(parsedToInitial(parsed));
     setFormKey(k => k + 1);
     setTab('manual');
-    showToast('Recipe imported from Markdown', 'success');
+    showToast(t.recipeImportedToast, 'success');
   };
 
   const isMarkdown = tab === 'markdown';
@@ -57,16 +55,15 @@ export default function NewRecipePage() {
         className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
         style={{ color: 'var(--text-3)' }}
       >
-        ← Back
+        {t.backBtn}
       </Link>
       <h1
         className="font-display text-3xl font-bold mb-6"
         style={{ color: 'var(--text-1)' }}
       >
-        New recipe
+        {t.newRecipeTitle}
       </h1>
 
-      {/* Tabs */}
       <div
         className="flex gap-0"
         style={{ borderBottom: '1px solid var(--border)' }}
@@ -82,7 +79,7 @@ export default function NewRecipePage() {
             marginBottom: '-1px',
           }}
         >
-          Manual
+          {t.manualTab}
         </button>
         <button
           type="button"
@@ -95,7 +92,7 @@ export default function NewRecipePage() {
             marginBottom: '-1px',
           }}
         >
-          Import from Markdown
+          {t.importMarkdownTab}
         </button>
       </div>
 
@@ -112,7 +109,7 @@ export default function NewRecipePage() {
             key={formKey}
             initialData={initialData}
             onSubmit={createRecipe}
-            submitLabel="Create recipe"
+            submitLabel={t.createRecipeSubmitLabel}
           />
         )}
         {tab === 'markdown' && <MarkdownImport onImport={handleImport} />}

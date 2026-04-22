@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { bulkUpdateTags } from '@/app/actions/bulk-recipes';
 import { useToast } from '@/components/ui/ToastContext';
+import { useT } from '@/components/ui/LanguageContext';
 import type { Recipe } from '@/types/recipe';
 
 interface Props {
@@ -21,6 +22,7 @@ export default function BulkTagDialog({
   onDone,
 }: Props) {
   const { showToast } = useToast();
+  const t = useT();
   const [addTags, setAddTags] = useState<string[]>([]);
   const [removeTags, setRemoveTags] = useState<string[]>([]);
   const [newTagInput, setNewTagInput] = useState('');
@@ -71,9 +73,9 @@ export default function BulkTagDialog({
         return;
       }
       if (result.failed.length > 0) {
-        showToast(`Updated ${result.succeeded.length} of ${ids.length}`, 'info');
+        showToast(t.bulkTagUpdatePartial(result.succeeded.length, ids.length), 'info');
       } else {
-        showToast(`Tags updated on ${result.succeeded.length}`, 'success');
+        showToast(t.bulkTagUpdated(result.succeeded.length), 'success');
       }
       reset();
       onDone();
@@ -111,13 +113,13 @@ export default function BulkTagDialog({
           className="font-display text-xl font-semibold mb-4"
           style={{ color: 'var(--text-1)' }}
         >
-          Edit tags on {selectedRecipes.length} {selectedRecipes.length === 1 ? 'recipe' : 'recipes'}
+          {t.bulkTagDialogTitle(selectedRecipes.length)}
         </h2>
 
         {/* Add tags */}
         <div className="mb-5">
           <p className="font-label text-xs tracking-widest uppercase mb-2" style={{ color: 'var(--text-3)' }}>
-            Add tags
+            {t.bulkTagAddSection}
           </p>
           <div className="flex gap-2 mb-2">
             <input
@@ -130,7 +132,7 @@ export default function BulkTagDialog({
                   commitNewTag();
                 }
               }}
-              placeholder="New tag…"
+              placeholder={t.bulkTagNewPlaceholder}
               className="input-base flex-1 text-sm"
               data-testid="bulk-tag-new-input"
             />
@@ -140,7 +142,7 @@ export default function BulkTagDialog({
               disabled={!newTagInput.trim()}
               className="btn-ghost text-sm disabled:opacity-40"
             >
-              Add
+              {t.bulkTagAddBtn}
             </button>
           </div>
           {suggestable.length > 0 && (
@@ -166,10 +168,10 @@ export default function BulkTagDialog({
               })}
             </div>
           )}
-          {addTags.filter(t => !allTags.includes(t)).length > 0 && (
+          {addTags.filter(tag => !allTags.includes(tag)).length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {addTags
-                .filter(t => !allTags.includes(t))
+                .filter(tag => !allTags.includes(tag))
                 .map(tag => (
                   <span
                     key={tag}
@@ -187,7 +189,7 @@ export default function BulkTagDialog({
         {sharedTags.length > 0 && (
           <div className="mb-5">
             <p className="font-label text-xs tracking-widest uppercase mb-2" style={{ color: 'var(--text-3)' }}>
-              Remove tags (shared across all selected)
+              {t.bulkTagRemoveSection}
             </p>
             <div className="flex flex-wrap gap-1.5">
               {sharedTags.map(tag => {
@@ -215,7 +217,7 @@ export default function BulkTagDialog({
 
         <div className="flex gap-3 justify-end mt-6">
           <button type="button" onClick={handleClose} className="btn-ghost">
-            Cancel
+            {t.bulkTagCancel}
           </button>
           <button
             type="button"
@@ -224,7 +226,7 @@ export default function BulkTagDialog({
             className="btn-primary disabled:opacity-40"
             data-testid="bulk-tag-apply"
           >
-            {isPending ? 'Updating…' : 'Apply'}
+            {isPending ? t.bulkTagUpdating : t.bulkTagApply}
           </button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useEffect, useTransition, useCallback } from
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import RecipeCard from './RecipeCard';
 import BulkActionBar from './BulkActionBar';
+import { useT } from '@/components/ui/LanguageContext';
 import type { Recipe } from '@/types/recipe';
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -38,14 +39,6 @@ function normalise(s: string) {
 
 type SortKey = 'newest' | 'az' | 'fastest' | 'most-ingredients';
 
-const SORT_LABELS: Record<SortKey, string> = {
-  newest: 'Newest',
-  az: 'A → Z',
-  fastest: 'Fastest',
-  'most-ingredients': 'Most ingredients',
-};
-
-
 interface Props {
   recipes: Recipe[];
   allTags: string[];
@@ -56,11 +49,19 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const t = useT();
+
+  const sortLabels: Record<SortKey, string> = {
+    newest: t.sortNewest,
+    az: t.sortAz,
+    fastest: t.sortFastest,
+    'most-ingredients': t.sortMostIngredients,
+  };
 
   const q = searchParams.get('q') ?? '';
   const activeTags = useMemo(() => {
-    const t = searchParams.get('tags');
-    return t ? t.split(',').filter(Boolean) : [];
+    const tag = searchParams.get('tags');
+    return tag ? tag.split(',').filter(Boolean) : [];
   }, [searchParams]);
   const sort = (searchParams.get('sort') ?? 'newest') as SortKey;
 
@@ -84,7 +85,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [tagSearchOpen]);
 
-  // Selection state
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIdx, setLastSelectedIdx] = useState<number | null>(null);
@@ -92,7 +92,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   useEffect(() => { setSearchInput(q); }, [q]);
 
-  // Clear hidden/selected IDs that no longer exist after a refresh
   useEffect(() => {
     const existing = new Set(recipes.map(r => r.id));
     setHiddenIds(prev => {
@@ -173,7 +172,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   const hasFilters = !!(q || activeTags.length > 0 || sort !== 'newest');
 
-  // ── Selection helpers ───────────────────────────────────────────────────────
   const enterSelectMode = useCallback(() => {
     setSelectMode(true);
     setLastSelectedIdx(null);
@@ -256,10 +254,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             type="search"
             value={searchInput}
             onChange={e => handleSearchChange(e.target.value)}
-            placeholder="Search recipes…"
+            placeholder={t.searchPlaceholder}
             className="input-base w-full pl-10 pr-10"
             style={{ borderRadius: '9999px' }}
-            aria-label="Search recipes"
+            aria-label={t.searchAriaLabel}
             data-testid="recipe-search"
           />
           <svg
@@ -275,7 +273,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             <button
               onClick={() => handleSearchChange('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 min-h-[44px] min-w-[44px] flex items-center justify-center"
-              aria-label="Clear search"
+              aria-label={t.clearSearchAriaLabel}
             >
               <svg className="w-4 h-4" style={{ color: 'var(--text-3)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -293,11 +291,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           }
           data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
         >
-          {selectMode ? 'Done' : 'Select'}
+          {selectMode ? t.doneSelectBtn : t.selectBtn}
         </button>
       </div>
 
-      {/* Select-all + hint row (only in select mode) */}
+      {/* Select-all + hint row */}
       {selectMode && filtered.length > 0 && (
         <div className="flex items-center justify-between mb-3">
           <button
@@ -321,19 +319,18 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                 </svg>
               )}
             </span>
-            {allSelected ? 'Deselect all' : `Select all (${filtered.length})`}
+            {allSelected ? t.deselectAll : t.selectAll(filtered.length)}
           </button>
           <span className="font-label text-xs tracking-wide" style={{ color: 'var(--text-3)' }}>
-            {selectedCount > 0 ? `${selectedCount} selected` : 'Tap to select'}
+            {selectedCount > 0 ? t.nSelectedHint(selectedCount) : t.tapToSelect}
           </span>
         </div>
       )}
 
-      {/* ── Desktop: sort select + filter button (≥ 640 px) ──────────────── */}
+      {/* Desktop: sort select + filter button */}
       {(allTags.length > 0 || sort !== 'newest') && (
         <>
         <div className="hidden sm:flex items-center gap-3 mb-3">
-          {/* Sort — native select */}
           <div className="relative flex-shrink-0">
             <select
               value={sort}
@@ -346,8 +343,8 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
               aria-label="Sort recipes"
               data-testid="sort-select"
             >
-              {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
-                <option key={k} value={k} data-testid={`sort-option-${k}`}>{SORT_LABELS[k]}</option>
+              {(Object.keys(sortLabels) as SortKey[]).map(k => (
+                <option key={k} value={k} data-testid={`sort-option-${k}`}>{sortLabels[k]}</option>
               ))}
             </select>
             <IconChevronDown
@@ -355,7 +352,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             />
           </div>
 
-          {/* Filter button — opens the same sheet as mobile */}
           {allTags.length > 0 && (
             <button
               type="button"
@@ -368,7 +364,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
               aria-expanded={showFilterSheet}
               data-testid="filter-desktop-btn"
             >
-              Filter
+              {t.filterBtn}
               {activeTags.length > 0 && (
                 <span
                   className="font-label text-xs rounded-full w-5 h-5 flex items-center justify-center"
@@ -381,7 +377,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           )}
         </div>
 
-        {/* Desktop: active tag pills strip */}
         {activeTags.length > 0 && (
           <div className="hidden sm:flex flex-wrap gap-2 mb-4">
             {activeTags.map(tag => (
@@ -402,9 +397,8 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         </>
       )}
 
-      {/* ── Mobile: Filter button + active-tag strip (< 640 px) ─────────────── */}
+      {/* Mobile: Filter button + active-tag strip */}
       <div className="sm:hidden mb-6">
-        {/* Row: Filter button + active tag count badge */}
         {(allTags.length > 0 || sort !== 'newest') && (
           <div className="flex items-center gap-2 mb-0">
             <button
@@ -423,7 +417,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h2" />
               </svg>
-              Filter
+              {t.filterBtn}
               {(activeTags.length > 0 || sort !== 'newest') && (
                 <span
                   className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
@@ -437,7 +431,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           </div>
         )}
 
-        {/* Active tag pills shown below search bar when filters are on */}
         {activeTags.length > 0 && (
           <div
             className="flex gap-2 overflow-x-auto pt-3 pb-1"
@@ -460,7 +453,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         )}
       </div>
 
-      {/* ── Mobile filter bottom sheet ────────────────────────────────────────── */}
+      {/* Filter bottom sheet */}
       {showFilterSheet && (
         <>
           <div
@@ -474,19 +467,17 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             role="dialog"
             aria-label="Filter and sort options"
           >
-            {/* Handle */}
             <div className="flex-shrink-0 pt-4 pb-2 flex justify-center">
               <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border)' }} />
             </div>
 
             <div className="overflow-y-auto px-6 pb-8 flex flex-col gap-6">
-              {/* Sort section */}
               <div>
                 <p className="font-label text-xs tracking-widest uppercase mb-3" style={{ color: 'var(--text-3)' }}>
-                  Sort by
+                  {t.sortByLabel}
                 </p>
                 <div className="flex flex-col gap-1">
-                  {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+                  {(Object.keys(sortLabels) as SortKey[]).map(k => (
                     <button
                       key={k}
                       onClick={() => { updateParams({ sort: k }); }}
@@ -497,38 +488,35 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                       }
                       data-testid={`sort-option-${k}`}
                     >
-                      {SORT_LABELS[k]}
+                      {sortLabels[k]}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Tags section */}
               {allTags.length > 0 && (
                 <div>
                   <p className="font-label text-xs tracking-widest uppercase mb-3" style={{ color: 'var(--text-3)' }}>
-                    Filter by tag
+                    {t.filterByTagLabel}
                   </p>
-                  {/* Tag search input */}
                   <div className="relative mb-3">
                     <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-3)' } as React.CSSProperties} />
                     <input
                       type="search"
                       value={tagSearch}
                       onChange={e => setTagSearch(e.target.value)}
-                      placeholder="Search tags…"
+                      placeholder={t.searchTagsPlaceholder}
                       className="w-full pl-9 pr-3 py-2 rounded-full text-sm font-label tracking-wide"
                       style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-input)', color: 'var(--text-1)', outline: 'none' }}
-                      aria-label="Search tags"
+                      aria-label={t.searchTagsAriaLabel}
                       data-testid="tag-search"
                     />
                   </div>
-                  {/* Tag pills grid */}
                   <div className="flex flex-wrap gap-2">
-                    {allTags.filter(t => normalise(t).includes(normalise(tagSearch))).length === 0 ? (
-                      <p className="font-label text-xs tracking-wide py-2" style={{ color: 'var(--text-3)' }}>No tags found</p>
+                    {allTags.filter(tag => normalise(tag).includes(normalise(tagSearch))).length === 0 ? (
+                      <p className="font-label text-xs tracking-wide py-2" style={{ color: 'var(--text-3)' }}>{t.noTagsFound}</p>
                     ) : (
-                      allTags.filter(t => normalise(t).includes(normalise(tagSearch))).map(tag => {
+                      allTags.filter(tag => normalise(tag).includes(normalise(tagSearch))).map(tag => {
                         const active = activeTags.includes(tag);
                         return (
                           <button
@@ -551,14 +539,13 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                 </div>
               )}
 
-              {/* Done + Clear row */}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowFilterSheet(false)}
                   className="btn-primary flex-1"
                 >
-                  Done
+                  {t.doneFilterBtn}
                 </button>
                 {(activeTags.length > 0 || sort !== 'newest') && (
                   <button
@@ -567,7 +554,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                     className="btn-ghost"
                     data-testid="clear-filters-btn-sheet"
                   >
-                    Clear
+                    {t.clearFilterBtn}
                   </button>
                 )}
               </div>
@@ -592,10 +579,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           >
             <div className="w-10 h-1 rounded-full mx-auto mb-6" style={{ background: 'var(--border)' }} />
             <p className="font-label text-xs tracking-widest uppercase mb-4" style={{ color: 'var(--text-3)' }}>
-              Sort by
+              {t.sortByLabel}
             </p>
             <div className="flex flex-col gap-2">
-              {(Object.keys(SORT_LABELS) as SortKey[]).map(k => (
+              {(Object.keys(sortLabels) as SortKey[]).map(k => (
                 <button
                   key={k}
                   onClick={() => { updateParams({ sort: k }); setShowSortSheet(false); }}
@@ -606,7 +593,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                   }
                   data-testid={`sort-option-${k}`}
                 >
-                  {SORT_LABELS[k]}
+                  {sortLabels[k]}
                 </button>
               ))}
             </div>
@@ -618,15 +605,15 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
       {filtered.length === 0 ? (
         <div className="text-center py-20" data-testid="filtered-empty-state">
           <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
-            Nothing here
+            {t.nothingHere}
           </p>
           {hasFilters && (
             <>
               <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
-                Try different tags or clear your search.
+                {t.tryDifferentTags}
               </p>
               <button onClick={clearFilters} className="btn-ghost" data-testid="clear-filters-btn">
-                Clear filters
+                {t.clearFiltersBtn}
               </button>
             </>
           )}

@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Recipe, Ingredient } from '@/types/recipe';
 import { useToast } from '@/components/ui/ToastContext';
+import { useT } from '@/components/ui/LanguageContext';
 import { recipeToMarkdown, triggerDownload } from '@/lib/utils/export-recipes';
 
 // ── Fraction rendering ────────────────────────────────────────────────────────
-
-type Fraction = { whole: number; num: number; den: number };
 
 const FRACTIONS: Array<[number, string]> = [
   [1 / 8,  '⅛'],
@@ -32,16 +31,12 @@ function snapFraction(n: number): string | null {
 
 function formatAmount(n: number): string {
   if (n <= 0) return '0';
-  if (n > 10) {
-    // Large batch — decimal rounded to 1 place
-    return String(Math.round(n * 10) / 10);
-  }
+  if (n > 10) return String(Math.round(n * 10) / 10);
   const whole = Math.floor(n);
   const frac  = n - whole;
   const fracStr = snapFraction(frac);
   if (frac < 0.05) return whole === 0 ? '0' : String(whole);
   if (fracStr) return whole === 0 ? fracStr : `${whole}${fracStr}`;
-  // Fallback: round to 2 decimals
   return String(Math.round(n * 100) / 100);
 }
 
@@ -80,7 +75,6 @@ function convertUnit(
 ): { amount: number; unit: string | null } {
   if (!unit) return { amount, unit };
   const u = unit.trim().toLowerCase();
-
   if (targetSystem === 'imperial') {
     const conv = METRIC_TO_IMPERIAL[u];
     if (conv) return { amount: amount * conv.factor, unit: conv.toUnit };
@@ -123,10 +117,10 @@ function formatTime(minutes: number): string {
 
 export default function RecipeDetailClient({ recipe }: Props) {
   const { showToast } = useToast();
+  const t = useT();
   const [targetServings, setTargetServings] = useState(recipe.servings);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
 
-  // Restore unit preference from localStorage on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem('preferred-unit-system');
@@ -171,7 +165,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             onClick={() => setTargetServings(s => Math.max(1, s - 1))}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
-            aria-label="Decrease servings"
+            aria-label={t.decreaseServings}
             data-testid="scaler-decrease"
           >
             −
@@ -181,13 +175,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
             style={{ color: 'var(--text-2)' }}
             data-testid="scaler-value"
           >
-            {targetServings} {targetServings !== 1 ? 'servings' : 'serving'}
+            {t.servingScalerLabel(targetServings)}
           </span>
           <button
             onClick={() => setTargetServings(s => s + 1)}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
-            aria-label="Increase servings"
+            aria-label={t.increaseServings}
             data-testid="scaler-increase"
           >
             +
@@ -201,13 +195,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
                 color: 'var(--color-terracotta)',
                 border: '1px solid rgba(212,112,63,0.25)',
               }}
-              aria-label="Reset to original serving count"
+              aria-label={t.resetServingsAriaLabel}
               data-testid="scaler-scaled-badge"
             >
               {multiplier < 1
                 ? `×${Math.round(multiplier * 100) / 100}`
                 : `×${Math.round(multiplier * 10) / 10}`
-              } Reset
+              } {t.resetBtn}
             </button>
           )}
         </div>
@@ -215,17 +209,17 @@ export default function RecipeDetailClient({ recipe }: Props) {
         {/* Time info */}
         {recipe.prep_time != null && (
           <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-            Prep: {formatTime(recipe.prep_time)}
+            {t.prepLabel} {formatTime(recipe.prep_time)}
           </span>
         )}
         {recipe.cook_time != null && (
           <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-            Cook: {formatTime(recipe.cook_time)}
+            {t.cookLabel} {formatTime(recipe.cook_time)}
           </span>
         )}
         {totalTime > 0 && recipe.prep_time != null && recipe.cook_time != null && (
           <span className="font-label text-sm tracking-wide font-semibold" style={{ color: 'var(--text-1)' }}>
-            Total: {formatTime(totalTime)}
+            {t.totalLabel} {formatTime(totalTime)}
           </span>
         )}
 
@@ -265,7 +259,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
               aria-pressed={unitSystem === sys}
               data-testid={`unit-${sys}`}
             >
-              {sys === 'metric' ? 'Metric' : 'Imperial'}
+              {sys === 'metric' ? t.metricLabel : t.imperialLabel}
             </button>
           ))}
         </div>
@@ -274,12 +268,11 @@ export default function RecipeDetailClient({ recipe }: Props) {
       {/* Two-column body on md+ */}
       <div className="md:grid md:grid-cols-[2fr_3fr] md:gap-10 md:items-start">
 
-        {/* LEFT: sticky sidebar — shown when there are ingredients or steps */}
         {(recipe.ingredients.length > 0 || recipe.steps.length > 0) && (
           <aside className="md:sticky md:top-20 mb-10 md:mb-0">
             {recipe.ingredients.length > 0 && (
               <section data-testid="ingredients-section">
-                <h2 className="section-label mb-4">Ingredients</h2>
+                <h2 className="section-label mb-4">{t.ingredientsSectionLabel}</h2>
                 <ul className="space-y-2.5">
                   {displayedIngredients.map((ing, i) => (
                     <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
@@ -299,7 +292,6 @@ export default function RecipeDetailClient({ recipe }: Props) {
               </section>
             )}
 
-            {/* Copy ingredients button */}
             {recipe.ingredients.length > 0 && (
               <div className="mt-4 mb-6">
                 <button
@@ -309,20 +301,19 @@ export default function RecipeDetailClient({ recipe }: Props) {
                       .join('\n');
                     try {
                       await navigator.clipboard.writeText(text);
-                      showToast('Ingredients copied', 'success');
+                      showToast(t.ingredientsCopiedToast, 'success');
                     } catch {
-                      showToast('Failed to copy to clipboard', 'error');
+                      showToast(t.copyFailedToast, 'error');
                     }
                   }}
                   className="btn-ghost text-sm"
                   data-testid="copy-ingredients-btn"
                 >
-                  Copy ingredients
+                  {t.copyIngredientsBtn}
                 </button>
               </div>
             )}
 
-            {/* Desktop Cocinar button — always in left column when there are steps */}
             {recipe.steps.length > 0 && (
               <div className="hidden md:block">
                 <Link
@@ -330,18 +321,17 @@ export default function RecipeDetailClient({ recipe }: Props) {
                   className="btn-primary w-full text-center"
                   data-testid="cook-mode-btn-desktop"
                 >
-                  Cook
+                  {t.cookBtn}
                 </Link>
               </div>
             )}
           </aside>
         )}
 
-        {/* RIGHT: steps + notes */}
         <div>
           {recipe.steps.length > 0 && (
             <section className="mb-10">
-              <h2 className="section-label mb-4">Preparation</h2>
+              <h2 className="section-label mb-4">{t.preparationLabel}</h2>
               <ol className="space-y-6">
                 {[...recipe.steps]
                   .sort((a, b) => a.order - b.order)
@@ -382,7 +372,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
               className="rounded-xl p-5"
               style={{ background: 'var(--bg-raised)', border: '1px solid var(--border)' }}
             >
-              <h2 className="section-label mb-3">Notes</h2>
+              <h2 className="section-label mb-3">{t.notesLabel}</h2>
               <p className="font-body text-base whitespace-pre-line" style={{ color: 'var(--text-2)' }}>
                 {recipe.notes}
               </p>
@@ -392,7 +382,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
 
       </div>
 
-      {/* Mobile sticky footer Cocinar button */}
+      {/* Mobile sticky footer Cook button */}
       {recipe.steps.length > 0 && (
         <div
           className="md:hidden fixed bottom-0 left-0 right-0 z-20 px-4 py-3"
@@ -409,7 +399,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             className="btn-primary w-full text-center block"
             data-testid="cook-mode-btn"
           >
-            Cook
+            {t.cookBtn}
           </Link>
         </div>
       )}

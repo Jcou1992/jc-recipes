@@ -1,5 +1,7 @@
 'use client';
 
+import { useT } from '@/components/ui/LanguageContext';
+
 export interface StepField {
   content: string;
   timerEnabled: boolean;
@@ -14,6 +16,7 @@ interface Props {
 }
 
 export default function StepRow({ index, value, onChange, onRemove }: Props) {
+  const t = useT();
   const set = (field: keyof StepField, v: string | boolean) =>
     onChange({ ...value, [field]: v });
 
@@ -30,9 +33,9 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
         <textarea
           value={value.content}
           onChange={e => set('content', e.target.value)}
-          placeholder={`Paso ${index + 1}…`}
+          placeholder={t.stepPlaceholder(index + 1)}
           rows={2}
-          aria-label={`Step ${index + 1}`}
+          aria-label={t.stepAriaLabel(index + 1)}
           className="input-base w-full resize-none"
         />
         <label
@@ -46,14 +49,14 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
             className="accent-terracotta"
             style={{ accentColor: '#D4703F' }}
           />
-          Timer
+          {t.timerLabel}
           {value.timerEnabled && (
             <input
               type="text"
               value={value.timerInput}
               onChange={e => set('timerInput', e.target.value)}
-              placeholder="ej. 5 min, 1h 30min"
-              aria-label="Timer duration"
+              placeholder={t.timerDurationPlaceholder}
+              aria-label={t.timerDurationAriaLabel}
               className="input-base ml-1 w-36"
               style={{ display: 'inline-block' }}
             />
@@ -65,7 +68,7 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
         <button
           type="button"
           onClick={onRemove}
-          aria-label="Remove step"
+          aria-label={t.removeStepAriaLabel}
           className="btn-remove mt-2 p-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
         >
           ×

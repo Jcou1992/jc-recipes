@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { useToast } from '@/components/ui/ToastContext';
+import { useT } from '@/components/ui/LanguageContext';
 import {
   bulkDeleteRecipes,
   bulkDuplicateRecipes,
@@ -31,12 +32,12 @@ export default function BulkActionBar({
 }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
+  const t = useT();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [showProgress, setShowProgress] = useState(false);
   const progressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  /** IDs that failed during the last bulk delete, kept so the user can retry. */
   const [retryIds, setRetryIds] = useState<string[]>([]);
 
   const count = selectedIds.length;
@@ -62,19 +63,16 @@ export default function BulkActionBar({
       onOptimisticRestore(ids);
       const reason = result.failed[0]?.error ?? 'Check your connection and try again';
       setRetryIds(ids);
-      showToast(`Failed to delete — ${reason}`, 'error');
+      showToast(t.bulkDeleteFailed(reason), 'error');
       return;
     }
     if (result.failed.length > 0) {
       const failedIds = result.failed.map(f => f.id);
       onOptimisticRestore(failedIds);
       setRetryIds(failedIds);
-      showToast(
-        `Deleted ${result.succeeded.length} of ${ids.length} — ${result.failed.length} failed. Use Retry below.`,
-        'info',
-      );
+      showToast(t.bulkDeletePartial(result.succeeded.length, ids.length, result.failed.length), 'info');
     } else {
-      showToast(`${result.succeeded.length} deleted`, 'success');
+      showToast(t.bulkDeleted(result.succeeded.length), 'success');
     }
     onDone();
     startTransition(() => router.refresh());
@@ -85,13 +83,13 @@ export default function BulkActionBar({
     const result = await bulkDuplicateRecipes(ids);
     if (result.succeeded.length === 0) {
       const reason = result.failed[0]?.error ?? 'Check your connection and try again';
-      showToast(`Failed to duplicate — ${reason}`, 'error');
+      showToast(t.bulkDuplicateFailed(reason), 'error');
       return;
     }
     if (result.failed.length > 0) {
-      showToast(`Duplicated ${result.succeeded.length} of ${ids.length} — ${result.failed.length} failed`, 'info');
+      showToast(t.bulkDuplicatePartial(result.succeeded.length, ids.length, result.failed.length), 'info');
     } else {
-      showToast(`${result.succeeded.length} duplicated`, 'success');
+      showToast(t.bulkDuplicated(result.succeeded.length), 'success');
     }
     onDone();
     startTransition(() => router.refresh());
@@ -105,7 +103,7 @@ export default function BulkActionBar({
       ? `${selectedRecipes[0].name.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.md`
       : `recipes-export-${date}.md`;
     triggerDownload(md, filename, 'text/markdown');
-    showToast(`Exported ${selectedRecipes.length} recipe${selectedRecipes.length === 1 ? '' : 's'}`, 'success');
+    showToast(t.bulkExported(selectedRecipes.length), 'success');
   }
 
   function handleExportPdf() {
@@ -140,7 +138,7 @@ export default function BulkActionBar({
               <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" d="M12 2a10 10 0 0 1 10 10" />
               </svg>
-              Deleting…
+              {t.bulkDeleting}
             </span>
           ) : (
             <span
@@ -148,7 +146,7 @@ export default function BulkActionBar({
               style={{ color: 'var(--text-1)' }}
               data-testid="bulk-count"
             >
-              {count} {count === 1 ? 'recipe selected' : 'recipes selected'}
+              {t.bulkRecipeSelected(count)}
             </span>
           )}
 
@@ -160,7 +158,7 @@ export default function BulkActionBar({
             style={{ background: 'var(--bg-raised)', color: 'var(--text-1)', border: '1px solid var(--border)' }}
             data-testid="bulk-duplicate"
           >
-            Duplicate
+            {t.bulkDuplicate}
           </button>
 
           <button
@@ -171,7 +169,7 @@ export default function BulkActionBar({
             style={{ background: 'var(--bg-raised)', color: 'var(--text-1)', border: '1px solid var(--border)' }}
             data-testid="bulk-tags"
           >
-            Tags
+            {t.bulkTags}
           </button>
 
           <button
@@ -182,7 +180,7 @@ export default function BulkActionBar({
             style={{ background: 'var(--bg-raised)', color: 'var(--text-1)', border: '1px solid var(--border)' }}
             data-testid="bulk-export-md"
           >
-            Export MD
+            {t.bulkExportMd}
           </button>
 
           <button
@@ -193,7 +191,7 @@ export default function BulkActionBar({
             style={{ background: 'var(--bg-raised)', color: 'var(--text-1)', border: '1px solid var(--border)' }}
             data-testid="bulk-export-pdf"
           >
-            Export PDF
+            {t.bulkExportPdf}
           </button>
 
           <button
@@ -204,7 +202,7 @@ export default function BulkActionBar({
             style={{ background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }}
             data-testid="bulk-delete"
           >
-            Delete
+            {t.bulkDelete}
           </button>
 
           {retryIds.length > 0 && (
@@ -220,7 +218,7 @@ export default function BulkActionBar({
               }}
               data-testid="bulk-retry"
             >
-              Retry ({retryIds.length} failed)
+              {t.bulkRetry(retryIds.length)}
             </button>
           )}
 
@@ -231,20 +229,17 @@ export default function BulkActionBar({
             style={{ color: 'var(--text-2)', marginLeft: 'auto', flexShrink: 0 }}
             data-testid="bulk-cancel"
           >
-            Cancel
+            {t.cancelBtn}
           </button>
         </div>
       </div>
 
       <ConfirmDialog
         open={confirmOpen}
-        title={count === 1 ? 'Delete recipe' : `Delete ${count} recipes`}
-        description={
-          count === 1
-            ? 'Delete this recipe? This cannot be undone.'
-            : `Delete these ${count} recipes? This cannot be undone.`
-        }
-        confirmLabel={isPending ? 'Deleting…' : 'Delete'}
+        title={t.bulkDeleteTitle(count)}
+        description={t.bulkDeleteDescription(count)}
+        confirmLabel={isPending ? t.bulkDeleting : t.bulkConfirmDelete}
+        cancelLabel={t.confirmCancelBtn}
         onConfirm={handleDelete}
         onCancel={() => setConfirmOpen(false)}
       >

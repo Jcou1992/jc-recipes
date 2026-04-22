@@ -7,6 +7,7 @@ import StepRow, { type StepField } from './StepRow';
 import { parseTimeToMinutes } from '@/lib/utils/parse-recipe-markdown';
 import { useUnsavedChanges } from '@/lib/hooks/useUnsavedChanges';
 import { useToast } from '@/components/ui/ToastContext';
+import { useT } from '@/components/ui/LanguageContext';
 import type { Recipe, RecipePayload, Ingredient, Step } from '@/types/recipe';
 import type { ActionResult } from '@/app/actions/recipes';
 
@@ -54,15 +55,10 @@ function stepsToFields(steps: Step[]): StepField[] {
     : [{ content: '', timerEnabled: false, timerInput: '' }];
 }
 
-// ── Label style ───────────────────────────────────────────────────────────────
-
 const labelStyle: React.CSSProperties = { color: 'var(--text-3)' };
-
-// ── Soft-delete ingredient type ───────────────────────────────────────────────
 
 interface IngredientEntry {
   field: IngredientField;
-  /** When set, this ingredient is pending deletion — permanently removed after timeout */
   deletedAt?: number;
   undoTimer?: ReturnType<typeof setTimeout>;
 }
@@ -72,18 +68,16 @@ interface IngredientEntry {
 export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
+  const t = useT();
   const [loading, setLoading] = useState(false);
 
-  // Required fields
   const [name, setName]         = useState(initialData?.name ?? '');
   const [servings, setServings] = useState(String(initialData?.servings ?? 1));
 
-  // Ingredients with soft-delete support
   const [ingredientEntries, setIngredientEntries] = useState<IngredientEntry[]>(
     () => ingredientsToFields(initialData?.ingredients ?? []).map(field => ({ field }))
   );
 
-  // Steps with soft-delete support (mirrors ingredient pattern)
   interface StepEntry {
     field: StepField;
     deletedAt?: number;
@@ -94,23 +88,16 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     () => stepsToFields(initialData?.steps ?? []).map(field => ({ field }))
   );
 
-  // Optional fields
   const [description, setDescription] = useState(initialData?.description ?? '');
   const [prepTime, setPrepTime]       = useState(initialData?.prep_time ? String(initialData.prep_time) : '');
   const [cookTime, setCookTime]       = useState(initialData?.cook_time ? String(initialData.cook_time) : '');
   const [tags, setTags]               = useState((initialData?.tags ?? []).join(', '));
   const [notes, setNotes]             = useState(initialData?.notes ?? '');
 
-  // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; ingredients?: string }>({});
-
-  // Ref to the name input for scrolling to first error
   const nameInputRef = useRef<HTMLInputElement>(null);
-
-  // Dirty tracking — true if any field changed from initial
   const [isDirty, setIsDirty] = useState(false);
 
-  // Derive live (non-deleted) entries for validation + dirty check
   const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
   const activeSteps = stepEntries.filter(e => !e.deletedAt);
 
@@ -136,11 +123,9 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
     setIngredientEntries(prev => prev.map((e, idx) => idx === i ? { ...e, field: v } : e));
 
   const softDeleteIngredient = useCallback((i: number) => {
-    // Start 4-second undo window
     const timer = setTimeout(() => {
       setIngredientEntries(prev => prev.filter((_, idx) => idx !== i));
     }, 4000);
-
     setIngredientEntries(prev =>
       prev.map((e, idx) =>
         idx === i ? { ...e, deletedAt: Date.now(), undoTimer: timer } : e
@@ -153,7 +138,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       prev.map((e, idx) => {
         if (idx !== i) return e;
         if (e.undoTimer) clearTimeout(e.undoTimer);
-        return { field: e.field }; // strip deletedAt + undoTimer
+        return { field: e.field };
       })
     );
   }, []);
@@ -189,19 +174,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const validate = (): boolean => {
     const errors: typeof fieldErrors = {};
 
-    if (!name.trim()) {
-      errors.name = 'Recipe name is required.';
-    }
+    if (!name.trim()) errors.name = t.nameRequired;
 
     const hasAtLeastOneIngredient = activeIngredients.some(e => e.field.name.trim());
-    if (!hasAtLeastOneIngredient) {
-      errors.ingredients = 'Add at least one ingredient.';
-    }
+    if (!hasAtLeastOneIngredient) errors.ingredients = t.ingredientRequired;
 
     setFieldErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      // Scroll to first error field
       if (errors.name && nameInputRef.current) {
         nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         nameInputRef.current.focus();
@@ -215,7 +195,6 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validate()) return;
 
     setLoading(true);
@@ -261,7 +240,6 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       return;
     }
 
-    // On success the server action calls redirect() — framework handles navigation
     setIsDirty(false);
   };
 
@@ -271,14 +249,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Name (required) */}
+      {/* Name */}
       <div>
         <label
           className="font-label block text-xs tracking-widest uppercase mb-1.5"
           style={labelStyle}
           htmlFor="name"
         >
-          Name <span style={{ color: 'var(--color-terracotta)' }}>*</span>
+          {t.nameLabel} <span style={{ color: 'var(--color-terracotta)' }}>*</span>
         </label>
         <input
           ref={nameInputRef}
@@ -289,7 +267,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             setName(e.target.value);
             if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined }));
           }}
-          placeholder="Recipe name"
+          placeholder={t.namePlaceholder}
           className="input-base"
           style={fieldErrors.name ? inputErrorStyle : undefined}
           aria-describedby={fieldErrors.name ? 'name-error' : undefined}
@@ -300,14 +278,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         )}
       </div>
 
-      {/* Servings (required) */}
+      {/* Servings */}
       <div className="w-32">
         <label
           className="font-label block text-xs tracking-widest uppercase mb-1.5"
           style={labelStyle}
           htmlFor="servings"
         >
-          Servings <span style={{ color: 'var(--color-terracotta)' }}>*</span>
+          {t.servingsLabel} <span style={{ color: 'var(--color-terracotta)' }}>*</span>
         </label>
         <input
           id="servings"
@@ -320,14 +298,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         />
       </div>
 
-      {/* Ingredients (required) */}
+      {/* Ingredients */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label
             className="font-label block text-xs tracking-widest uppercase"
             style={labelStyle}
           >
-            Ingredients <span style={{ color: 'var(--color-terracotta)' }}>*</span>
+            {t.ingredientsFormLabel} <span style={{ color: 'var(--color-terracotta)' }}>*</span>
           </label>
           <button
             type="button"
@@ -335,7 +313,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             className="font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--color-terracotta)' }}
           >
-            + Add
+            {t.addIngredientBtn}
           </button>
         </div>
         <div className="space-y-2">
@@ -358,7 +336,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                       className="font-label text-xs tracking-widest uppercase"
                       style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
                     >
-                      {entry.field.name || 'Ingredient'} removed
+                      {t.ingredientRemovedLabel(entry.field.name || t.ingredientDefault)}
                     </span>
                     <button
                       type="button"
@@ -366,7 +344,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                       className="font-label text-xs tracking-widest uppercase transition-colors"
                       style={{ color: 'var(--color-terracotta)' }}
                     >
-                      Undo
+                      {t.undoBtn}
                     </button>
                   </div>
                   <div className="drain-bar" />
@@ -392,14 +370,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         )}
       </div>
 
-      {/* Steps (required) */}
+      {/* Steps */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label
             className="font-label block text-xs tracking-widest uppercase"
             style={labelStyle}
           >
-            Steps <span style={{ color: 'var(--color-terracotta)' }}>*</span>
+            {t.stepsLabel} <span style={{ color: 'var(--color-terracotta)' }}>*</span>
           </label>
           <button
             type="button"
@@ -407,7 +385,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             className="font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--color-terracotta)' }}
           >
-            + Paso
+            {t.addStepBtn}
           </button>
         </div>
         <div className="space-y-3">
@@ -428,7 +406,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                       className="font-label text-xs tracking-widest uppercase"
                       style={{ color: 'var(--text-3)', textDecoration: 'line-through', flex: 1 }}
                     >
-                      Paso {i + 1} removed
+                      {t.stepRemovedLabel(i + 1)}
                     </span>
                     <button
                       type="button"
@@ -436,7 +414,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                       className="font-label text-xs tracking-widest uppercase transition-colors"
                       style={{ color: 'var(--color-terracotta)' }}
                     >
-                      Undo
+                      {t.undoBtn}
                     </button>
                   </div>
                   <div className="drain-bar" />
@@ -456,39 +434,37 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         </div>
       </div>
 
-      {/* Optional fields — collapsible */}
+      {/* Optional fields */}
       <details className="group">
         <summary
           className="cursor-pointer font-label text-xs tracking-widest uppercase select-none list-none flex items-center gap-1 transition-colors"
           style={{ color: 'var(--text-3)' }}
         >
           <span className="group-open:rotate-90 transition-transform inline-block">›</span>
-          Optional fields
+          {t.optionalFields}
         </summary>
         <div
           className="mt-4 space-y-4 pl-4"
           style={{ borderLeft: '2px solid var(--border)' }}
         >
-          {/* Description */}
           <div>
             <label
               className="font-label block text-xs tracking-widest uppercase mb-1.5"
               style={labelStyle}
               htmlFor="description"
             >
-              Description
+              {t.descriptionLabel}
             </label>
             <textarea
               id="description"
               value={description}
               onChange={e => setDescription(e.target.value)}
               rows={2}
-              placeholder="Short description for the list view"
+              placeholder={t.descriptionPlaceholder}
               className="input-base resize-none"
             />
           </div>
 
-          {/* Prep + Cook time */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label
@@ -496,7 +472,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 style={labelStyle}
                 htmlFor="prep-time"
               >
-                Prep time (min)
+                {t.prepTimeLabelForm}
               </label>
               <input
                 id="prep-time"
@@ -513,7 +489,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 style={labelStyle}
                 htmlFor="cook-time"
               >
-                Cook time (min)
+                {t.cookTimeLabelForm}
               </label>
               <input
                 id="cook-time"
@@ -526,40 +502,38 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             </div>
           </div>
 
-          {/* Tags */}
           <div>
             <label
               className="font-label block text-xs tracking-widest uppercase mb-1.5"
               style={labelStyle}
               htmlFor="tags"
             >
-              Tags
+              {t.tagsLabel}
             </label>
             <input
               id="tags"
               type="text"
               value={tags}
               onChange={e => setTags(e.target.value)}
-              placeholder="tag1, tag2, tag3"
+              placeholder={t.tagsPlaceholder}
               className="input-base"
             />
           </div>
 
-          {/* Notes */}
           <div>
             <label
               className="font-label block text-xs tracking-widest uppercase mb-1.5"
               style={labelStyle}
               htmlFor="notes"
             >
-              Notes
+              {t.notesFormLabel}
             </label>
             <textarea
               id="notes"
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={3}
-              placeholder="Variations, tips, shopping notes…"
+              placeholder={t.notesPlaceholder}
               className="input-base resize-none"
             />
           </div>
@@ -569,17 +543,17 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
         <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? 'Saving…' : submitLabel}
+          {loading ? t.savingBtn : submitLabel}
         </button>
         <button
           type="button"
           onClick={() => {
-            if (isDirty && !window.confirm('You have unsaved changes. Leave anyway?')) return;
+            if (isDirty && !window.confirm(t.unsavedChangesWarning)) return;
             router.back();
           }}
           className="btn-ghost"
         >
-          Cancel
+          {t.cancelBtn}
         </button>
         {isDirty && (
           <span
@@ -587,7 +561,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
             style={{ color: 'var(--color-terracotta)' }}
             aria-live="polite"
           >
-            ● Unsaved changes
+            {t.unsavedChangesIndicator}
           </span>
         )}
       </div>

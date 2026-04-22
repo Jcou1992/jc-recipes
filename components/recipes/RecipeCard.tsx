@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
+import { useT } from '@/components/ui/LanguageContext';
 
 interface Props {
   recipe: Recipe;
@@ -19,12 +20,13 @@ export default function RecipeCard({
   selected = false,
   onToggle,
 }: Props) {
+  const t = useT();
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
 
   const metaRow = (
     <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
       <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-        {recipe.servings} {recipe.servings !== 1 ? 'servings' : 'serving'}
+        {t.servingLabel(recipe.servings)}
       </span>
       {totalTime > 0 && (
         <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
@@ -33,7 +35,7 @@ export default function RecipeCard({
       )}
       {recipe.ingredients.length > 0 && (
         <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-          {recipe.ingredients.length} ingredients
+          {t.ingredientsCount(recipe.ingredients.length)}
         </span>
       )}
     </div>
@@ -115,7 +117,7 @@ export default function RecipeCard({
         onClick={handleClick}
         role="button"
         aria-pressed={selected}
-        aria-label={`${selected ? 'Deselect' : 'Select'} ${recipe.name}`}
+        aria-label={selected ? t.deselectRecipeAriaLabel(recipe.name) : t.selectRecipeAriaLabel(recipe.name)}
         data-testid={`recipe-card-${recipe.id}`}
         data-selected={selected ? 'true' : 'false'}
       >

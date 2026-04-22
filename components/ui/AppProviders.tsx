@@ -3,12 +3,21 @@
 import type { ReactNode } from 'react';
 import { ToastProvider } from './ToastContext';
 import ToastContainer from './ToastContainer';
+import { LanguageProvider } from './LanguageContext';
+import type { Language } from '@/lib/i18n';
 
-export default function AppProviders({ children }: { children: ReactNode }) {
+interface Props {
+  children: ReactNode;
+  initialLanguage?: Language;
+}
+
+export default function AppProviders({ children, initialLanguage }: Props) {
   return (
-    <ToastProvider>
-      {children}
-      <ToastContainer />
-    </ToastProvider>
+    <LanguageProvider initialLanguage={initialLanguage}>
+      <ToastProvider>
+        {children}
+        <ToastContainer />
+      </ToastProvider>
+    </LanguageProvider>
   );
 }

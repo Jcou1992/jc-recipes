@@ -1,5 +1,7 @@
 'use client';
 
+import { useT } from '@/components/ui/LanguageContext';
+
 export interface IngredientField {
   amount: string;
   unit: string;
@@ -23,6 +25,7 @@ const UNITS = [
 ];
 
 export default function IngredientRow({ value, onChange, onRemove }: Props) {
+  const t = useT();
   const set = (field: keyof IngredientField, v: string) =>
     onChange({ ...value, [field]: v });
 
@@ -37,16 +40,16 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
           type="text"
           value={value.amount}
           onChange={e => set('amount', e.target.value)}
-          placeholder="Cant."
-          aria-label="Ingredient amount"
+          placeholder={t.ingredientAmountPlaceholder}
+          aria-label={t.ingredientAmountAriaLabel}
           className="input-base w-20"
         />
         <input
           type="text"
           value={value.unit}
           onChange={e => set('unit', e.target.value)}
-          placeholder="Unidad"
-          aria-label="Ingredient unit"
+          placeholder={t.ingredientUnitPlaceholder}
+          aria-label={t.ingredientUnitAriaLabel}
           list={UNIT_DATALIST_ID}
           role="textbox"
           className="input-base w-24"
@@ -55,15 +58,15 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
           type="text"
           value={value.name}
           onChange={e => set('name', e.target.value)}
-          placeholder="Ingrediente"
-          aria-label="Ingredient name"
+          placeholder={t.ingredientDefault}
+          aria-label={t.ingredientNameAriaLabel}
           className="input-base flex-1"
         />
         {onRemove && (
           <button
             type="button"
             onClick={onRemove}
-            aria-label="Remove ingredient"
+            aria-label={t.removeIngredientAriaLabel}
             className="btn-remove p-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
           >
             ×

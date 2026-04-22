@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
+import { getServerT } from '@/lib/i18n-server';
 import RecipeListClient from '@/components/recipes/RecipeListClient';
 
 export const metadata: Metadata = { title: 'My Recipes - jc-recipes' };
@@ -13,15 +14,16 @@ export default async function RecipesPage() {
     .select('*')
     .order('created_at', { ascending: false });
 
+  const t = await getServerT();
+
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-8 text-sm" style={{ color: 'var(--color-terracotta)' }}>
-        Error loading recipes: {error.message}
+        {t.errorLoadingRecipes} {error.message}
       </div>
     );
   }
 
-  // Collect all unique tags across the user's recipes
   const allTags = Array.from(
     new Set(recipes.flatMap(r => r.tags ?? []))
   ).sort();
@@ -30,23 +32,23 @@ export default async function RecipesPage() {
     <div className="max-w-3xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
-          My Recipes
+          {t.recipesPageTitle}
         </h1>
         <Link href="/recipes/new" className="btn-primary min-h-[44px]">
-          + New recipe
+          {t.newRecipeBtn}
         </Link>
       </div>
 
       {recipes.length === 0 ? (
         <div data-testid="empty-state" className="text-center py-20">
           <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
-            No recipes yet
+            {t.noRecipesYet}
           </p>
           <p className="font-body text-base mb-8" style={{ color: 'var(--text-3)' }}>
-            Add your first recipe to get started.
+            {t.noRecipesGetStarted}
           </p>
           <Link href="/recipes/new" className="btn-primary">
-            Create your first recipe
+            {t.noRecipesCreateFirst}
           </Link>
         </div>
       ) : (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useT } from '@/components/ui/LanguageContext';
 import type { Recipe, Step } from '@/types/recipe';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -101,6 +102,7 @@ function formatElapsed(seconds: number): string {
 }
 
 export default function CookMode({ recipe, initialServings, unitSystem }: Props) {
+  const t = useT();
   const sortedSteps: Step[] = [...recipe.steps].sort((a, b) => a.order - b.order);
   const totalSteps = sortedSteps.length;
   const multiplier = initialServings / recipe.servings;
@@ -143,11 +145,11 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       setTimers(prev => {
         const next = new Map(prev);
         let changed = false;
-        for (const [idx, t] of next) {
-          if (t.running && t.remaining > 0) {
-            next.set(idx, { ...t, remaining: t.remaining - 1 });
+        for (const [idx, ts] of next) {
+          if (ts.running && ts.remaining > 0) {
+            next.set(idx, { ...ts, remaining: ts.remaining - 1 });
             changed = true;
-            if (t.remaining - 1 === 0) {
+            if (ts.remaining - 1 === 0) {
               try { navigator.vibrate?.([200, 100, 200]); } catch {}
               const ctx = audioCtxRef.current;
               if (ctx) playBeeps(ctx);
@@ -262,7 +264,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             href={`/recipes/${recipe.id}`}
             className="absolute top-4 right-5 font-label text-xs tracking-widest uppercase transition-colors"
             style={{ color: 'var(--text-3)' }}
-            aria-label="Salir"
+            aria-label={t.cookExitBtn}
           >
             ✕
           </Link>
@@ -275,7 +277,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 className="font-body text-sm"
                 style={{ color: 'var(--color-terracotta)' }}
               >
-                Listo.
+                {t.cookDoneBanner}
               </p>
               <h1
                 className="font-display"
@@ -289,7 +291,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 style={{ color: 'var(--text-3)' }}
                 data-testid="cook-completion-elapsed"
               >
-                {elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : '< 1s'} en cocina
+                {t.cookInKitchen(elapsedSeconds > 0 ? formatElapsed(elapsedSeconds) : '< 1s')}
               </p>
             </div>
 
@@ -309,7 +311,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 }}
                 data-testid="cook-completion-return"
               >
-                Volver a la receta
+                {t.cookBackToRecipe}
               </Link>
 
               {/* Secondary: print */}
@@ -324,7 +326,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 }}
                 data-testid="cook-completion-print"
               >
-                Imprimir receta
+                {t.cookPrintRecipe}
               </Link>
 
               {/* Tertiary: start again */}
@@ -339,7 +341,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 }}
                 data-testid="cook-completion-restart"
               >
-                Empezar de nuevo
+                {t.cookStartAgain}
               </button>
             </div>
           </div>
@@ -347,26 +349,26 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       )}
 
       {/* Active timer pills */}
-      {[...timers.entries()].filter(([, t]) => t.running || t.remaining === 0).length > 0 && (
+      {[...timers.entries()].filter(([, ts]) => ts.running || ts.remaining === 0).length > 0 && (
         <div className="absolute top-14 right-3 z-20 flex flex-col gap-1.5">
           {[...timers.entries()]
-            .filter(([, t]) => t.running || t.remaining === 0)
-            .map(([idx, t]) => (
+            .filter(([, ts]) => ts.running || ts.remaining === 0)
+            .map(([idx, ts]) => (
               <button
                 key={idx}
-                onClick={() => t.remaining === 0 ? resetTimer(idx) : toggleTimer(idx)}
+                onClick={() => ts.remaining === 0 ? resetTimer(idx) : toggleTimer(idx)}
                 className={`font-label text-xs tracking-wider px-3 py-1.5 rounded-full transition-all ${
-                  t.remaining === 0 ? 'animate-pulse' : ''
+                  ts.remaining === 0 ? 'animate-pulse' : ''
                 }`}
                 style={{
-                  background: t.remaining === 0 ? 'var(--color-terracotta)' : 'rgba(212,112,63,0.85)',
+                  background: ts.remaining === 0 ? 'var(--color-terracotta)' : 'rgba(212,112,63,0.85)',
                   color: '#fff',
                   backdropFilter: 'blur(8px)',
                 }}
-                aria-label={t.remaining === 0 ? `Reset timer for step ${idx + 1}` : `Timer for step ${idx + 1}`}
-                data-testid={t.remaining === 0 ? `cook-timer-reset-${idx}` : `timer-pill-${idx}`}
+                aria-label={ts.remaining === 0 ? `Reset timer for step ${idx + 1}` : `Timer for step ${idx + 1}`}
+                data-testid={ts.remaining === 0 ? `cook-timer-reset-${idx}` : `timer-pill-${idx}`}
               >
-                {t.remaining === 0 ? `Paso ${idx + 1} — Reiniciar` : `Paso ${idx + 1} — ${formatSeconds(t.remaining)}`}
+                {ts.remaining === 0 ? t.cookTimerPillDone(idx + 1) : t.cookTimerPillRunning(idx + 1, formatSeconds(ts.remaining))}
               </button>
             ))}
         </div>
@@ -384,10 +386,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               style={{ color: 'var(--text-3)' }}
               data-testid="cook-exit-btn"
             >
-              ← Salir
+              {t.cookExitBtn}
             </Link>
             <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-3)' }}>
-              Paso {currentIndex + 1} de {totalSteps}
+              {t.cookStepOf(currentIndex + 1, totalSteps)}
             </span>
           </div>
 
@@ -427,7 +429,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                     className="btn-primary"
                     data-testid={`cook-timer-reset-${currentIndex}`}
                   >
-                    Reiniciar
+                    {t.cookResetTimer}
                   </button>
                 ) : (
                   <button
@@ -435,7 +437,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                     className="btn-primary"
                     data-testid="cook-timer-btn"
                   >
-                    {currentTimer.running ? 'Pausar' : 'Iniciar'}
+                    {currentTimer.running ? t.cookPauseTimer : t.cookStartTimer}
                   </button>
                 )}
               </div>
@@ -451,7 +453,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               style={{ borderColor: 'var(--border)', color: 'var(--text-2)' }}
               data-testid="cook-prev-btn"
             >
-              ← Anterior
+              {t.cookPrevBtn}
             </button>
             <button
               onClick={() => goTo(currentIndex + 1)}
@@ -459,7 +461,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
               style={{ color: currentIndex === totalSteps - 1 ? 'var(--color-terracotta)' : 'var(--text-2)' }}
               data-testid="cook-next-btn"
             >
-              {currentIndex === totalSteps - 1 ? 'Finalizar ✓' : 'Siguiente →'}
+              {currentIndex === totalSteps - 1 ? t.cookFinishBtn : t.cookNextBtn}
             </button>
           </div>
         </div>
@@ -467,7 +469,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         {/* Right: ingredients (40%) */}
         <div className="flex-[2] flex flex-col h-full overflow-y-auto px-6 py-6">
           <h2 className="section-label mb-5" style={{ color: 'var(--text-3)' }}>
-            Ingredientes
+            {t.cookIngredients}
           </h2>
           <ul className="space-y-3">
             {displayedIngredients.map((ing, i) => (
@@ -524,10 +526,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             style={{ color: 'var(--text-3)' }}
             data-testid="cook-exit-btn-mobile"
           >
-            ← Salir
+            {t.cookExitBtn}
           </Link>
           <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-3)' }}>
-            Paso {currentIndex + 1} de {totalSteps}
+            {t.cookStepOf(currentIndex + 1, totalSteps)}
           </span>
         </div>
 
@@ -568,7 +570,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   className="btn-primary"
                   data-testid={`cook-timer-reset-${currentIndex}`}
                 >
-                  Reiniciar
+                  {t.cookResetTimer}
                 </button>
               ) : (
                 <button
@@ -576,7 +578,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   className="btn-primary"
                   data-testid="cook-timer-btn-mobile"
                 >
-                  {currentTimer.running ? 'Pausar' : 'Iniciar'}
+                  {currentTimer.running ? t.cookPauseTimer : t.cookStartTimer}
                 </button>
               )}
             </div>
@@ -596,7 +598,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             }}
             data-testid="cook-prev-btn-mobile"
           >
-            ← Anterior
+            {t.cookPrevBtn}
           </button>
           <button
             onClick={() => goTo(currentIndex + 1)}
@@ -607,7 +609,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             }}
             data-testid="cook-next-btn-mobile"
           >
-            {currentIndex === totalSteps - 1 ? 'Finalizar ✓' : 'Siguiente →'}
+            {currentIndex === totalSteps - 1 ? t.cookFinishBtn : t.cookNextBtn}
           </button>
         </div>
 
@@ -623,7 +625,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             aria-expanded={sheetOpen}
             data-testid="cook-ingredient-sheet-toggle"
           >
-            <span>Ingredientes</span>
+            <span>{t.cookIngredients}</span>
             <svg
               className={`w-4 h-4 transition-transform ${sheetOpen ? 'rotate-180' : ''}`}
               fill="none" viewBox="0 0 24 24" stroke="currentColor"
