@@ -46,8 +46,9 @@ export default function StepRow({ index, value, onChange, onRemove }: Props) {
             type="checkbox"
             checked={value.timerEnabled}
             onChange={e => set('timerEnabled', e.target.checked)}
+            aria-label="Enable timer for this step"
             className="accent-terracotta"
-            style={{ accentColor: '#D4703F' }}
+            style={{ accentColor: 'var(--color-terracotta)' }}
           />
           {t.timerLabel}
           {value.timerEnabled && (

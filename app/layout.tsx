@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Serif_JP, Barlow_Condensed, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
+import { getServerLanguage } from '@/lib/i18n-server';
 
 const notoSerifJP = Noto_Serif_JP({
   subsets: ['latin'],
@@ -28,10 +29,16 @@ export const metadata: Metadata = {
   description: 'Personal recipe manager',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let lang: string = 'en';
+  try {
+    lang = await getServerLanguage();
+  } catch {
+    lang = 'en';
+  }
   return (
     <html
-      lang="es"
+      lang={lang}
       className={`${notoSerifJP.variable} ${barlowCondensed.variable} ${cormorantGaramond.variable}`}
     >
       <body className="min-h-screen">{children}</body>

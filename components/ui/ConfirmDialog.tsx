@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface Props {
   open: boolean;
@@ -23,6 +24,9 @@ export default function ConfirmDialog({
   onConfirm,
   onCancel,
 }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onCancel);
+
   if (!open) return null;
 
   return (
@@ -34,12 +38,14 @@ export default function ConfirmDialog({
     >
       <div
         className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.65)' }}
+        style={{ background: 'oklch(0 0 0 / 0.65)' }}
         onClick={onCancel}
         aria-hidden="true"
       />
 
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="relative rounded-2xl p-6 w-full max-w-sm animate-scale-in"
         style={{
           background: 'var(--bg-card)',

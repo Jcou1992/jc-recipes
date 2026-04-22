@@ -34,9 +34,26 @@ export default function RecipeDetailClient({ recipe }: Props) {
     } catch {}
   }, []);
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`recipe-servings:${recipe.id}`);
+      if (stored !== null) {
+        const parsed = parseInt(stored, 10);
+        if (Number.isFinite(parsed) && parsed >= 1) {
+          setTargetServings(parsed);
+        }
+      }
+    } catch {}
+  }, [recipe.id]);
+
   function toggleUnitSystem(next: UnitSystem) {
     setUnitSystem(next);
     try { localStorage.setItem('preferred-unit-system', next); } catch {}
+  }
+
+  function updateTargetServings(next: number) {
+    setTargetServings(next);
+    try { localStorage.setItem(`recipe-servings:${recipe.id}`, String(next)); } catch {}
   }
 
   function handleExportMd() {
@@ -60,15 +77,37 @@ export default function RecipeDetailClient({ recipe }: Props) {
 
   return (
     <div>
-      {/* Meta strip */}
+      {/* Times micro-row */}
+      {(recipe.prep_time != null || recipe.cook_time != null || totalTime > 0) && (
+        <div className="flex flex-wrap gap-x-5 gap-y-1 mb-4" data-testid="recipe-times">
+          {recipe.prep_time != null && (
+            <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
+              {t.prepLabel} {formatTime(recipe.prep_time)}
+            </span>
+          )}
+          {recipe.cook_time != null && (
+            <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
+              {t.cookLabel} {formatTime(recipe.cook_time)}
+            </span>
+          )}
+          {totalTime > 0 && recipe.prep_time != null && recipe.cook_time != null && (
+            <span className="font-label text-sm tracking-wide font-semibold" style={{ color: 'var(--text-1)' }}>
+              {t.totalLabel} {formatTime(totalTime)}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Service bar */}
       <div
-        className="flex flex-wrap gap-x-6 gap-y-3 mb-6 pb-6"
+        className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-6 pb-6"
         style={{ borderBottom: '1px solid var(--border)' }}
+        data-testid="service-bar"
       >
         {/* Serving scaler */}
         <div className="flex items-center gap-2" data-testid="serving-scaler">
           <button
-            onClick={() => setTargetServings(s => Math.max(1, s - 1))}
+            onClick={() => updateTargetServings(Math.max(1, targetServings - 1))}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
             aria-label={t.decreaseServings}
@@ -84,7 +123,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             {t.servingScalerLabel(targetServings)}
           </span>
           <button
-            onClick={() => setTargetServings(s => s + 1)}
+            onClick={() => updateTargetServings(targetServings + 1)}
             className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full transition-colors font-label font-bold text-lg"
             style={{ background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }}
             aria-label={t.increaseServings}
@@ -94,12 +133,12 @@ export default function RecipeDetailClient({ recipe }: Props) {
           </button>
           {isScaled && (
             <button
-              onClick={() => setTargetServings(recipe.servings)}
+              onClick={() => updateTargetServings(recipe.servings)}
               className="font-label text-xs tracking-wider uppercase px-2 py-0.5 rounded-full transition-colors"
               style={{
-                background: 'rgba(212,112,63,0.12)',
+                background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
                 color: 'var(--color-terracotta)',
-                border: '1px solid rgba(212,112,63,0.25)',
+                border: '1px solid color-mix(in oklch, var(--color-terracotta) 25%, transparent)',
               }}
               aria-label={t.resetServingsAriaLabel}
               data-testid="scaler-scaled-badge"
@@ -112,41 +151,6 @@ export default function RecipeDetailClient({ recipe }: Props) {
           )}
         </div>
 
-        {/* Time info */}
-        {recipe.prep_time != null && (
-          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-            {t.prepLabel} {formatTime(recipe.prep_time)}
-          </span>
-        )}
-        {recipe.cook_time != null && (
-          <span className="font-label text-sm tracking-wide" style={{ color: 'var(--text-2)' }}>
-            {t.cookLabel} {formatTime(recipe.cook_time)}
-          </span>
-        )}
-        {totalTime > 0 && recipe.prep_time != null && recipe.cook_time != null && (
-          <span className="font-label text-sm tracking-wide font-semibold" style={{ color: 'var(--text-1)' }}>
-            {t.totalLabel} {formatTime(totalTime)}
-          </span>
-        )}
-
-        {/* Export buttons */}
-        <div className="flex items-center gap-1 ml-auto">
-          <button
-            onClick={handleExportMd}
-            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
-            data-testid="recipe-export-md"
-          >
-            MD
-          </button>
-          <button
-            onClick={handleExportPdf}
-            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
-            data-testid="recipe-export-pdf"
-          >
-            PDF
-          </button>
-        </div>
-
         {/* Unit toggle */}
         <div
           className="flex items-center rounded-lg overflow-hidden"
@@ -157,9 +161,9 @@ export default function RecipeDetailClient({ recipe }: Props) {
             <button
               key={sys}
               onClick={() => toggleUnitSystem(sys)}
-              className="font-label text-xs tracking-wider uppercase px-3 min-h-[36px] transition-all capitalize"
+              className="font-label text-xs tracking-wider uppercase px-3 min-h-[44px] transition-all capitalize"
               style={unitSystem === sys
-                ? { background: 'var(--color-terracotta)', color: '#fff' }
+                ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)' }
                 : { background: 'transparent', color: 'var(--text-2)' }
               }
               aria-pressed={unitSystem === sys}
@@ -168,6 +172,24 @@ export default function RecipeDetailClient({ recipe }: Props) {
               {sys === 'metric' ? t.metricLabel : t.imperialLabel}
             </button>
           ))}
+        </div>
+
+        {/* Admin export group */}
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            onClick={handleExportMd}
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg"
+            data-testid="recipe-export-md"
+          >
+            Markdown
+          </button>
+          <button
+            onClick={handleExportPdf}
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg"
+            data-testid="recipe-export-pdf"
+          >
+            Print / PDF
+          </button>
         </div>
       </div>
 
@@ -247,8 +269,8 @@ export default function RecipeDetailClient({ recipe }: Props) {
                         className="font-label flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-base font-semibold"
                         style={{
                           color: 'var(--color-gold)',
-                          background: 'rgba(237,209,142,0.08)',
-                          border: '1px solid rgba(237,209,142,0.18)',
+                          background: 'color-mix(in oklch, var(--color-gold) 14%, transparent)',
+                          border: '1px solid color-mix(in oklch, var(--color-gold) 32%, transparent)',
                           minWidth: '2.25rem',
                         }}
                       >

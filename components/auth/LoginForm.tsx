@@ -12,10 +12,11 @@ export default function LoginForm() {
     <form action={action} className="space-y-4">
       {state?.error && (
         <p
-          className="bg-red-50 font-label text-xs tracking-wide px-3 py-2.5 rounded-lg"
+          role="alert"
+          className="font-label text-xs tracking-wide uppercase px-3 py-2.5 rounded-lg"
           style={{
-            background: 'rgba(212,112,63,0.1)',
-            border: '1px solid rgba(212,112,63,0.3)',
+            background: 'color-mix(in oklch, var(--color-terracotta) 10%, transparent)',
+            border: '1px solid color-mix(in oklch, var(--color-terracotta) 30%, transparent)',
             color: 'var(--color-terracotta)',
           }}
         >
@@ -37,7 +38,7 @@ export default function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          placeholder="tu@email.com"
+          placeholder="you@email.com"
           className="input-base"
         />
       </div>
@@ -64,9 +65,10 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className="btn-primary w-full mt-2"
       >
-        {pending ? 'Accediendo…' : 'Sign in'}
+        {pending ? 'Signing in…' : 'Sign in'}
       </button>
     </form>
   );

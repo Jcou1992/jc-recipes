@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { parseRecipeMarkdown } from '@/lib/utils/parse-recipe-markdown';
 import type { ParsedRecipe } from '@/lib/utils/parse-recipe-markdown';
+import { useToast } from '@/components/ui/ToastContext';
 
 // ── Lightweight markdown → HTML preview ──────────────────────────────────────
 
@@ -89,7 +90,9 @@ interface Props {
 
 export default function MarkdownImport({ onImport }: Props) {
   const [markdown, setMarkdown] = useState('');
+  const [parseError, setParseError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -99,10 +102,27 @@ export default function MarkdownImport({ onImport }: Props) {
       return;
     }
     const reader = new FileReader();
-    reader.onload = evt => setMarkdown((evt.target?.result as string) ?? '');
-    reader.onerror = () => { window.alert('Failed to read file.'); };
+    reader.onload = evt => {
+      setMarkdown((evt.target?.result as string) ?? '');
+      setParseError(null);
+    };
+    reader.onerror = () => { showToast('Could not read that file. Try copy/paste instead.', 'error'); };
     reader.readAsText(file);
     e.target.value = '';
+  }
+
+  function handleImport() {
+    const parsed = parseRecipeMarkdown(markdown);
+    if (!parsed.title.trim()) {
+      setParseError('Add a title with "# Recipe name" on the first line.');
+      return;
+    }
+    if (parsed.ingredients.length === 0 && parsed.steps.length === 0) {
+      setParseError('No ingredients or steps found. Check the section headings ("## Ingredients", "## Steps").');
+      return;
+    }
+    setParseError(null);
+    onImport(parsed);
   }
 
   const previewHtml = useMemo(() => markdownToHtml(markdown), [markdown]);
@@ -113,6 +133,7 @@ export default function MarkdownImport({ onImport }: Props) {
         {/* Editor */}
         <div className="flex-1 flex flex-col">
           <label
+            htmlFor="markdown-input"
             className="font-label block text-xs tracking-widest uppercase mb-1.5"
             style={{ color: 'var(--text-3)' }}
           >
@@ -124,29 +145,37 @@ export default function MarkdownImport({ onImport }: Props) {
               type="file"
               accept=".md,.txt"
               className="sr-only"
+              aria-label="Upload Markdown file"
               data-testid="md-file-upload-input"
               onChange={handleFileSelect}
             />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[36px] rounded-lg"
+              className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg"
               data-testid="md-file-upload-btn"
             >
               Upload .md file
             </button>
           </div>
           <textarea
+            id="markdown-input"
             data-testid="markdown-input"
             value={markdown}
-            onChange={e => setMarkdown(e.target.value)}
+            onChange={e => {
+              setMarkdown(e.target.value);
+              if (parseError) setParseError(null);
+            }}
             placeholder={PLACEHOLDER}
+            aria-label="Paste recipe in Markdown"
             className="flex-1 min-h-96 w-full rounded-lg px-3 py-2.5 font-mono text-sm resize-none focus:outline-none"
             style={{
               background: 'var(--bg-input)',
               border: '1px solid var(--border-input)',
               color: 'var(--text-1)',
             }}
+            aria-invalid={parseError ? true : undefined}
+            aria-describedby={parseError ? 'markdown-parse-error' : undefined}
           />
         </div>
 
@@ -172,11 +201,23 @@ export default function MarkdownImport({ onImport }: Props) {
         </div>
       </div>
 
+      {parseError && (
+        <p
+          id="markdown-parse-error"
+          role="alert"
+          className="font-body text-sm"
+          style={{ color: 'var(--color-terracotta)' }}
+          data-testid="markdown-parse-error"
+        >
+          {parseError}
+        </p>
+      )}
+
       <div className="flex justify-end">
         <button
           type="button"
           data-testid="import-button"
-          onClick={() => onImport(parseRecipeMarkdown(markdown))}
+          onClick={handleImport}
           disabled={!markdown.trim()}
           className="btn-primary w-full sm:w-auto"
         >

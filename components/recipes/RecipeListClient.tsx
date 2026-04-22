@@ -4,34 +4,11 @@ import { useMemo, useState, useRef, useEffect, useTransition, useCallback } from
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import RecipeCard from './RecipeCard';
 import BulkActionBar from './BulkActionBar';
+import FilterPanel from './FilterPanel';
+import FilterPopover from './FilterPopover';
 import { useT } from '@/components/ui/LanguageContext';
+import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut';
 import type { Recipe } from '@/types/recipe';
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function IconSearch({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <svg className={className} style={style} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  );
-}
-
-function IconChevronDown({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  );
-}
-
-function IconX({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
 
 function normalise(s: string) {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
@@ -48,15 +25,8 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const t = useT();
-
-  const sortLabels: Record<SortKey, string> = {
-    newest: t.sortNewest,
-    az: t.sortAz,
-    fastest: t.sortFastest,
-    'most-ingredients': t.sortMostIngredients,
-  };
 
   const q = searchParams.get('q') ?? '';
   const activeTags = useMemo(() => {
@@ -67,23 +37,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   const [searchInput, setSearchInput] = useState(q);
   const [tagSearch, setTagSearch] = useState('');
-  const [tagSearchOpen, setTagSearchOpen] = useState(false);
-  const [showSortSheet, setShowSortSheet] = useState(false);
   const [showFilterSheet, setShowFilterSheet] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tagSearchRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!tagSearchOpen) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (tagSearchRef.current && !tagSearchRef.current.contains(e.target as Node)) {
-        setTagSearch('');
-        setTagSearchOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [tagSearchOpen]);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const desktopFilterBtnRef = useRef<HTMLButtonElement>(null);
 
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -134,7 +91,6 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   function clearFilters() {
     setSearchInput('');
     setTagSearch('');
-    setTagSearchOpen(false);
     startTransition(() => { router.replace(pathname, { scroll: false }); });
   }
 
@@ -171,6 +127,24 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   }, [recipes, hiddenIds, q, activeTags, sort]);
 
   const hasFilters = !!(q || activeTags.length > 0 || sort !== 'newest');
+  const panelHasFilters = activeTags.length > 0 || sort !== 'newest';
+
+  useKeyboardShortcut('/', () => {
+    searchInputRef.current?.focus();
+    searchInputRef.current?.select();
+  });
+  useKeyboardShortcut('f', () => {
+    if (allTags.length === 0 && sort === 'newest') return;
+    setShowFilterSheet(v => !v);
+  });
+  useKeyboardShortcut(
+    'Escape',
+    () => {
+      if (showFilterSheet) setShowFilterSheet(false);
+      if (hasFilters) clearFilters();
+    },
+    { ignoreInInputs: false },
+  );
 
   const enterSelectMode = useCallback(() => {
     setSelectMode(true);
@@ -245,12 +219,42 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
     [recipes, selectedIds],
   );
 
+  // Shared FilterPanel handlers.
+  const handleSortChange = useCallback(
+    (k: SortKey) => { updateParams({ sort: k }); },
+    // updateParams is stable enough in this context (closure over router/params).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [searchParams, pathname],
+  );
+  const handleDone = useCallback(() => setShowFilterSheet(false), []);
+  const handleClear = useCallback(() => {
+    clearFilters();
+    setShowFilterSheet(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
+
+  const panel = (
+    <FilterPanel
+      sort={sort}
+      allTags={allTags}
+      activeTags={activeTags}
+      tagSearch={tagSearch}
+      hasFilters={panelHasFilters}
+      onSortChange={handleSortChange}
+      onToggleTag={toggleTag}
+      onTagSearchChange={setTagSearch}
+      onDone={handleDone}
+      onClear={handleClear}
+    />
+  );
+
   return (
     <div className={selectMode && selectedCount > 0 ? 'pb-24' : ''}>
       {/* Search bar + Select button */}
       <div className="flex items-center gap-2 mb-4">
         <div className="relative flex-1">
           <input
+            ref={searchInputRef}
             type="search"
             value={searchInput}
             onChange={e => handleSearchChange(e.target.value)}
@@ -286,7 +290,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           onClick={selectMode ? exitSelectMode : enterSelectMode}
           className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-4 rounded-full min-h-[44px] flex items-center gap-1.5 transition-all"
           style={selectMode
-            ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+            ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
             : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
           }
           data-testid={selectMode ? 'select-mode-exit' : 'select-mode-enter'}
@@ -294,6 +298,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           {selectMode ? t.doneSelectBtn : t.selectBtn}
         </button>
       </div>
+
+      <p className="hidden sm:block font-label text-xs tracking-widest uppercase mb-4" style={{ color: 'var(--text-3)' }}>
+        {t.shortcutHint}
+      </p>
 
       {/* Select-all + hint row */}
       {selectMode && filtered.length > 0 && (
@@ -327,74 +335,65 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         </div>
       )}
 
-      {/* Desktop: sort select + filter button */}
-      {(allTags.length > 0 || sort !== 'newest') && (
-        <>
-        <div className="hidden sm:flex items-center gap-3 mb-3">
-          <div className="relative flex-shrink-0">
-            <select
-              value={sort}
-              onChange={e => updateParams({ sort: e.target.value as SortKey })}
-              className="font-label text-xs tracking-wider uppercase appearance-none pl-3 pr-8 rounded-full min-h-[36px] transition-all cursor-pointer"
-              style={sort !== 'newest'
-                ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
-                : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-              }
-              aria-label="Sort recipes"
-              data-testid="sort-select"
-            >
-              {(Object.keys(sortLabels) as SortKey[]).map(k => (
-                <option key={k} value={k} data-testid={`sort-option-${k}`}>{sortLabels[k]}</option>
-              ))}
-            </select>
-            <IconChevronDown
-              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3"
-            />
-          </div>
-
-          {allTags.length > 0 && (
+      {/* Desktop: single Filter button + popover */}
+      {allTags.length > 0 && (
+        <div className="hidden sm:block mb-3">
+          <div className="relative inline-block">
             <button
+              ref={desktopFilterBtnRef}
               type="button"
-              onClick={() => setShowFilterSheet(true)}
+              onClick={() => setShowFilterSheet(v => !v)}
               className="flex-shrink-0 flex items-center gap-2 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] transition-all"
-              style={activeTags.length > 0
-                ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+              style={panelHasFilters
+                ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
                 : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
               }
               aria-expanded={showFilterSheet}
+              aria-haspopup="dialog"
               data-testid="filter-desktop-btn"
             >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h2" />
+              </svg>
               {t.filterBtn}
-              {activeTags.length > 0 && (
+              {panelHasFilters && (
                 <span
                   className="font-label text-xs rounded-full w-5 h-5 flex items-center justify-center"
-                  style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
+                  style={{ background: 'oklch(100% 0 0 / 0.25)', color: '#fff' }}
                 >
-                  {activeTags.length}
+                  {activeTags.length + (sort !== 'newest' ? 1 : 0)}
                 </span>
               )}
             </button>
-          )}
-        </div>
-
-        {activeTags.length > 0 && (
-          <div className="hidden sm:flex flex-wrap gap-2 mb-4">
-            {activeTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className="flex items-center gap-1.5 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[32px] transition-all"
-                style={{ background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }}
-                aria-pressed={true}
-                data-testid={`tag-filter-${tag}`}
-              >
-                {tag}
-                <IconX className="w-3 h-3" />
-              </button>
-            ))}
+            <FilterPopover
+              open={showFilterSheet}
+              onClose={() => setShowFilterSheet(false)}
+              anchorRef={desktopFilterBtnRef}
+            >
+              {panel}
+            </FilterPopover>
           </div>
-        )}
-        </>
+        </div>
+      )}
+
+      {/* Desktop: active-tag chip strip (no X icon, whole chip dismisses) */}
+      {activeTags.length > 0 && (
+        <div className="hidden sm:flex flex-wrap gap-2 mb-4">
+          {activeTags.map(tag => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => toggleTag(tag)}
+              className="font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[32px] flex items-center transition-all"
+              style={{ background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }}
+              aria-pressed={true}
+              aria-label={`Remove tag: ${tag}`}
+              data-testid={`tag-filter-${tag}`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
       )}
 
       {/* Mobile: Filter button + active-tag strip */}
@@ -406,8 +405,8 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
               onClick={() => setShowFilterSheet(true)}
               className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-4 rounded-full min-h-[44px] flex items-center gap-1.5 transition-all"
               style={
-                activeTags.length > 0 || sort !== 'newest'
-                  ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                panelHasFilters
+                  ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
                   : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
               }
               aria-label="Open filter and sort options"
@@ -418,10 +417,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h2" />
               </svg>
               {t.filterBtn}
-              {(activeTags.length > 0 || sort !== 'newest') && (
+              {panelHasFilters && (
                 <span
                   className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
-                  style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}
+                  style={{ background: 'oklch(100% 0 0 / 0.25)', color: '#fff' }}
                   aria-label={`${activeTags.length + (sort !== 'newest' ? 1 : 0)} active filters`}
                 >
                   {activeTags.length + (sort !== 'newest' ? 1 : 0)}
@@ -434,171 +433,52 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         {activeTags.length > 0 && (
           <div
             className="flex gap-2 overflow-x-auto pt-3 pb-1"
-            style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none' } as React.CSSProperties}
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+              maskImage: 'linear-gradient(to right, black 92%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, black 92%, transparent)',
+            } as React.CSSProperties}
           >
             {activeTags.map(tag => (
               <button
                 key={tag}
+                type="button"
                 onClick={() => toggleTag(tag)}
-                className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] flex items-center gap-1.5 transition-all"
-                style={{ background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }}
+                className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[44px] flex items-center transition-all"
+                style={{ background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }}
                 aria-pressed={true}
+                aria-label={`Remove tag: ${tag}`}
                 data-testid={`tag-filter-${tag}`}
               >
                 {tag}
-                <IconX className="w-3 h-3 opacity-70" />
               </button>
             ))}
           </div>
         )}
       </div>
 
-      {/* Filter bottom sheet */}
+      {/* Mobile bottom sheet */}
       {showFilterSheet && (
-        <>
+        <div className="sm:hidden">
           <div
             className="fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.5)' }}
+            style={{ background: 'oklch(0 0 0 / 0.5)' }}
             onClick={() => setShowFilterSheet(false)}
           />
           <div
             className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
             style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-dialog)', maxHeight: '85svh', display: 'flex', flexDirection: 'column' }}
             role="dialog"
+            aria-modal="true"
             aria-label="Filter and sort options"
+            data-testid="filter-sheet"
           >
-            <div className="flex-shrink-0 pt-4 pb-2 flex justify-center">
-              <div className="w-10 h-1 rounded-full" style={{ background: 'var(--border)' }} />
-            </div>
-
-            <div className="overflow-y-auto px-6 pb-8 flex flex-col gap-6">
-              <div>
-                <p className="font-label text-xs tracking-widest uppercase mb-3" style={{ color: 'var(--text-3)' }}>
-                  {t.sortByLabel}
-                </p>
-                <div className="flex flex-col gap-1">
-                  {(Object.keys(sortLabels) as SortKey[]).map(k => (
-                    <button
-                      key={k}
-                      onClick={() => { updateParams({ sort: k }); }}
-                      className="text-left font-body text-base px-4 py-3 rounded-xl min-h-[48px] transition-all"
-                      style={sort === k
-                        ? { background: 'rgba(212,112,63,0.1)', color: 'var(--color-terracotta)' }
-                        : { color: 'var(--text-1)' }
-                      }
-                      data-testid={`sort-option-${k}`}
-                    >
-                      {sortLabels[k]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {allTags.length > 0 && (
-                <div>
-                  <p className="font-label text-xs tracking-widest uppercase mb-3" style={{ color: 'var(--text-3)' }}>
-                    {t.filterByTagLabel}
-                  </p>
-                  <div className="relative mb-3">
-                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-3)' } as React.CSSProperties} />
-                    <input
-                      type="search"
-                      value={tagSearch}
-                      onChange={e => setTagSearch(e.target.value)}
-                      placeholder={t.searchTagsPlaceholder}
-                      className="w-full pl-9 pr-3 py-2 rounded-full text-sm font-label tracking-wide"
-                      style={{ background: 'var(--bg-raised)', border: '1px solid var(--border-input)', color: 'var(--text-1)', outline: 'none' }}
-                      aria-label={t.searchTagsAriaLabel}
-                      data-testid="tag-search"
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {allTags.filter(tag => normalise(tag).includes(normalise(tagSearch))).length === 0 ? (
-                      <p className="font-label text-xs tracking-wide py-2" style={{ color: 'var(--text-3)' }}>{t.noTagsFound}</p>
-                    ) : (
-                      allTags.filter(tag => normalise(tag).includes(normalise(tagSearch))).map(tag => {
-                        const active = activeTags.includes(tag);
-                        return (
-                          <button
-                            key={tag}
-                            onClick={() => toggleTag(tag)}
-                            className="font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[40px] flex items-center transition-all"
-                            style={active
-                              ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
-                              : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-                            }
-                            aria-pressed={active}
-                            data-testid={`tag-filter-${tag}`}
-                          >
-                            {tag}
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowFilterSheet(false)}
-                  className="btn-primary flex-1"
-                >
-                  {t.doneFilterBtn}
-                </button>
-                {(activeTags.length > 0 || sort !== 'newest') && (
-                  <button
-                    type="button"
-                    onClick={() => { clearFilters(); setShowFilterSheet(false); }}
-                    className="btn-ghost"
-                    data-testid="clear-filters-btn-sheet"
-                  >
-                    {t.clearFilterBtn}
-                  </button>
-                )}
-              </div>
+            <div className="overflow-y-auto px-6 pt-6 pb-8">
+              {panel}
             </div>
           </div>
-        </>
-      )}
-
-      {/* Sort bottom sheet (mobile) — kept for data-testid compatibility */}
-      {showSortSheet && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.5)' }}
-            onClick={() => setShowSortSheet(false)}
-          />
-          <div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl p-6"
-            style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-dialog)' }}
-            role="dialog"
-            aria-label="Sort options"
-          >
-            <div className="w-10 h-1 rounded-full mx-auto mb-6" style={{ background: 'var(--border)' }} />
-            <p className="font-label text-xs tracking-widest uppercase mb-4" style={{ color: 'var(--text-3)' }}>
-              {t.sortByLabel}
-            </p>
-            <div className="flex flex-col gap-2">
-              {(Object.keys(sortLabels) as SortKey[]).map(k => (
-                <button
-                  key={k}
-                  onClick={() => { updateParams({ sort: k }); setShowSortSheet(false); }}
-                  className="text-left font-body text-base px-4 py-3 rounded-xl min-h-[48px] transition-all"
-                  style={sort === k
-                    ? { background: 'rgba(212,112,63,0.1)', color: 'var(--color-terracotta)' }
-                    : { color: 'var(--text-1)' }
-                  }
-                  data-testid={`sort-option-${k}`}
-                >
-                  {sortLabels[k]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
+        </div>
       )}
 
       {/* Results */}
@@ -609,9 +489,16 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           </p>
           {hasFilters && (
             <>
-              <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
-                {t.tryDifferentTags}
-              </p>
+              {(q || activeTags.length > 0) && (
+                <p className="font-label text-xs tracking-wide mb-2" style={{ color: 'var(--text-3)' }}>
+                  {`No match for "${q}"${activeTags.length ? ` with tags [${activeTags.join(', ')}]` : ''}`}
+                </p>
+              )}
+              {(!q && activeTags.length === 0) && (
+                <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
+                  {t.tryDifferentTags}
+                </p>
+              )}
               <button onClick={clearFilters} className="btn-ghost" data-testid="clear-filters-btn">
                 {t.clearFiltersBtn}
               </button>
@@ -619,7 +506,11 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 transition-opacity"
+          style={{ opacity: isPending ? 0.6 : 1 }}
+          aria-busy={isPending}
+        >
           {filtered.map((recipe, index) => (
             <div
               key={recipe.id}
@@ -648,6 +539,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           onOptimisticRestore={handleOptimisticRestore}
         />
       )}
+
     </div>
   );
 }

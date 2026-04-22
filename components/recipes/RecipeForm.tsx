@@ -8,6 +8,7 @@ import { parseTimeToMinutes } from '@/lib/utils/parse-recipe-markdown';
 import { useUnsavedChanges } from '@/lib/hooks/useUnsavedChanges';
 import { useToast } from '@/components/ui/ToastContext';
 import { useT } from '@/components/ui/LanguageContext';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Recipe, RecipePayload, Ingredient, Step } from '@/types/recipe';
 import type { ActionResult } from '@/app/actions/recipes';
 
@@ -97,6 +98,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   const [fieldErrors, setFieldErrors] = useState<{ name?: string; ingredients?: string }>({});
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
   const activeSteps = stepEntries.filter(e => !e.deletedAt);
@@ -248,7 +250,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" aria-busy={loading}>
       {/* Name */}
       <div>
         <label
@@ -326,11 +328,11 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 <div
                   key={i}
                   className="rounded overflow-hidden"
-                  style={{ border: '1px dashed rgba(212,112,63,0.3)' }}
+                  style={{ border: '1px dashed color-mix(in oklch, var(--color-terracotta) 30%, transparent)' }}
                 >
                   <div
                     className="flex items-center gap-2 px-2 py-1"
-                    style={{ background: 'rgba(212,112,63,0.07)' }}
+                    style={{ background: 'color-mix(in oklch, var(--color-terracotta) 7%, transparent)' }}
                   >
                     <span
                       className="font-label text-xs tracking-widest uppercase"
@@ -396,11 +398,11 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
                 <div
                   key={i}
                   className="rounded overflow-hidden"
-                  style={{ border: '1px dashed rgba(212,112,63,0.3)' }}
+                  style={{ border: '1px dashed color-mix(in oklch, var(--color-terracotta) 30%, transparent)' }}
                 >
                   <div
                     className="flex items-center gap-2 px-2 py-1"
-                    style={{ background: 'rgba(212,112,63,0.07)' }}
+                    style={{ background: 'color-mix(in oklch, var(--color-terracotta) 7%, transparent)' }}
                   >
                     <span
                       className="font-label text-xs tracking-widest uppercase"
@@ -443,10 +445,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           <span className="group-open:rotate-90 transition-transform inline-block">›</span>
           {t.optionalFields}
         </summary>
-        <div
-          className="mt-4 space-y-4 pl-4"
-          style={{ borderLeft: '2px solid var(--border)' }}
-        >
+        <div className="mt-4 space-y-4 pl-4">
           <div>
             <label
               className="font-label block text-xs tracking-widest uppercase mb-1.5"
@@ -548,8 +547,8 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
         <button
           type="button"
           onClick={() => {
-            if (isDirty && !window.confirm(t.unsavedChangesWarning)) return;
-            router.back();
+            if (isDirty) setShowCancelConfirm(true);
+            else router.back();
           }}
           className="btn-ghost"
         >
@@ -565,6 +564,33 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
           </span>
         )}
       </div>
+
+      {loading && (
+        <div
+          className="h-[2px] rounded overflow-hidden"
+          style={{ background: 'color-mix(in oklch, var(--color-terracotta) 20%, transparent)' }}
+          aria-hidden="true"
+          data-testid="form-save-progress"
+        >
+          <div
+            className="h-full animate-pulse"
+            style={{ width: '40%', background: 'var(--color-terracotta)' }}
+          />
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={showCancelConfirm}
+        title="Discard changes"
+        description={t.unsavedChangesWarning}
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          router.back();
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </form>
   );
 }

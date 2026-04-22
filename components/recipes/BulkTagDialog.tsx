@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useRef, useState, useTransition } from 'react';
 import { bulkUpdateTags } from '@/app/actions/bulk-recipes';
 import { useToast } from '@/components/ui/ToastContext';
 import { useT } from '@/components/ui/LanguageContext';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { Recipe } from '@/types/recipe';
 
 interface Props {
@@ -34,10 +35,16 @@ export default function BulkTagDialog({
     return first.filter(t => selectedRecipes.every(r => (r.tags ?? []).includes(t)));
   }, [selectedRecipes]);
 
-  const suggestable = useMemo(
-    () => allTags.filter(t => !addTags.includes(t)),
-    [allTags, addTags],
-  );
+  const query = newTagInput.trim().toLowerCase();
+
+  const suggestable = useMemo(() => {
+    const pool = allTags.filter(t => !addTags.includes(t));
+    if (!query) return pool;
+    return pool.filter(t => t.toLowerCase().includes(query));
+  }, [allTags, addTags, query]);
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
 
   if (!open) return null;
 
@@ -69,7 +76,8 @@ export default function BulkTagDialog({
     startTransition(async () => {
       const result = await bulkUpdateTags(ids, addTags, removeTags);
       if (result.succeeded.length === 0) {
-        showToast(`Error: ${result.failed[0]?.error ?? 'Unknown'}`, 'error');
+        const reason = result.failed[0]?.error ?? 'Check your connection and try again';
+        showToast(`Couldn't update tags. ${reason}`, 'error');
         return;
       }
       if (result.failed.length > 0) {
@@ -98,12 +106,14 @@ export default function BulkTagDialog({
     >
       <div
         className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.65)' }}
+        style={{ background: 'oklch(0 0 0 / 0.65)' }}
         onClick={handleClose}
         aria-hidden="true"
       />
 
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         className="relative rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto animate-scale-in"
         style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-dialog)' }}
         data-testid="bulk-tag-dialog"
@@ -133,6 +143,7 @@ export default function BulkTagDialog({
                 }
               }}
               placeholder={t.bulkTagNewPlaceholder}
+              aria-label="Filter or add tag"
               className="input-base flex-1 text-sm"
               data-testid="bulk-tag-new-input"
             />
@@ -145,7 +156,7 @@ export default function BulkTagDialog({
               {t.bulkTagAddBtn}
             </button>
           </div>
-          {suggestable.length > 0 && (
+          {suggestable.length > 0 ? (
             <div className="flex flex-wrap gap-1.5">
               {suggestable.map(tag => {
                 const active = addTags.includes(tag);
@@ -156,7 +167,7 @@ export default function BulkTagDialog({
                     onClick={() => toggleAdd(tag)}
                     className="font-label text-xs tracking-wider uppercase px-2.5 py-1 rounded-full transition-all"
                     style={active
-                      ? { background: 'var(--color-gold)', color: '#fff', border: '1px solid var(--color-gold)' }
+                      ? { background: 'var(--color-gold)', color: 'var(--color-ink)', border: '1px solid var(--color-gold)' }
                       : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
                     }
                     aria-pressed={active}
@@ -167,7 +178,11 @@ export default function BulkTagDialog({
                 );
               })}
             </div>
-          )}
+          ) : query ? (
+            <p className="font-body text-xs italic" style={{ color: 'var(--text-3)' }}>
+              No match. Press Enter to create &ldquo;{newTagInput.trim()}&rdquo;.
+            </p>
+          ) : null}
           {addTags.filter(tag => !allTags.includes(tag)).length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {addTags
@@ -176,7 +191,7 @@ export default function BulkTagDialog({
                   <span
                     key={tag}
                     className="font-label text-xs tracking-wider uppercase px-2.5 py-1 rounded-full"
-                    style={{ background: 'var(--color-gold)', color: '#fff', border: '1px solid var(--color-gold)' }}
+                    style={{ background: 'var(--color-gold)', color: 'var(--color-ink)', border: '1px solid var(--color-gold)' }}
                   >
                     + {tag}
                   </span>
@@ -201,7 +216,7 @@ export default function BulkTagDialog({
                     onClick={() => toggleRemove(tag)}
                     className="font-label text-xs tracking-wider uppercase px-2.5 py-1 rounded-full transition-all"
                     style={active
-                      ? { background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }
+                      ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
                       : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
                     }
                     aria-pressed={active}

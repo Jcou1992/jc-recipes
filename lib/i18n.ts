@@ -42,6 +42,11 @@ export interface Translations {
   sortAz: string;
   sortFastest: string;
   sortMostIngredients: string;
+  sortNewestHint: string;
+  sortAzHint: string;
+  sortFastestHint: string;
+  sortMostIngredientsHint: string;
+  shortcutFilter: string;
 
   // RecipeCard
   servingLabel: (n: number) => string;
@@ -181,6 +186,15 @@ export interface Translations {
 
   // ConfirmDialog
   confirmCancelBtn: string;
+
+  // Keyboard shortcuts
+  shortcutHint: string;
+  keyboardShortcutsTitle: string;
+  shortcutSearch: string;
+  shortcutNew: string;
+  shortcutClear: string;
+  shortcutHelp: string;
+  shortcutClose: string;
 }
 
 export const en: Translations = {
@@ -220,6 +234,11 @@ export const en: Translations = {
   sortAz: 'A → Z',
   sortFastest: 'Fastest',
   sortMostIngredients: 'Most ingredients',
+  sortNewestHint: 'Most recent first',
+  sortAzHint: 'Alphabetical by name',
+  sortFastestHint: 'Shortest total time',
+  sortMostIngredientsHint: 'Most complex first',
+  shortcutFilter: 'F — Open filter',
 
   servingLabel: (n) => `${n} ${n !== 1 ? 'servings' : 'serving'}`,
   ingredientsCount: (n) => `${n} ingredients`,
@@ -354,6 +373,14 @@ export const en: Translations = {
   bulkTagUpdatePartial: (succeeded, total) => `Updated ${succeeded} of ${total}`,
 
   confirmCancelBtn: 'Cancel',
+
+  shortcutHint: 'Press / search · N new · F filter · Esc clear · ? help',
+  keyboardShortcutsTitle: 'Keyboard shortcuts',
+  shortcutSearch: '/ — Focus search',
+  shortcutNew: 'N — New recipe',
+  shortcutClear: 'Esc — Clear filters',
+  shortcutHelp: '? — Show this help',
+  shortcutClose: 'Close',
 };
 
 export const es: Translations = {
@@ -393,6 +420,11 @@ export const es: Translations = {
   sortAz: 'A → Z',
   sortFastest: 'Más rápido',
   sortMostIngredients: 'Más ingredientes',
+  sortNewestHint: 'Más reciente primero',
+  sortAzHint: 'Alfabético por nombre',
+  sortFastestHint: 'Menor tiempo total',
+  sortMostIngredientsHint: 'Más complejo primero',
+  shortcutFilter: 'F — Abrir filtro',
 
   servingLabel: (n) => `${n} ${n !== 1 ? 'porciones' : 'porción'}`,
   ingredientsCount: (n) => `${n} ingredientes`,
@@ -527,6 +559,14 @@ export const es: Translations = {
   bulkTagUpdatePartial: (succeeded, total) => `Actualizadas ${succeeded} de ${total}`,
 
   confirmCancelBtn: 'Cancelar',
+
+  shortcutHint: 'Pulsa / buscar · N nueva · F filtro · Esc limpiar · ? ayuda',
+  keyboardShortcutsTitle: 'Atajos de teclado',
+  shortcutSearch: '/ — Buscar',
+  shortcutNew: 'N — Nueva receta',
+  shortcutClear: 'Esc — Limpiar filtros',
+  shortcutHelp: '? — Mostrar esta ayuda',
+  shortcutClose: 'Cerrar',
 };
 
 export const translations: Record<Language, Translations> = { en, es };

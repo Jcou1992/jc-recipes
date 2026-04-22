@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
 import RecipeListClient from '@/components/recipes/RecipeListClient';
+import RetryButton from '@/components/ui/RetryButton';
 
 export const metadata: Metadata = { title: 'My Recipes - jc-recipes' };
 
@@ -18,8 +19,22 @@ export default async function RecipesPage() {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 text-sm" style={{ color: 'var(--color-terracotta)' }}>
-        {t.errorLoadingRecipes} {error.message}
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
+          {t.recipesPageTitle}
+        </h1>
+        <div data-testid="recipes-error-state" className="py-20 text-center">
+          <p className="font-display text-xl font-semibold mb-3" style={{ color: 'var(--text-2)' }}>
+            Can&apos;t load recipes.
+          </p>
+          <p className="font-body text-base mb-8" style={{ color: 'var(--text-3)' }}>
+            {error.message}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <RetryButton label="Retry" testId="retry-btn" />
+            <a href="/" className="btn-ghost">Home</a>
+          </div>
+        </div>
       </div>
     );
   }
@@ -50,6 +65,9 @@ export default async function RecipesPage() {
           <Link href="/recipes/new" className="btn-primary">
             {t.noRecipesCreateFirst}
           </Link>
+          <p className="font-label text-xs tracking-widest uppercase mt-6" style={{ color: 'var(--text-3)' }}>
+            <Link href="/recipes/new#import">Or paste a recipe from Markdown</Link>
+          </p>
         </div>
       ) : (
         <Suspense fallback={

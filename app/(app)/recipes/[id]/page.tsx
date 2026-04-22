@@ -59,9 +59,9 @@ export default async function RecipeDetailPage({ params }: PageProps) {
               key={tag}
               className="font-label text-sm tracking-wider uppercase px-2.5 py-0.5 rounded-full"
               style={{
-                background: 'rgba(237,209,142,0.12)',
+                background: 'color-mix(in oklch, var(--color-gold) 12%, transparent)',
                 color: 'var(--color-gold)',
-                border: '1px solid rgba(237,209,142,0.2)',
+                border: '1px solid color-mix(in oklch, var(--color-gold) 20%, transparent)',
               }}
             >
               {tag}

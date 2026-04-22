@@ -121,7 +121,7 @@ export default function BulkActionBar({
         style={{
           background: 'var(--bg-card)',
           borderColor: 'var(--border)',
-          boxShadow: '0 -4px 20px rgba(0,0,0,0.08)',
+          boxShadow: '0 -4px 20px oklch(0 0 0 / 0.08)',
           paddingBottom: 'env(safe-area-inset-bottom, 0)',
         }}
         role="toolbar"
@@ -131,9 +131,10 @@ export default function BulkActionBar({
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
           {showProgress ? (
             <span
-              className="font-label text-sm tracking-wide flex-shrink-0 pr-2 flex items-center gap-2"
+              className="font-label text-sm tracking-wide tabular-nums flex-shrink-0 pr-2 flex items-center gap-2"
               style={{ color: 'var(--text-1)' }}
               data-testid="bulk-count"
+              aria-live="polite"
             >
               <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" d="M12 2a10 10 0 0 1 10 10" />
@@ -142,9 +143,10 @@ export default function BulkActionBar({
             </span>
           ) : (
             <span
-              className="font-label text-sm tracking-wide flex-shrink-0 pr-2"
+              className="font-label text-sm tracking-wide tabular-nums flex-shrink-0 pr-2"
               style={{ color: 'var(--text-1)' }}
               data-testid="bulk-count"
+              aria-live="polite"
             >
               {t.bulkRecipeSelected(count)}
             </span>
@@ -199,7 +201,7 @@ export default function BulkActionBar({
             onClick={() => setConfirmOpen(true)}
             disabled={isPending || count === 0}
             className={btn}
-            style={{ background: 'var(--color-terracotta)', color: '#fff', border: '1px solid var(--color-terracotta)' }}
+            style={{ background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }}
             data-testid="bulk-delete"
           >
             {t.bulkDelete}

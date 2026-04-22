@@ -48,9 +48,9 @@ export default function RecipeCard({
           key={tag}
           className="font-label text-xs tracking-wider uppercase px-2 py-0.5 rounded-full"
           style={{
-            background: 'rgba(237,209,142,0.15)',
+            background: 'color-mix(in oklch, var(--color-gold) 18%, transparent)',
             color: 'var(--color-gold)',
-            border: '1px solid rgba(237,209,142,0.3)',
+            border: '1px solid color-mix(in oklch, var(--color-gold) 40%, transparent)',
           }}
         >
           {tag}
@@ -75,7 +75,7 @@ export default function RecipeCard({
             selected ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'
           }`}
           style={{
-            background: selected ? 'var(--color-terracotta)' : 'rgba(255,255,255,0.9)',
+            background: selected ? 'var(--color-terracotta)' : 'oklch(100% 0 0 / 0.9)',
             border: `1.5px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
           }}
           aria-hidden="true"
@@ -133,7 +133,7 @@ export default function RecipeCard({
       style={{
         background: featured ? 'var(--bg-raised)' : 'var(--bg-card)',
         boxShadow: featured
-          ? '0 0 0 1px rgba(255,255,255,0.07), 0 4px 28px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)'
+          ? '0 0 0 1px oklch(100% 0 0 / 0.07), 0 4px 28px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(100% 0 0 / 0.05)'
           : 'var(--shadow-card)',
       }}
       data-testid={`recipe-card-${recipe.id}`}

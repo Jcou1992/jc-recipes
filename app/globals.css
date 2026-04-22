@@ -2,45 +2,82 @@
 
 /* ── Brand tokens (static — generate Tailwind utilities) ───────────────────── */
 @theme {
-  --color-terracotta:       #D4703F;
-  --color-terracotta-dark:  #BF6335;
-  --color-gold:             #EDD18E;
-  --color-bone:             #F5F1E8;
-  --color-ink:              #0D0D0F;
+  --color-terracotta:          oklch(63.2% 0.148 45);
+  --color-terracotta-dark:     oklch(40% 0.145 44);
+  --color-terracotta-contrast: oklch(47% 0.16 45);
+  --color-success:             oklch(72% 0.17 145);
+  --color-gold:                oklch(86.5% 0.089 89);
+  --color-bone:                oklch(95.3% 0.014 85);
+  --color-ink:                 oklch(11% 0.004 285);
 }
 
 /* ── Semantic tokens: dark default ─────────────────────────────────────────── */
 :root {
-  --bg:            #0D0D0F;
+  --bg:            oklch(11% 0.004 285);
   --bg-card:       #131315;
   --bg-raised:     #1C1C1F;
   --bg-input:      #1A1A1D;
-  --border:        rgba(255,255,255,0.07);
-  --border-input:  rgba(255,255,255,0.13);
+  --border:        oklch(100% 0 0 / 0.07);
+  --border-input:  oklch(100% 0 0 / 0.13);
   --text-1:        #EDE8DC;
   --text-2:        #A89E92;
   --text-3:        #8A7E72;
-  --ring:          rgba(212,112,63,0.45);
-  --shadow-card:   0 0 0 1px rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.45);
-  --shadow-dialog: 0 0 0 1px rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.7);
+  --ring:          oklch(63.2% 0.148 45 / 0.45);
+  --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
+  --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
 }
 
 /* ── Semantic tokens: light override ───────────────────────────────────────── */
 @media (prefers-color-scheme: light) {
   :root {
-    --bg:            #F5F1E8;
+    --bg:            oklch(95.3% 0.014 85);
     --bg-card:       #FFFFFF;
     --bg-raised:     #FDFCF8;
     --bg-input:      #FFFFFF;
-    --border:        rgba(13,13,15,0.09);
-    --border-input:  rgba(13,13,15,0.18);
+    --border:        oklch(11% 0.004 285 / 0.09);
+    --border-input:  oklch(11% 0.004 285 / 0.18);
     --text-1:        #17120A;
     --text-2:        #4A4039;
     --text-3:        #6B5F54;
-    --ring:          rgba(212,112,63,0.35);
-    --shadow-card:   0 0 0 1px rgba(13,13,15,0.07), 0 2px 12px rgba(0,0,0,0.06);
-    --shadow-dialog: 0 0 0 1px rgba(13,13,15,0.08), 0 24px 64px rgba(0,0,0,0.15);
+    --ring:          oklch(63.2% 0.148 45 / 0.35);
+    --shadow-card:   0 0 0 1px oklch(11% 0.004 285 / 0.07), 0 2px 12px oklch(0 0 0 / 0.06);
+    --shadow-dialog: 0 0 0 1px oklch(11% 0.004 285 / 0.08), 0 24px 64px oklch(0 0 0 / 0.15);
   }
+}
+
+/* ── Manual theme override ──────────────────────────────────────────────────── */
+/* `data-theme` on <html> overrides the `prefers-color-scheme` media query      */
+/* above. Set by ThemeToggle → writes to localStorage('preferred-theme') and    */
+/* applies data-theme="light" | "dark"; "system" removes the attribute.         */
+
+:root[data-theme="light"] {
+  --bg:            oklch(95.3% 0.014 85);
+  --bg-card:       #FFFFFF;
+  --bg-raised:     #FDFCF8;
+  --bg-input:      #FFFFFF;
+  --border:        oklch(11% 0.004 285 / 0.09);
+  --border-input:  oklch(11% 0.004 285 / 0.18);
+  --text-1:        #17120A;
+  --text-2:        #4A4039;
+  --text-3:        #6B5F54;
+  --ring:          oklch(63.2% 0.148 45 / 0.35);
+  --shadow-card:   0 0 0 1px oklch(11% 0.004 285 / 0.07), 0 2px 12px oklch(0 0 0 / 0.06);
+  --shadow-dialog: 0 0 0 1px oklch(11% 0.004 285 / 0.08), 0 24px 64px oklch(0 0 0 / 0.15);
+}
+
+:root[data-theme="dark"] {
+  --bg:            oklch(11% 0.004 285);
+  --bg-card:       #131315;
+  --bg-raised:     #1C1C1F;
+  --bg-input:      #1A1A1D;
+  --border:        oklch(100% 0 0 / 0.07);
+  --border-input:  oklch(100% 0 0 / 0.13);
+  --text-1:        #EDE8DC;
+  --text-2:        #A89E92;
+  --text-3:        #8A7E72;
+  --ring:          oklch(63.2% 0.148 45 / 0.45);
+  --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
+  --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
 }
 
 /* ── Grain texture overlay ──────────────────────────────────────────────────── */
@@ -63,7 +100,7 @@ body::after {
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    font-size: clamp(1rem, 0.85rem + 0.5vw, 1.25rem);
+    font-size: 1rem;
   }
 
   body {
@@ -91,8 +128,7 @@ body::after {
   .nav-frosted {
     backdrop-filter: blur(16px) saturate(1.4);
     -webkit-backdrop-filter: blur(16px) saturate(1.4);
-    background: var(--bg-card);
-    background: color-mix(in srgb, var(--bg) 80%, transparent);
+    background: color-mix(in oklch, var(--bg) 80%, transparent);
   }
 }
 
@@ -107,6 +143,8 @@ body::after {
   .font-body {
     font-family: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif);
   }
+  .display-xl { font-size: clamp(1.75rem, 1.35rem + 1.2vw, 2.5rem); line-height: 1.15; }
+  .display-lg { font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.875rem); line-height: 1.2; }
 }
 
 /* ── Component classes ──────────────────────────────────────────────────────── */
@@ -137,8 +175,8 @@ body::after {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: #D4703F;
-    color: #F5F1E8;
+    background-color: var(--color-terracotta-contrast);
+    color: var(--color-bone);
     border: none;
     border-radius: 6px;
     padding: 0.5625rem 1.25rem;
@@ -153,8 +191,8 @@ body::after {
     transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
   }
   .btn-primary:hover {
-    background-color: #BF6335;
-    box-shadow: 0 2px 10px rgba(212,112,63,0.35);
+    background-color: var(--color-terracotta-dark);
+    box-shadow: 0 2px 10px color-mix(in oklch, var(--color-terracotta) 35%, transparent);
   }
   .btn-primary:active { transform: scale(0.98); }
   .btn-primary:disabled {
@@ -192,8 +230,8 @@ body::after {
     align-items: center;
     justify-content: center;
     background: transparent;
-    color: #D4703F;
-    border: 1px solid rgba(212,112,63,0.3);
+    color: var(--color-terracotta);
+    border: 1px solid color-mix(in oklch, var(--color-terracotta) 30%, transparent);
     border-radius: 6px;
     padding: 0.5rem 1rem;
     font-family: var(--font-barlow, 'Barlow Condensed', sans-serif);
@@ -205,14 +243,14 @@ body::after {
     transition: background 0.15s, border-color 0.15s;
   }
   .btn-danger:hover {
-    background: rgba(212,112,63,0.08);
-    border-color: rgba(212,112,63,0.5);
+    background: color-mix(in oklch, var(--color-terracotta) 8%, transparent);
+    border-color: color-mix(in oklch, var(--color-terracotta) 50%, transparent);
   }
 
   /* Markdown preview — uses CSS vars so light mode works correctly */
   .md-h1 { font-size: 1.25rem; font-weight: 700; margin-top: .5rem; color: var(--text-1); }
   .md-h2 { font-size: 0.8125rem; font-weight: 600; margin-top: 1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); }
-  .md-blockquote { border-left: 3px solid rgba(212,112,63,0.4); padding-left: .75rem; color: var(--text-2); font-style: italic; }
+  .md-blockquote { margin-left: 1rem; text-indent: -1rem; color: var(--text-2); font-style: italic; }
   .md-ul { margin-left: 1.25rem; list-style: disc; }
   .md-ol { margin-left: 1.25rem; list-style: decimal; }
   .md-li { color: var(--text-1); }
@@ -237,7 +275,7 @@ body::after {
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.15s;
   }
   .recipe-card:hover {
-    border-color: rgba(212, 112, 63, 0.3);
+    border-color: color-mix(in oklch, var(--color-terracotta) 30%, transparent);
     transform: translateY(-3px);
     box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,0.55);
   }
@@ -345,4 +383,20 @@ body::after {
     font-size: 0.75rem;
     margin-top: 0.375rem;
   }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  body::after { display: none !important; }
+  .animate-fade-up,
+  .animate-scale-in,
+  .drain-bar { animation: none !important; }
 }

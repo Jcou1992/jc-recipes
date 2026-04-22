@@ -4,6 +4,8 @@ import { logout } from '@/app/actions/auth';
 import { getServerT } from '@/lib/i18n-server';
 import AppProviders from '@/components/ui/AppProviders';
 import LanguageToggle from '@/components/ui/LanguageToggle';
+import ThemeToggle from '@/components/ui/ThemeToggle';
+import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -30,6 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               jc-recipes
             </a>
             <div className="flex items-center gap-1">
+              <ThemeToggle />
               <LanguageToggle />
               <form action={logout}>
                 <button
@@ -42,6 +45,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
           </div>
         </nav>
+        <GlobalShortcuts />
         <main>{children}</main>
       </AppProviders>
     </div>

@@ -90,10 +90,12 @@ test('tag filter chips mark as pressed and combine with search @regression', asy
   await page.goto('/recipes');
   await openFilterSheet(page);
 
-  const chip = page.getByTestId(`tag-filter-${tag}`);
+  const isNarrow = ((await page.viewportSize())?.width ?? 1280) < 640;
+  const surface = page.getByTestId(isNarrow ? 'filter-sheet' : 'filter-popover');
+  const chip = surface.getByTestId(`tag-filter-${tag}`);
   await expect(chip).toBeVisible();
   await chip.click();
-  await page.getByRole('button', { name: 'Done' }).click();
+  await surface.getByRole('button', { name: 'Done' }).click();
 
   // .first() — desktop + mobile strips share testId.
   await expect(page.getByTestId(`tag-filter-${tag}`).first()).toHaveAttribute('aria-pressed', 'true');

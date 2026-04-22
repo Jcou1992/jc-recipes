@@ -7,7 +7,11 @@ export default function LanguageToggle() {
 
   return (
     <button
-      onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+      onClick={() => {
+        const next = language === 'en' ? 'es' : 'en';
+        setLanguage(next);
+        if (typeof document !== 'undefined') document.documentElement.lang = next;
+      }}
       className="font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
       style={{ color: 'var(--text-3)' }}
       aria-label={`Switch to ${language === 'en' ? 'Spanish' : 'English'}`}

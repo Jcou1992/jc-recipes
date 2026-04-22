@@ -204,6 +204,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     if (!audioCtxRef.current && typeof window !== 'undefined') {
       try { audioCtxRef.current = new AudioContext(); } catch {}
     }
+    // iOS: resume on every user gesture in case it auto-suspended
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume().catch(() => {});
+    }
     setTimers(prev => {
       const t = prev.get(stepIdx);
       if (!t || t.remaining === 0) return prev;
@@ -305,8 +309,8 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 href={`/recipes/${recipe.id}`}
                 className="font-label text-sm tracking-widest uppercase text-center py-4 px-6 transition-colors"
                 style={{
-                  background: 'var(--color-terracotta)',
-                  color: '#fff',
+                  background: 'var(--color-terracotta-contrast)',
+                  color: 'var(--color-bone)',
                   letterSpacing: '0.12em',
                 }}
                 data-testid="cook-completion-return"
@@ -361,8 +365,8 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                   ts.remaining === 0 ? 'animate-pulse' : ''
                 }`}
                 style={{
-                  background: ts.remaining === 0 ? 'var(--color-terracotta)' : 'rgba(212,112,63,0.85)',
-                  color: '#fff',
+                  background: ts.remaining === 0 ? 'var(--color-terracotta-contrast)' : 'color-mix(in oklch, var(--color-terracotta-contrast) 85%, transparent)',
+                  color: 'var(--color-bone)',
                   backdropFilter: 'blur(8px)',
                 }}
                 aria-label={ts.remaining === 0 ? `Reset timer for step ${idx + 1}` : `Timer for step ${idx + 1}`}
@@ -394,7 +398,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </div>
 
           {/* Progress bar */}
-          <div className="h-1.5" style={{ background: 'var(--border)' }}>
+          <div className="h-1.5" style={{ background: 'oklch(100% 0 0 / 0.12)' }}>
             <div
               className="h-full transition-all duration-300"
               style={{
@@ -496,7 +500,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 <span
                   className="font-body text-sm"
                   style={{
-                    color: checkedIngredients.has(i) ? 'color-mix(in srgb, var(--text-1) 30%, transparent)' : 'var(--text-2)',
+                    color: checkedIngredients.has(i) ? 'color-mix(in oklch, var(--text-1) 30%, transparent)' : 'var(--text-2)',
                     textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
                   }}
                   data-testid={`cook-ingredient-${i}`}
@@ -534,7 +538,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         </div>
 
         {/* Progress bar */}
-        <div className="h-1.5" style={{ background: 'var(--border)' }}>
+        <div className="h-1.5" style={{ background: 'oklch(100% 0 0 / 0.12)' }}>
           <div
             className="h-full transition-all duration-300"
             style={{
@@ -546,7 +550,28 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         </div>
 
         {/* Step content */}
-        <div className="flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
+        <div className="relative flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
+          {/* Swipe affordance — decorative only */}
+          <div
+            className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-20"
+            aria-hidden="true"
+          >
+            {currentIndex > 0 && (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-3)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            )}
+          </div>
+          <div
+            className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-20"
+            aria-hidden="true"
+          >
+            {currentIndex < totalSteps - 1 && (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: 'var(--text-3)' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            )}
+          </div>
           <p
             className="font-body mb-8"
             style={{ fontSize: '1.75rem', fontWeight: 500, lineHeight: 1.5, color: 'var(--text-1)' }}
@@ -669,7 +694,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                     <span
                       className="font-body text-sm"
                       style={{
-                        color: checkedIngredients.has(i) ? 'color-mix(in srgb, var(--text-1) 30%, transparent)' : 'var(--text-2)',
+                        color: checkedIngredients.has(i) ? 'color-mix(in oklch, var(--text-1) 30%, transparent)' : 'var(--text-2)',
                         textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
                       }}
                     >

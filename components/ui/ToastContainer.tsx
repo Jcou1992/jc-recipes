@@ -4,9 +4,9 @@ import { useToast } from './ToastContext';
 
 const VARIANT_STYLES = {
   success: {
-    background: 'rgba(34,197,94,0.12)',
-    border: '1px solid rgba(34,197,94,0.25)',
-    color: '#4ade80',
+    background: 'color-mix(in oklch, var(--color-success) 12%, transparent)',
+    border: '1px solid color-mix(in oklch, var(--color-success) 25%, transparent)',
+    color: 'var(--color-success)',
     icon: (
       <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -14,8 +14,8 @@ const VARIANT_STYLES = {
     ),
   },
   error: {
-    background: 'rgba(212,112,63,0.12)',
-    border: '1px solid rgba(212,112,63,0.3)',
+    background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
+    border: '1px solid color-mix(in oklch, var(--color-terracotta) 30%, transparent)',
     color: 'var(--color-terracotta)',
     icon: (
       <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -24,8 +24,8 @@ const VARIANT_STYLES = {
     ),
   },
   info: {
-    background: 'rgba(237,209,142,0.1)',
-    border: '1px solid rgba(237,209,142,0.2)',
+    background: 'color-mix(in oklch, var(--color-gold) 10%, transparent)',
+    border: '1px solid color-mix(in oklch, var(--color-gold) 20%, transparent)',
     color: 'var(--color-gold)',
     icon: (
       <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
