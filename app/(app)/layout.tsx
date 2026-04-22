@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
@@ -5,6 +6,7 @@ import { getUserPreferences } from '@/app/actions/preferences';
 import AppProviders from '@/components/ui/AppProviders';
 import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
 import FontSizeBootstrap from '@/components/ui/FontSizeBootstrap';
+import ThemeBootstrap from '@/components/ui/ThemeBootstrap';
 import AvatarMenu from '@/components/ui/AvatarMenu';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -22,13 +24,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <AppProviders initialLanguage={initialLanguage}>
+        <ThemeBootstrap />
         <FontSizeBootstrap />
         <nav
           className="nav-frosted sticky top-0 z-10"
           style={{ borderBottom: '1px solid var(--border)' }}
         >
           <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/recipes" className="flex items-baseline gap-1.5">
+            <Link href="/recipes" className="flex items-baseline gap-1.5">
               <span
                 className="font-label text-lg font-bold tracking-widest uppercase"
                 style={{ color: 'var(--color-terracotta)' }}
@@ -41,7 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               >
                 世界
               </span>
-            </a>
+            </Link>
             <AvatarMenu initial={initial} email={email} />
           </div>
         </nav>

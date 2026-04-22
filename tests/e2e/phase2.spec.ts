@@ -288,6 +288,30 @@ test('font-size preference persists across reload @regression', async ({ page })
   expect(parseFloat(fontSize)).toBeGreaterThan(17);
 });
 
+test('theme preference re-applies after full reload @regression', async ({ page }) => {
+  // Regression: ThemeToggle only mounts inside the avatar dropdown. Any plain-anchor
+  // navigation (or hard reload) returned server HTML without data-theme, so the user's
+  // chosen theme silently flipped back to prefers-color-scheme until they reopened the
+  // menu. ThemeBootstrap re-applies the stored theme on every page mount.
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  await page.evaluate(() => {
+    localStorage.setItem('preferred-theme', 'light');
+  });
+
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+
+  const attr = await page.evaluate(() =>
+    document.documentElement.getAttribute('data-theme'),
+  );
+  expect(attr).toBe('light');
+
+  // Cleanup so we don't poison other tests.
+  await page.evaluate(() => localStorage.removeItem('preferred-theme'));
+});
+
 test('editable space name persists across reload @regression', async ({ page, isMobile }, testInfo) => {
   test.skip(!!isMobile, 'desktop viewport test — uses double-click to edit');
   // Mutates user-scoped DB state; racy under parallel workers hitting the same test user.
