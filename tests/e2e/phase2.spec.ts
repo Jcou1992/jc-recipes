@@ -389,6 +389,45 @@ test('onboarding tour: replay button launches tour and Next advances @regression
   await expect(page.getByTestId('onboarding-tour')).not.toBeVisible();
 });
 
+test('onboarding tour: spotlight lands on the mobile filter button, not the corner @mobile', async ({ page }) => {
+  // Regression: the filter step's selector was
+  //   [data-testid="filter-desktop-btn"], [data-testid="filter-mobile-btn"]
+  // querySelector returned the desktop (display:none) element first on mobile,
+  // whose rect is (0,0,0,0). Spotlight ring rendered as a tiny square at the
+  // top-left corner. measure() now picks the first VISIBLE candidate.
+  const vp = page.viewportSize();
+  if (!vp || vp.width >= 768) return; // mobile-only
+
+  await page.goto('/recipes?tour=1');
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 5000 });
+
+  // Advance to step 3 of 5 (filter)
+  await page.getByTestId('onboarding-next').click();
+  await page.getByTestId('onboarding-next').click();
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible();
+
+  const mobileBtn = page.getByTestId('filter-mobile-btn');
+  await expect(mobileBtn).toBeVisible();
+  const btnBox = await mobileBtn.boundingBox();
+  expect(btnBox, 'mobile filter button must be measurable').not.toBeNull();
+
+  const ring = page.getByTestId('tour-spotlight-ring');
+  await expect(ring).toBeVisible();
+  const ringBox = await ring.boundingBox();
+  expect(ringBox, 'spotlight ring must be measurable').not.toBeNull();
+
+  // Ring center should be inside the button's bounding box.
+  // (Spotlight adds 8px padding around the target, so the ring is slightly
+  // larger than the button but centered on it.)
+  const cx = ringBox!.x + ringBox!.width / 2;
+  const cy = ringBox!.y + ringBox!.height / 2;
+  expect(cx).toBeGreaterThanOrEqual(btnBox!.x);
+  expect(cx).toBeLessThanOrEqual(btnBox!.x + btnBox!.width);
+  expect(cy).toBeGreaterThanOrEqual(btnBox!.y);
+  expect(cy).toBeLessThanOrEqual(btnBox!.y + btnBox!.height);
+});
+
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
   const vp = page.viewportSize();
   if (!vp || vp.width >= 768) return; // Desktop has always-visible sidebar.

@@ -99,27 +99,6 @@
   --tag-text:   var(--color-gold);
 }
 
-/* ── Force-dark scope: any subtree with data-force-theme="dark" uses dark ──
-   tokens regardless of the global theme. Used by the onboarding tour so the
-   spotlight + tooltip always read as theater mode, not a bright white card on
-   a dimmed light-theme page. */
-[data-force-theme="dark"] {
-  --bg:            oklch(11% 0.004 285);
-  --bg-card:       #131315;
-  --bg-raised:     #1C1C1F;
-  --bg-input:      #1A1A1D;
-  --border:        oklch(100% 0 0 / 0.07);
-  --border-input:  oklch(100% 0 0 / 0.13);
-  --text-1:        #EDE8DC;
-  --text-2:        #A89E92;
-  --text-3:        #8A7E72;
-  --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
-  --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
-  --tag-bg:     color-mix(in oklch, var(--color-gold) 18%, transparent);
-  --tag-border: color-mix(in oklch, var(--color-gold) 40%, transparent);
-  --tag-text:   var(--color-gold);
-}
-
 /* ── Grain texture overlay ──────────────────────────────────────────────────── */
 body::after {
   content: '';

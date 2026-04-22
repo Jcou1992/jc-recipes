@@ -81,6 +81,7 @@ export default function Spotlight({ targetRect }: Props) {
       />
       {/* Terracotta outline ring around target */}
       <div
+        data-testid="tour-spotlight-ring"
         style={{
           position: 'absolute',
           left: x,

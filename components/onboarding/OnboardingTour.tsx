@@ -48,9 +48,24 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     let cancelled = false;
     let attempts = 0;
 
+    // Selectors may use a comma-separated OR (e.g. desktop-btn, mobile-btn).
+    // querySelector returns the first DOM match regardless of visibility — on
+    // the wrong viewport that element is display:none with a zero-sized rect,
+    // which drags the spotlight to (0,0). Walk all candidates and pick the
+    // first VISIBLE one (offsetParent present + non-zero rect).
+    function findVisibleTarget(selector: string): HTMLElement | null {
+      const candidates = document.querySelectorAll<HTMLElement>(selector);
+      for (const el of candidates) {
+        if (el.offsetParent === null) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) return el;
+      }
+      return null;
+    }
+
     function measure() {
       if (cancelled) return;
-      const el = document.querySelector(current.targetSelector) as HTMLElement | null;
+      const el = findVisibleTarget(current.targetSelector);
       if (el) {
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
@@ -86,8 +101,17 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     function remeasure() {
       const sel = TOUR_STEPS[stepIdx]?.targetSelector;
       if (!sel) return;
-      const el = document.querySelector(sel) as HTMLElement | null;
-      if (el) setTargetRect(el.getBoundingClientRect());
+      // Same visibility filter as measure() — hidden viewport-siblings would
+      // otherwise drag the spotlight to the corner.
+      const candidates = document.querySelectorAll<HTMLElement>(sel);
+      for (const el of candidates) {
+        if (el.offsetParent === null) continue;
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          setTargetRect(r);
+          return;
+        }
+      }
     }
     window.addEventListener('resize', remeasure);
     window.addEventListener('scroll', remeasure, true);
