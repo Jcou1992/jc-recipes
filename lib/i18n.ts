@@ -207,6 +207,33 @@ export interface Translations {
   spaceNameSaved: string;
   spaceNameSaveFailed: string;
   spaceNameCharLimit: string;
+
+  // Recipe form preview pane
+  recipePreviewLabel: string;
+  recipePreviewEmpty: string;
+  recipePreviewMoreIngredients: (n: number) => string;
+  recipePreviewStepsCount: (n: number) => string;
+
+  // Settings page
+  settingsTitle: string;
+  settingsWorkspaceSection: string;
+  settingsAppearanceSection: string;
+  settingsLanguageSection: string;
+  settingsAccountSection: string;
+  settingsTourSection: string;
+  settingsSpaceNameLabel: string;
+  settingsThemeLabel: string;
+  settingsEmailLabel: string;
+  settingsSaveBtn: string;
+  settingsReplayTour: string;
+  settingsSignOut: string;
+  settingsBackToRecipes: string;
+
+  // Avatar menu
+  avatarMenuAriaLabel: string;
+  avatarMenuSignedInAs: string;
+  avatarMenuSettings: string;
+  avatarMenuQuick: string;
 }
 
 export const en: Translations = {
@@ -403,6 +430,30 @@ export const en: Translations = {
   spaceNameSaved: 'Space name saved',
   spaceNameSaveFailed: 'Could not save space name',
   spaceNameCharLimit: '30 characters max',
+
+  recipePreviewLabel: 'Preview',
+  recipePreviewEmpty: 'Preview appears here as you type.',
+  recipePreviewMoreIngredients: (n) => `+${n} more`,
+  recipePreviewStepsCount: (n) => `${n} ${n === 1 ? 'step' : 'steps'}`,
+
+  settingsTitle: 'Settings',
+  settingsWorkspaceSection: 'Workspace',
+  settingsAppearanceSection: 'Appearance',
+  settingsLanguageSection: 'Language',
+  settingsAccountSection: 'Account',
+  settingsTourSection: 'Tour',
+  settingsSpaceNameLabel: 'Space name',
+  settingsThemeLabel: 'Theme',
+  settingsEmailLabel: 'Email',
+  settingsSaveBtn: 'Save',
+  settingsReplayTour: 'Replay tour',
+  settingsSignOut: 'Sign out',
+  settingsBackToRecipes: '← Back to recipes',
+
+  avatarMenuAriaLabel: 'Account menu',
+  avatarMenuSignedInAs: 'Signed in as',
+  avatarMenuSettings: 'Settings',
+  avatarMenuQuick: 'Quick toggles',
 };
 
 export const es: Translations = {
@@ -599,6 +650,30 @@ export const es: Translations = {
   spaceNameSaved: 'Nombre del espacio guardado',
   spaceNameSaveFailed: 'No se pudo guardar',
   spaceNameCharLimit: '30 caracteres máximo',
+
+  recipePreviewLabel: 'Vista previa',
+  recipePreviewEmpty: 'La vista previa aparece aquí al escribir.',
+  recipePreviewMoreIngredients: (n) => `+${n} más`,
+  recipePreviewStepsCount: (n) => `${n} ${n === 1 ? 'paso' : 'pasos'}`,
+
+  settingsTitle: 'Ajustes',
+  settingsWorkspaceSection: 'Espacio',
+  settingsAppearanceSection: 'Apariencia',
+  settingsLanguageSection: 'Idioma',
+  settingsAccountSection: 'Cuenta',
+  settingsTourSection: 'Tour',
+  settingsSpaceNameLabel: 'Nombre del espacio',
+  settingsThemeLabel: 'Tema',
+  settingsEmailLabel: 'Correo',
+  settingsSaveBtn: 'Guardar',
+  settingsReplayTour: 'Reproducir tour',
+  settingsSignOut: 'Cerrar sesión',
+  settingsBackToRecipes: '← Volver a recetas',
+
+  avatarMenuAriaLabel: 'Menú de cuenta',
+  avatarMenuSignedInAs: 'Sesión iniciada como',
+  avatarMenuSettings: 'Ajustes',
+  avatarMenuQuick: 'Ajustes rápidos',
 };
 
 export const translations: Record<Language, Translations> = { en, es };

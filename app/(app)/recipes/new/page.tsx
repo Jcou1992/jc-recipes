@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import RecipeForm from '@/components/recipes/RecipeForm';
+import FormWithPreview from '@/components/recipes/FormWithPreview';
 import MarkdownImport from '@/components/recipes/MarkdownImport';
 import { createRecipe } from '@/app/actions/recipes';
 import { useToast } from '@/components/ui/ToastContext';
@@ -49,7 +49,7 @@ export default function NewRecipePage() {
   const isMarkdown = tab === 'markdown';
 
   return (
-    <div className={isMarkdown ? 'max-w-5xl mx-auto px-4 py-8' : 'max-w-3xl mx-auto px-4 py-8'}>
+    <div className={isMarkdown ? 'max-w-5xl mx-auto px-4 py-8' : 'max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8'}>
       <Link
         href="/recipes"
         className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
@@ -105,7 +105,7 @@ export default function NewRecipePage() {
         }}
       >
         {tab === 'manual' && (
-          <RecipeForm
+          <FormWithPreview
             key={formKey}
             initialData={initialData}
             onSubmit={createRecipe}

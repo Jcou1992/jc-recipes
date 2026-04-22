@@ -321,6 +321,32 @@ test('editable space name persists across reload @regression', async ({ page, is
   await cleanupInput.press('Enter');
 });
 
+test('new recipe form: desktop preview card updates as user types @regression', async ({ page, isMobile }) => {
+  test.skip(!!isMobile, 'desktop preview pane — mobile hides preview');
+  await page.goto('/recipes/new');
+  const preview = page.getByTestId('recipe-form-preview');
+  await expect(preview).toBeVisible();
+  // Empty state: preview shows placeholder
+  await expect(preview).toContainText(/Preview/i);
+  // Type a name
+  const nameInput = page.getByLabel(/Name|Nombre/).first();
+  await nameInput.fill('Test Preview Recipe');
+  // Preview updates
+  await expect(preview).toContainText('Test Preview Recipe', { timeout: 3000 });
+});
+
+test('avatar menu opens dropdown with Settings link @regression', async ({ page }) => {
+  await page.goto('/recipes');
+  const avatar = page.getByTestId('avatar-menu-btn');
+  await expect(avatar).toBeVisible();
+  await avatar.click();
+  const menu = page.getByTestId('avatar-menu-dropdown');
+  await expect(menu).toBeVisible();
+  await menu.getByRole('link', { name: /settings|ajustes/i }).click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByRole('heading', { name: /settings|ajustes/i, level: 1 })).toBeVisible();
+});
+
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
   const vp = page.viewportSize();
   if (!vp || vp.width >= 768) return; // Desktop has always-visible sidebar.

@@ -1,12 +1,11 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { logout } from '@/app/actions/auth';
 import { getServerT } from '@/lib/i18n-server';
+import { getUserPreferences } from '@/app/actions/preferences';
 import AppProviders from '@/components/ui/AppProviders';
-import LanguageToggle from '@/components/ui/LanguageToggle';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
 import FontSizeBootstrap from '@/components/ui/FontSizeBootstrap';
+import AvatarMenu from '@/components/ui/AvatarMenu';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -14,12 +13,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!session) redirect('/login');
 
-  const t = await getServerT();
+  const [t, prefs] = await Promise.all([getServerT(), getUserPreferences()]);
   const initialLanguage = t.language;
+
+  const email = session.user.email ?? '';
+  const initial = (prefs?.space_name || email || '?').charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <AppProviders initialLanguage={initialLanguage}>
+        <FontSizeBootstrap />
         <nav
           className="nav-frosted sticky top-0 z-10"
           style={{ borderBottom: '1px solid var(--border)' }}
@@ -39,22 +42,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 世界
               </span>
             </a>
-            <div className="flex items-center gap-1">
-              <ThemeToggle />
-              <LanguageToggle />
-              <form action={logout}>
-                <button
-                  type="submit"
-                  className="nav-signout font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
-                >
-                  {t.navSignOut}
-                </button>
-              </form>
-            </div>
+            <AvatarMenu initial={initial} email={email} />
           </div>
         </nav>
         <GlobalShortcuts />
-        <FontSizeBootstrap />
         <main>{children}</main>
       </AppProviders>
     </div>

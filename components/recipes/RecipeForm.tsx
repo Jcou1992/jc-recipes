@@ -12,10 +12,22 @@ import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import type { Recipe, RecipePayload, Ingredient, Step } from '@/types/recipe';
 import type { ActionResult } from '@/app/actions/recipes';
 
+export interface PreviewData {
+  name: string;
+  description: string | null;
+  servings: number;
+  prep_time: number | null;
+  cook_time: number | null;
+  tags: string[];
+  ingredients: Ingredient[];
+  stepsCount: number;
+}
+
 interface Props {
   initialData?: Partial<Recipe>;
   onSubmit: (payload: RecipePayload) => Promise<ActionResult>;
   submitLabel: string;
+  onPreviewChange?: (preview: PreviewData) => void;
 }
 
 // ── Amount helpers ────────────────────────────────────────────────────────────
@@ -66,7 +78,7 @@ interface IngredientEntry {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props) {
+export default function RecipeForm({ initialData, onSubmit, submitLabel, onPreviewChange }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const t = useT();
@@ -115,6 +127,31 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel }: Props
   }, [name, servings, description, notes, activeIngredients.length, activeSteps.length, initialData]);
 
   useUnsavedChanges(isDirty);
+
+  // ── Preview pipe (debounced) ────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!onPreviewChange) return;
+    const id = setTimeout(() => {
+      onPreviewChange({
+        name: name.trim(),
+        description: description.trim() || null,
+        servings: parseInt(servings) || 1,
+        prep_time: prepTime ? (parseInt(prepTime) || null) : null,
+        cook_time: cookTime ? (parseInt(cookTime) || null) : null,
+        tags: tags.trim() ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [],
+        ingredients: activeIngredients
+          .filter(e => e.field.name.trim())
+          .map(e => ({
+            amount: parseAmount(e.field.amount),
+            unit: e.field.unit.trim() || null,
+            name: e.field.name.trim(),
+          })),
+        stepsCount: activeSteps.filter(e => e.field.content.trim()).length,
+      });
+    }, 150);
+    return () => clearTimeout(id);
+  }, [name, description, servings, prepTime, cookTime, tags, activeIngredients, activeSteps, onPreviewChange]);
 
   // ── Ingredient handlers ──────────────────────────────────────────────────────
 

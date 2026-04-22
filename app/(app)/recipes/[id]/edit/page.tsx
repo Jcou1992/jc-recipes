@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
-import RecipeForm from '@/components/recipes/RecipeForm';
+import FormWithPreview from '@/components/recipes/FormWithPreview';
 import { updateRecipe } from '@/app/actions/recipes';
 import type { Recipe, RecipePayload } from '@/types/recipe';
 
@@ -38,7 +38,7 @@ export default async function EditRecipePage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8">
       <Link
         href={`/recipes/${id}`}
         className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
@@ -52,7 +52,7 @@ export default async function EditRecipePage({ params }: PageProps) {
       >
         {t.editRecipeTitle}
       </h1>
-      <RecipeForm
+      <FormWithPreview
         initialData={recipe}
         onSubmit={handleUpdate}
         submitLabel={t.saveChangesSubmitLabel}
