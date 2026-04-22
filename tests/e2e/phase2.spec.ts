@@ -47,7 +47,7 @@ async function createTestRecipe(
 
   const stepFields = o.steps ?? ['Step one.'];
   for (let i = 0; i < stepFields.length; i++) {
-    if (i > 0) await page.getByRole('button', { name: '+ Paso' }).click();
+    if (i > 0) await page.getByRole('button', { name: '+ Step' }).click();
     await page.getByRole('textbox', { name: `Step ${i + 1}` }).fill(stepFields[i]);
     if (i === 0 && o.timerMinutes) {
       // Enable timer for first step
@@ -306,11 +306,11 @@ test('cooking mode: timer controls work', async ({ page }) => {
     // Timer exists — start it
     await expect(timerDisplay.first()).toContainText('01:00');
     await timerBtn.first().click();
-    // Should now show Pausar
-    await expect(timerBtn.first()).toContainText('Pausar');
+    // Should now show Pause
+    await expect(timerBtn.first()).toContainText('Pause');
     // Pause
     await timerBtn.first().click();
-    await expect(timerBtn.first()).toContainText('Iniciar');
+    await expect(timerBtn.first()).toContainText('Start');
   }
 });
 
