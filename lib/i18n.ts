@@ -233,6 +233,7 @@ export interface Translations {
   avatarMenuAriaLabel: string;
   avatarMenuSignedInAs: string;
   avatarMenuSettings: string;
+  avatarMenuTour: string;
   avatarMenuQuick: string;
 
   // Onboarding tour
@@ -470,6 +471,7 @@ export const en: Translations = {
   avatarMenuAriaLabel: 'Account menu',
   avatarMenuSignedInAs: 'Signed in as',
   avatarMenuSettings: 'Settings',
+  avatarMenuTour: 'Take the tour',
   avatarMenuQuick: 'Quick toggles',
 
   tourStep1Title: 'Welcome to SEKAI',
@@ -706,6 +708,7 @@ export const es: Translations = {
   avatarMenuAriaLabel: 'Menú de cuenta',
   avatarMenuSignedInAs: 'Sesión iniciada como',
   avatarMenuSettings: 'Ajustes',
+  avatarMenuTour: 'Hacer el tour',
   avatarMenuQuick: 'Ajustes rápidos',
 
   tourStep1Title: 'Bienvenido a SEKAI',

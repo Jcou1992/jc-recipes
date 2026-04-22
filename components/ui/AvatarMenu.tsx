@@ -87,6 +87,15 @@ export default function AvatarMenu({ initial, email }: Props) {
           >
             {t.avatarMenuSettings}
           </Link>
+          <Link
+            href="/recipes?tour=1"
+            className="block px-4 py-3 font-label text-sm tracking-wider uppercase transition-colors hover:brightness-110"
+            style={{ color: 'var(--text-1)', borderTop: '1px solid var(--border)' }}
+            onClick={() => setOpen(false)}
+            data-testid="avatar-menu-tour-link"
+          >
+            {t.avatarMenuTour}
+          </Link>
 
           <div
             className="px-4 py-2 flex items-center gap-2"
