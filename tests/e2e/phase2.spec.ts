@@ -22,11 +22,6 @@ async function seedAndOpen(
   return `/recipes/${id}`;
 }
 
-async function openFilterSheet(page: Page) {
-  const isNarrow = ((await page.viewportSize())?.width ?? 1280) < 640;
-  await page.getByTestId(isNarrow ? 'filter-mobile-btn' : 'filter-desktop-btn').click();
-}
-
 // ── Search ────────────────────────────────────────────────────────────────────
 
 test('search filters the recipe list by name @smoke', async ({ page }) => {
@@ -82,27 +77,54 @@ test('search: Clear filters button resets the filter @regression', async ({ page
 
 // ── Tag filter (combines tag + search) ────────────────────────────────────────
 
-test('tag filter chips mark as pressed and combine with search @regression', async ({ page }) => {
-  const tag  = `e2etag${Date.now()}`;
+test('tag rail chip marks as pressed and combines with search @regression', async ({ page }) => {
+  // Prefix with '0' so it sorts into the first 12 tags (alphabetical) and stays
+  // inline on the rail even when the account has many tags.
+  const tag  = `0e2etag${Date.now()}`;
   const name = uniqueName('TagRecipe');
   await seedRecipe({ name, tags: [tag] });
 
   await page.goto('/recipes');
-  await openFilterSheet(page);
+  await page.waitForLoadState('networkidle');
 
-  const isNarrow = ((await page.viewportSize())?.width ?? 1280) < 640;
-  const surface = page.getByTestId(isNarrow ? 'filter-sheet' : 'filter-popover');
-  const chip = surface.getByTestId(`tag-filter-${tag}`);
+  // Tag chip is inline in the TagRail — no popover to open.
+  const chip = page.getByTestId(`tag-filter-${tag}`);
   await expect(chip).toBeVisible();
+  await expect(chip).toHaveAttribute('aria-pressed', 'false');
   await chip.click();
-  await surface.getByRole('button', { name: 'Done' }).click();
-
-  // .first() — desktop + mobile strips share testId.
-  await expect(page.getByTestId(`tag-filter-${tag}`).first()).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip).toHaveAttribute('aria-pressed', 'true', { timeout: 10_000 });
 
   // Combined with search: tag-filtered list still finds our recipe by name.
   await page.getByTestId('recipe-search').fill(name);
   await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible({ timeout: 15_000 });
+});
+
+test('sort pills change URL sort param @regression', async ({ page }) => {
+  await seedRecipe({ name: uniqueName('SortSentinel') });
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  const azPill = page.getByTestId('sort-pill-az');
+  await expect(azPill).toBeVisible();
+  await azPill.click();
+  await expect(page).toHaveURL(/sort=az/, { timeout: 10_000 });
+  await expect(azPill).toHaveAttribute('aria-checked', 'true');
+});
+
+test('result count updates and announces filter context @regression', async ({ page }) => {
+  const tag = `countTag${Date.now()}`;
+  await seedRecipe({ name: uniqueName('CountA'), tags: [tag] });
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  const count = page.getByTestId('result-count');
+  await expect(count).toBeVisible();
+  const before = (await count.textContent()) ?? '';
+
+  await page.getByTestId(`tag-filter-${tag}`).click();
+  // After filter, count format flips to "X of Y"
+  await expect(count).not.toHaveText(before, { timeout: 10_000 });
+  await expect(count).toContainText(/\d+/);
 });
 
 // ── Scaler DOM wiring (math unit-tested elsewhere) ───────────────────────────
@@ -389,14 +411,16 @@ test('onboarding tour: replay button launches tour and Next advances @regression
   await expect(page.getByTestId('onboarding-tour')).not.toBeVisible();
 });
 
-test('onboarding tour: spotlight lands on the mobile filter button, not the corner @mobile', async ({ page }) => {
-  // Regression: the filter step's selector was
-  //   [data-testid="filter-desktop-btn"], [data-testid="filter-mobile-btn"]
-  // querySelector returned the desktop (display:none) element first on mobile,
-  // whose rect is (0,0,0,0). Spotlight ring rendered as a tiny square at the
-  // top-left corner. measure() now picks the first VISIBLE candidate.
+test('onboarding tour: spotlight lands on the visible filter control, not the corner @mobile', async ({ page }) => {
+  // Regression: measure() used querySelector which picks the first DOM match
+  // regardless of visibility. If the selector was a comma-OR and the first
+  // candidate was display:none, the ring rendered at (0,0,0,0). The filter
+  // step now targets sort-pills / tag-rail (always visible when recipes exist).
   const vp = page.viewportSize();
   if (!vp || vp.width >= 768) return; // mobile-only
+
+  // Seed a recipe so sort-pills + tag-rail render at all
+  await seedRecipe({ name: uniqueName('TourFilter'), tags: ['seeded'] });
 
   await page.goto('/recipes?tour=1');
   await page.waitForLoadState('networkidle');
@@ -407,25 +431,24 @@ test('onboarding tour: spotlight lands on the mobile filter button, not the corn
   await page.getByTestId('onboarding-next').click();
   await expect(page.getByTestId('onboarding-tour')).toBeVisible();
 
-  const mobileBtn = page.getByTestId('filter-mobile-btn');
-  await expect(mobileBtn).toBeVisible();
-  const btnBox = await mobileBtn.boundingBox();
-  expect(btnBox, 'mobile filter button must be measurable').not.toBeNull();
+  // Spotlight anchors to the first sort pill (always visible when recipes exist)
+  const target = page.getByTestId('sort-pill-newest');
+  await expect(target).toBeVisible();
+  const tBox = await target.boundingBox();
+  expect(tBox, 'sort pills must be measurable').not.toBeNull();
 
   const ring = page.getByTestId('tour-spotlight-ring');
   await expect(ring).toBeVisible();
   const ringBox = await ring.boundingBox();
   expect(ringBox, 'spotlight ring must be measurable').not.toBeNull();
 
-  // Ring center should be inside the button's bounding box.
-  // (Spotlight adds 8px padding around the target, so the ring is slightly
-  // larger than the button but centered on it.)
+  // Ring center should land inside the target's bounding box.
   const cx = ringBox!.x + ringBox!.width / 2;
   const cy = ringBox!.y + ringBox!.height / 2;
-  expect(cx).toBeGreaterThanOrEqual(btnBox!.x);
-  expect(cx).toBeLessThanOrEqual(btnBox!.x + btnBox!.width);
-  expect(cy).toBeGreaterThanOrEqual(btnBox!.y);
-  expect(cy).toBeLessThanOrEqual(btnBox!.y + btnBox!.height);
+  expect(cx).toBeGreaterThanOrEqual(tBox!.x);
+  expect(cx).toBeLessThanOrEqual(tBox!.x + tBox!.width);
+  expect(cy).toBeGreaterThanOrEqual(tBox!.y);
+  expect(cy).toBeLessThanOrEqual(tBox!.y + tBox!.height);
 });
 
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {

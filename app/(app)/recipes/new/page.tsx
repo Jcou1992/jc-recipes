@@ -97,7 +97,7 @@ export default function NewRecipePage() {
       </div>
 
       <div
-        className="rounded-b-xl rounded-tr-xl p-6 mt-0"
+        className="rounded-b-xl rounded-tr-xl p-4 sm:p-6 mt-0"
         style={{
           background: 'var(--bg-card)',
           border: '1px solid var(--border)',

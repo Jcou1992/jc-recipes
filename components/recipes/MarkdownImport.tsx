@@ -213,7 +213,7 @@ export default function MarkdownImport({ onImport }: Props) {
         </p>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex w-full sm:justify-end">
         <button
           type="button"
           data-testid="import-button"

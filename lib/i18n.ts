@@ -48,6 +48,13 @@ export interface Translations {
   sortMostIngredientsHint: string;
   shortcutFilter: string;
 
+  // Inline filter rail
+  moreTagsBtn: (n: number) => string;
+  tagsZeroHint: string;
+  resultCount: (n: number) => string;
+  resultCountOf: (shown: number, total: number) => string;
+  filteredBy: (tags: string[]) => string;
+
   // RecipeCard
   servingLabel: (n: number) => string;
   ingredientsCount: (n: number) => string;
@@ -297,6 +304,12 @@ export const en: Translations = {
   sortMostIngredientsHint: 'Most complex first',
   shortcutFilter: 'F — Open filter',
 
+  moreTagsBtn: (n) => `+${n} more`,
+  tagsZeroHint: 'Tag recipes to filter here',
+  resultCount: (n) => `${n} ${n === 1 ? 'recipe' : 'recipes'}`,
+  resultCountOf: (shown, total) => `${shown} of ${total}`,
+  filteredBy: (tags) => `filtered by ${tags.join(', ')}`,
+
   servingLabel: (n) => `${n} ${n !== 1 ? 'servings' : 'serving'}`,
   ingredientsCount: (n) => `${n} ingredients`,
   selectRecipeAriaLabel: (name) => `Select ${name}`,
@@ -533,6 +546,12 @@ export const es: Translations = {
   sortFastestHint: 'Menor tiempo total',
   sortMostIngredientsHint: 'Más complejo primero',
   shortcutFilter: 'F — Abrir filtro',
+
+  moreTagsBtn: (n) => `+${n} más`,
+  tagsZeroHint: 'Etiqueta recetas para filtrar aquí',
+  resultCount: (n) => `${n} ${n === 1 ? 'receta' : 'recetas'}`,
+  resultCountOf: (shown, total) => `${shown} de ${total}`,
+  filteredBy: (tags) => `filtrado por ${tags.join(', ')}`,
 
   servingLabel: (n) => `${n} ${n !== 1 ? 'porciones' : 'porción'}`,
   ingredientsCount: (n) => `${n} ingredientes`,

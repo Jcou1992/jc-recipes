@@ -5,7 +5,8 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import RecipeCard from './RecipeCard';
 import BulkActionBar from './BulkActionBar';
 import FilterPanel from './FilterPanel';
-import FilterPopover from './FilterPopover';
+import SortPills, { type SortKey as SortKeyT } from './SortPills';
+import TagRail from './TagRail';
 import { useT } from '@/components/ui/LanguageContext';
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut';
 import type { Recipe } from '@/types/recipe';
@@ -37,10 +38,9 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
   const [searchInput, setSearchInput] = useState(q);
   const [tagSearch, setTagSearch] = useState('');
-  const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [showOverflow, setShowOverflow] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const desktopFilterBtnRef = useRef<HTMLButtonElement>(null);
 
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -127,20 +127,20 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   }, [recipes, hiddenIds, q, activeTags, sort]);
 
   const hasFilters = !!(q || activeTags.length > 0 || sort !== 'newest');
-  const panelHasFilters = activeTags.length > 0 || sort !== 'newest';
 
   useKeyboardShortcut('/', () => {
     searchInputRef.current?.focus();
     searchInputRef.current?.select();
   });
   useKeyboardShortcut('f', () => {
-    if (allTags.length === 0 && sort === 'newest') return;
-    setShowFilterSheet(v => !v);
+    // Only meaningful when overflow exists
+    if (allTags.length <= 12) return;
+    setShowOverflow(v => !v);
   });
   useKeyboardShortcut(
     'Escape',
     () => {
-      if (showFilterSheet) setShowFilterSheet(false);
+      if (showOverflow) setShowOverflow(false);
       if (hasFilters) clearFilters();
     },
     { ignoreInInputs: false },
@@ -221,32 +221,23 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
     [recipes, selectedIds],
   );
 
-  // Shared FilterPanel handlers.
+  // Handlers for the filter surface
   const handleSortChange = useCallback(
-    (k: SortKey) => { updateParams({ sort: k }); },
+    (k: SortKeyT) => { updateParams({ sort: k }); },
     // updateParams is stable enough in this context (closure over router/params).
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [searchParams, pathname],
   );
-  const handleDone = useCallback(() => setShowFilterSheet(false), []);
-  const handleClear = useCallback(() => {
-    clearFilters();
-    setShowFilterSheet(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  const handleDone = useCallback(() => setShowOverflow(false), []);
 
-  const panel = (
+  const overflowPanel = (
     <FilterPanel
-      sort={sort}
       allTags={allTags}
       activeTags={activeTags}
       tagSearch={tagSearch}
-      hasFilters={panelHasFilters}
-      onSortChange={handleSortChange}
       onToggleTag={toggleTag}
       onTagSearchChange={setTagSearch}
       onDone={handleDone}
-      onClear={handleClear}
     />
   );
 
@@ -338,148 +329,76 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
       )}
 
       {/* Desktop: single Filter button + popover */}
-      {allTags.length > 0 && (
-        <div className="hidden sm:block mb-3">
-          <div className="relative inline-block">
-            <button
-              ref={desktopFilterBtnRef}
-              type="button"
-              onClick={() => setShowFilterSheet(v => !v)}
-              className="flex-shrink-0 flex items-center gap-2 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[36px] transition-all"
-              style={panelHasFilters
-                ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
-                : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-              }
-              aria-expanded={showFilterSheet}
-              aria-haspopup="dialog"
-              data-testid="filter-desktop-btn"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h2" />
-              </svg>
-              {t.filterBtn}
-              {panelHasFilters && (
-                <span
-                  className="font-label text-xs rounded-full w-5 h-5 flex items-center justify-center"
-                  style={{ background: 'oklch(100% 0 0 / 0.25)', color: '#fff' }}
-                >
-                  {activeTags.length + (sort !== 'newest' ? 1 : 0)}
-                </span>
-              )}
-            </button>
-            <FilterPopover
-              open={showFilterSheet}
-              onClose={() => setShowFilterSheet(false)}
-              anchorRef={desktopFilterBtnRef}
-            >
-              {panel}
-            </FilterPopover>
-          </div>
+      {/* Sort row: always visible when there's anything to sort (i.e. recipes exist). */}
+      {recipes.length > 0 && !selectMode && (
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <SortPills sort={sort} onChange={handleSortChange} />
+          <p
+            className="flex-shrink-0 font-label text-xs tracking-widest uppercase tabular-nums"
+            style={{ color: 'var(--text-3)' }}
+            role="status"
+            aria-live="polite"
+            data-testid="result-count"
+          >
+            {hasFilters
+              ? t.resultCountOf(filtered.length, recipes.length - hiddenIds.size)
+              : t.resultCount(filtered.length)}
+            {activeTags.length > 0 && (
+              <span className="sr-only"> {t.filteredBy(activeTags)}</span>
+            )}
+          </p>
         </div>
       )}
 
-      {/* Desktop: active-tag chip strip (no X icon, whole chip dismisses) */}
-      {activeTags.length > 0 && (
-        <div className="hidden sm:flex flex-wrap gap-2 mb-4">
-          {activeTags.map(tag => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => toggleTag(tag)}
-              className="font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[32px] flex items-center transition-all"
-              style={{ background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }}
-              aria-pressed={true}
-              aria-label={`Remove tag: ${tag}`}
-              data-testid={`tag-filter-${tag}`}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Mobile: Filter button + active-tag strip */}
-      <div className="sm:hidden mb-6">
-        {(allTags.length > 0 || sort !== 'newest') && (
-          <div className="flex items-center gap-2 mb-0">
-            <button
-              type="button"
-              onClick={() => setShowFilterSheet(true)}
-              className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-4 rounded-full min-h-[44px] flex items-center gap-1.5 transition-all"
-              style={
-                panelHasFilters
-                  ? { background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }
-                  : { background: 'var(--bg-raised)', color: 'var(--text-2)', border: '1px solid var(--border)' }
-              }
-              aria-label="Open filter and sort options"
-              aria-expanded={showFilterSheet}
-              data-testid="filter-mobile-btn"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18M7 8h10M11 12h2" />
-              </svg>
-              {t.filterBtn}
-              {panelHasFilters && (
-                <span
-                  className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold"
-                  style={{ background: 'oklch(100% 0 0 / 0.25)', color: '#fff' }}
-                  aria-label={`${activeTags.length + (sort !== 'newest' ? 1 : 0)} active filters`}
-                >
-                  {activeTags.length + (sort !== 'newest' ? 1 : 0)}
-                </span>
+      {/* Tag row + CLEAR */}
+      {recipes.length > 0 && !selectMode && (
+        <div className="flex items-center justify-between gap-3 mb-6">
+          <div className="flex-1 min-w-0">
+            <TagRail
+              allTags={allTags}
+              activeTags={activeTags}
+              onToggle={toggleTag}
+              overflowPanel={overflowPanel}
+              overflowOpen={showOverflow}
+              onOverflowOpenChange={setShowOverflow}
+              renderMobileSheet={(panel) => (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    style={{ background: 'oklch(0 0 0 / 0.5)' }}
+                    onClick={() => setShowOverflow(false)}
+                  />
+                  <div
+                    className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
+                    style={{
+                      background: 'var(--bg-card)',
+                      boxShadow: 'var(--shadow-dialog)',
+                      maxHeight: '85svh',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="All tags"
+                    data-testid="filter-sheet"
+                  >
+                    <div className="overflow-y-auto px-6 pt-6 pb-8">{panel}</div>
+                  </div>
+                </>
               )}
+            />
+          </div>
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex-shrink-0 font-label text-xs tracking-widest uppercase transition-colors"
+              style={{ color: 'var(--color-terracotta)', minHeight: 44, padding: '0 0.5rem' }}
+              data-testid="clear-filters-btn-inline"
+            >
+              {t.clearFiltersBtn}
             </button>
-          </div>
-        )}
-
-        {activeTags.length > 0 && (
-          <div
-            className="flex gap-2 overflow-x-auto pt-3 pb-1"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              maskImage: 'linear-gradient(to right, black 92%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to right, black 92%, transparent)',
-            } as React.CSSProperties}
-          >
-            {activeTags.map(tag => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => toggleTag(tag)}
-                className="flex-shrink-0 font-label text-xs tracking-wider uppercase px-3 rounded-full min-h-[44px] flex items-center transition-all"
-                style={{ background: 'var(--color-terracotta-contrast)', color: 'var(--color-bone)', border: '1px solid var(--color-terracotta)' }}
-                aria-pressed={true}
-                aria-label={`Remove tag: ${tag}`}
-                data-testid={`tag-filter-${tag}`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Mobile bottom sheet */}
-      {showFilterSheet && (
-        <div className="sm:hidden">
-          <div
-            className="fixed inset-0 z-40"
-            style={{ background: 'oklch(0 0 0 / 0.5)' }}
-            onClick={() => setShowFilterSheet(false)}
-          />
-          <div
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-2xl"
-            style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-dialog)', maxHeight: '85svh', display: 'flex', flexDirection: 'column' }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Filter and sort options"
-            data-testid="filter-sheet"
-          >
-            <div className="overflow-y-auto px-6 pt-6 pb-8">
-              {panel}
-            </div>
-          </div>
+          )}
         </div>
       )}
 

@@ -28,7 +28,7 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     id: 'filter',
-    targetSelector: '[data-testid="filter-desktop-btn"], [data-testid="filter-mobile-btn"]',
+    targetSelector: '[data-testid="sort-pill-newest"]',
     titleKey: 'tourStep3Title',
     bodyKey: 'tourStep3Body',
     page: '/recipes',
