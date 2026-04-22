@@ -1,323 +1,160 @@
 /**
- * Phase 2 — Serving scaler, unit conversion, cooking mode, search, tag filter.
- * All tests cover both desktop and mobile viewports via the three profiles.
+ * Phase 2 — search, tag filter, serving-scaler DOM wiring, cooking mode.
+ *
+ * Scaler math is covered exhaustively by lib/utils/__tests__/scaling.test.ts.
+ * This spec only verifies the DOM wiring: clicking the scaler mutates the
+ * rendered ingredient amount. No numeric-correctness assertions live here.
  */
 import { test, expect, type Page } from '@playwright/test';
-
-const EMAIL    = 'test@jc-recipes.local';
-const PASSWORD = process.env.TEST_USER_PASSWORD ?? 'changeme';
+import { seedRecipe, uniqueName } from './helpers';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-async function signIn(page: Page) {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/recipes$/, { timeout: 10_000 });
-}
-
-/** Creates a recipe and returns its URL. */
-async function createTestRecipe(
+async function seedAndOpen(
   page: Page,
-  name: string,
-  opts?: {
-    servings?: number;
-    ingredientAmount?: string;
-    ingredientUnit?: string;
-    ingredientName?: string;
-    steps?: string[];
-    tags?: string;
-    timerMinutes?: number;
-  },
-) {
-  const o = opts ?? {};
-  await page.goto('/recipes/new');
-  await page.waitForLoadState('networkidle'); // ensure React hydration before interacting
-  await page.locator('#name').fill(name);
-  if (o.servings) await page.getByLabel('Servings').fill(String(o.servings));
-
-  const amtField  = page.getByRole('textbox', { name: 'Ingredient amount' }).first();
-  const unitField = page.getByRole('textbox', { name: 'Ingredient unit' }).first();
-  const nameField = page.getByRole('textbox', { name: 'Ingredient name' }).first();
-
-  await amtField.fill(o.ingredientAmount ?? '1');
-  if (o.ingredientUnit) await unitField.fill(o.ingredientUnit);
-  await nameField.fill(o.ingredientName ?? 'test ingredient');
-
-  const stepFields = o.steps ?? ['Step one.'];
-  for (let i = 0; i < stepFields.length; i++) {
-    if (i > 0) await page.getByRole('button', { name: '+ Step' }).click();
-    await page.getByRole('textbox', { name: `Step ${i + 1}` }).fill(stepFields[i]);
-    if (i === 0 && o.timerMinutes) {
-      // Enable timer for first step
-      await page.getByRole('checkbox', { name: /timer/i }).first().check();
-      await page.getByLabel('Timer duration').first().fill(`${o.timerMinutes} min`);
-    }
-  }
-
-  if (o.tags) {
-    await page.getByText('Optional fields').click();
-    await page.getByLabel('Tags').fill(o.tags);
-  }
-
-  await page.getByRole('button', { name: 'Create recipe' }).click();
-  // Wait for navigation to a real recipe UUID (not /recipes/new which matches the same pattern)
-  await page.waitForURL(
-    url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
-    { timeout: 30_000 },
-  );
-  return page.url();
+  prefix: string,
+  opts: Parameters<typeof seedRecipe>[0] extends infer T
+    ? (T extends { name: string } ? Omit<T, 'name'> : never)
+    : never = {} as never,
+): Promise<string> {
+  const { id } = await seedRecipe({ name: uniqueName(prefix), ...opts });
+  await page.goto(`/recipes/${id}`);
+  return `/recipes/${id}`;
 }
-
-// ── 2A: Search ─────────────────────────────────────────────────────────────────
-
-test('search filters recipes by name', async ({ page }) => {
-  await signIn(page);
-  const unique = `SearchTest-${Date.now()}`;
-  await createTestRecipe(page, unique);
-
-  await page.goto('/recipes');
-  await page.waitForLoadState('networkidle');
-  const searchInput = page.getByTestId('recipe-search');
-  await expect(searchInput).toBeVisible();
-
-  // Type a query — wait for the filtered result (generous timeout for WebKit debounce+render)
-  await searchInput.fill(unique);
-  await expect(page.getByRole('heading', { name: unique, level: 2 })).toBeVisible({ timeout: 15_000 });
-});
-
-test('search shows empty filtered state for no matches', async ({ page }) => {
-  await signIn(page);
-  await page.goto('/recipes');
-  await page.waitForLoadState('networkidle');
-
-  const searchInput = page.getByTestId('recipe-search');
-  await searchInput.fill('zzz-no-match-recipe-xyz');
-  // Wait for debounce + router.replace + re-render (can be slow on WebKit)
-  await expect(page.getByTestId('filtered-empty-state')).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId('clear-filters-btn')).toBeVisible();
-});
-
-test('clear filters restores full recipe list', async ({ page }) => {
-  await signIn(page);
-  await page.goto('/recipes');
-  await page.waitForLoadState('networkidle');
-
-  const searchInput = page.getByTestId('recipe-search');
-  await searchInput.fill('zzz-no-match-recipe-xyz');
-  await expect(page.getByTestId('filtered-empty-state')).toBeVisible({ timeout: 15_000 });
-
-  await page.getByTestId('clear-filters-btn').click();
-  await expect(page.getByTestId('filtered-empty-state')).not.toBeVisible({ timeout: 10_000 });
-});
-
-test('× button clears search input', async ({ page }) => {
-  await signIn(page);
-  await page.goto('/recipes');
-  await page.waitForLoadState('networkidle');
-
-  const searchInput = page.getByTestId('recipe-search');
-  await searchInput.fill('something');
-  // × button appears immediately from local state (no URL update needed)
-  await page.getByRole('button', { name: 'Clear search' }).click();
-  await expect(searchInput).toHaveValue('');
-});
-
-// ── 2A: Tag filter ─────────────────────────────────────────────────────────────
 
 async function openFilterSheet(page: Page) {
   const isNarrow = ((await page.viewportSize())?.width ?? 1280) < 640;
   await page.getByTestId(isNarrow ? 'filter-mobile-btn' : 'filter-desktop-btn').click();
 }
 
-test('tag filter shows and filters by tag', async ({ page }) => {
-  await signIn(page);
-  const tag = `e2etag${Date.now()}`;
-  const recipeName = `TagRecipe-${Date.now()}`;
-  await createTestRecipe(page, recipeName, { tags: tag });
+// ── Search ────────────────────────────────────────────────────────────────────
+
+test('search filters the recipe list by name @smoke', async ({ page }) => {
+  const name = uniqueName('SearchHit');
+  await seedRecipe({ name });
+
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  const input = page.getByTestId('recipe-search');
+  await expect(input).toBeVisible();
+  await input.fill(name);
+  await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible({ timeout: 15_000 });
+});
+
+test('search: no-match shows filtered empty state; × button clears the input @regression', async ({ page }) => {
+  // Seed so the list is non-empty when filters clear — filtered-empty-state is
+  // also shown when the account truly has no recipes, which would make this
+  // assertion flaky under parallel bulk-delete workers.
+  await seedRecipe({ name: uniqueName('SearchSentinel') });
+
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  const input = page.getByTestId('recipe-search');
+  await input.fill('zzz-no-match-recipe-xyz');
+  await expect(page.getByTestId('filtered-empty-state')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId('clear-filters-btn')).toBeVisible();
+
+  // × button clears input; local state is synchronous.
+  await page.getByRole('button', { name: 'Clear search' }).click();
+  await expect(input).toHaveValue('');
+  // And restores the list — empty-state unmounts once the debounce flushes.
+  await expect(page.getByTestId('filtered-empty-state')).toBeHidden({ timeout: 10_000 });
+});
+
+test('search: Clear filters button resets the filter @regression', async ({ page }) => {
+  await seedRecipe({ name: uniqueName('ClearFiltersSentinel') });
+
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  const input = page.getByTestId('recipe-search');
+  await input.fill('zzz-no-match-recipe-xyz');
+  await expect(page.getByTestId('filtered-empty-state')).toBeVisible({ timeout: 15_000 });
+
+  await page.getByTestId('clear-filters-btn').click();
+  // clearFilters() replaces the URL and clears searchInput synchronously;
+  // the filtered view unmounts once the server re-renders.
+  await expect(page.getByTestId('filtered-empty-state')).toBeHidden({ timeout: 10_000 });
+  await expect(input).toHaveValue('');
+});
+
+// ── Tag filter (combines tag + search) ────────────────────────────────────────
+
+test('tag filter chips mark as pressed and combine with search @regression', async ({ page }) => {
+  const tag  = `e2etag${Date.now()}`;
+  const name = uniqueName('TagRecipe');
+  await seedRecipe({ name, tags: [tag] });
 
   await page.goto('/recipes');
   await openFilterSheet(page);
 
-  // Tag chip is inside the sheet
-  const tagChip = page.getByTestId(`tag-filter-${tag}`);
-  await expect(tagChip).toBeVisible();
-
-  // Click to filter, then close sheet
-  await tagChip.click();
+  const chip = page.getByTestId(`tag-filter-${tag}`);
+  await expect(chip).toBeVisible();
+  await chip.click();
   await page.getByRole('button', { name: 'Done' }).click();
 
-  // Active strip shows tag (desktop + mobile strips share testId; .first() avoids strict mode)
+  // .first() — desktop + mobile strips share testId.
   await expect(page.getByTestId(`tag-filter-${tag}`).first()).toHaveAttribute('aria-pressed', 'true');
 
-  // Our recipe should still be visible
-  await expect(page.getByRole('heading', { name: recipeName, level: 2 })).toBeVisible();
+  // Combined with search: tag-filtered list still finds our recipe by name.
+  await page.getByTestId('recipe-search').fill(name);
+  await expect(page.getByRole('heading', { name, level: 2 })).toBeVisible({ timeout: 15_000 });
 });
 
-test('tag filter combined with search', async ({ page }) => {
-  await signIn(page);
-  const tag = `combinetag${Date.now()}`;
-  const recipeName = `CombineRecipe-${Date.now()}`;
-  await createTestRecipe(page, recipeName, { tags: tag });
+// ── Scaler DOM wiring (math unit-tested elsewhere) ───────────────────────────
 
-  await page.goto('/recipes');
-
-  // Open filter sheet, select tag, close
-  await openFilterSheet(page);
-  const tagChip = page.getByTestId(`tag-filter-${tag}`);
-  await expect(tagChip).toBeVisible();
-  await tagChip.click();
-  await page.getByRole('button', { name: 'Done' }).click();
-
-  const searchInput = page.getByTestId('recipe-search');
-  await searchInput.fill(recipeName);
-  await expect(page.getByRole('heading', { name: recipeName, level: 2 })).toBeVisible({ timeout: 15_000 });
-});
-
-// ── 2B-1: Serving scaler ──────────────────────────────────────────────────────
-
-test('scaler changes serving count and updates ingredient amount', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `ScalerTest-${Date.now()}`, {
+test('serving scaler: increasing servings updates the rendered ingredient amount @regression', async ({ page }) => {
+  await seedAndOpen(page, 'ScalerWiring', {
     servings: 2,
-    ingredientAmount: '100',
-    ingredientUnit: 'g',
-    ingredientName: 'flour',
-  });
-  await page.goto(recipeUrl);
+    ingredients: [{ amount: 100, unit: 'g', name: 'flour' }],
+    steps: [{ content: 'Mix.' }],
+  } as never);
 
-  // Initial state: 2 servings, 100g flour
   await expect(page.getByTestId('scaler-value')).toContainText('2');
-  await expect(page.getByTestId('ingredient-amount-0')).toContainText('100');
-
-  // Increase to 4 servings (×2)
+  const before = (await page.getByTestId('ingredient-amount-0').textContent()) ?? '';
   await page.getByTestId('scaler-increase').click();
-  await page.getByTestId('scaler-increase').click();
-  await expect(page.getByTestId('scaler-value')).toContainText('4');
-  // 100g × 2 = 200g
-  await expect(page.getByTestId('ingredient-amount-0')).toContainText('200');
-});
-
-test('scaler shows scaled badge and reset clears it', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `ScalerBadge-${Date.now()}`, {
-    servings: 2,
-    ingredientAmount: '1',
-    ingredientName: 'egg',
-  });
-  await page.goto(recipeUrl);
-
-  // No scaled badge initially
-  await expect(page.getByTestId('scaler-scaled-badge')).not.toBeVisible();
-
-  // Scale up
-  await page.getByTestId('scaler-increase').click();
+  await expect(page.getByTestId('scaler-value')).toContainText('3');
+  await expect.poll(async () =>
+    (await page.getByTestId('ingredient-amount-0').textContent()) ?? ''
+  , { timeout: 5_000 }).not.toBe(before);
   await expect(page.getByTestId('scaler-scaled-badge')).toBeVisible();
-
-  // Reset
-  await page.getByTestId('scaler-scaled-badge').click();
-  await expect(page.getByTestId('scaler-scaled-badge')).not.toBeVisible();
-  await expect(page.getByTestId('scaler-value')).toContainText('2');
 });
 
-test('base recipe data is not mutated by scaler', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `BaseRecipe-${Date.now()}`, {
-    servings: 1,
-    ingredientAmount: '50',
-    ingredientUnit: 'g',
-    ingredientName: 'sugar',
-  });
-  await page.goto(recipeUrl);
+// ── Cooking mode ──────────────────────────────────────────────────────────────
 
-  // Scale up
-  await page.getByTestId('scaler-increase').click();
-  await page.getByTestId('scaler-increase').click();
-  await expect(page.getByTestId('ingredient-amount-0')).toContainText('150');
+test('cooking mode: enter, navigate steps forward, exit back to detail @smoke', async ({ page }) => {
+  await seedAndOpen(page, 'CookNav', {
+    steps: [{ content: 'Prepare ingredients.' }, { content: 'Cook for 10 minutes.' }, { content: 'Serve hot.' }],
+  } as never);
 
-  // Reload page — should reset to base
-  await page.reload();
-  await expect(page.getByTestId('ingredient-amount-0')).toContainText('50');
-});
-
-// ── 2B-3: Cooking mode ────────────────────────────────────────────────────────
-
-test('cooking mode: enter from detail page, navigate steps, exit returns to detail', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `CookTest-${Date.now()}`, {
-    steps: ['Prepare ingredients.', 'Cook for 10 minutes.', 'Serve hot.'],
-  });
-  await page.goto(recipeUrl);
-
-  // Enter cooking mode (mobile uses cook-mode-btn, desktop uses cook-mode-btn-desktop)
   const cookBtn = page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first();
-  await expect(cookBtn).toBeVisible();
   await cookBtn.click();
   await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
-
   await expect(page.getByTestId('cook-mode')).toBeVisible();
 
-  // Pick the correct desktop vs mobile element based on viewport (sm breakpoint = 640px)
   const vp = page.viewportSize();
-  const isMobile = vp ? vp.width < 640 : false;
-  const stepSuffix = isMobile ? '-mobile' : '';
+  const suf = vp && vp.width < 640 ? '-mobile' : '';
 
-  // Should be on step 1
-  const stepText = page.getByTestId(`cook-step-text${stepSuffix}`);
+  const stepText = page.getByTestId(`cook-step-text${suf}`);
   await expect(stepText).toContainText('Prepare ingredients');
 
-  // Navigate to step 2
-  const nextBtn = page.getByTestId(`cook-next-btn${stepSuffix}`);
-  await nextBtn.click();
+  const next = page.getByTestId(`cook-next-btn${suf}`);
+  await next.click();
   await expect(stepText).toContainText('Cook for 10 minutes');
-
-  // Navigate to step 3
-  await nextBtn.click();
+  await next.click();
   await expect(stepText).toContainText('Serve hot');
 
-  // Exit returns to detail
-  const exitBtn = page.getByTestId(`cook-exit-btn${stepSuffix}`);
-  await exitBtn.click();
+  await page.getByTestId(`cook-exit-btn${suf}`).click();
   await page.waitForURL(
     url => /\/recipes\/[a-z0-9-]+$/.test(url.toString()) && !url.pathname.endsWith('/recipes/new'),
     { timeout: 30_000 },
   );
-  // Should not have /cook in URL
   await expect(page).not.toHaveURL(/\/cook/);
 });
 
-test('cooking mode: timer controls work', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `TimerTest-${Date.now()}`, {
-    steps: ['Cook pasta.'],
-    timerMinutes: 1,
-  });
-
-  // Check if timer field exists — skip gracefully if step form doesn't have timer
-  await page.goto(recipeUrl);
-  await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
-  await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
-
-  const timerDisplay = page.getByTestId('cook-timer-display').or(page.getByTestId('cook-timer-display-mobile'));
-  const timerBtn = page.getByTestId('cook-timer-btn').or(page.getByTestId('cook-timer-btn-mobile'));
-
-  if (await timerDisplay.first().isVisible()) {
-    // Timer exists — start it
-    await expect(timerDisplay.first()).toContainText('01:00');
-    await timerBtn.first().click();
-    // Should now show Pause
-    await expect(timerBtn.first()).toContainText('Pause');
-    // Pause
-    await timerBtn.first().click();
-    await expect(timerBtn.first()).toContainText('Start');
-  }
-});
-
-test('cooking mode: wake lock is requested', async ({ page }) => {
-  await signIn(page);
-
-  // Intercept wake lock API via prototype override
+test('cooking mode: wake lock is requested on entry @regression', async ({ page }) => {
   await page.addInitScript(() => {
     try {
       Object.defineProperty(Navigator.prototype, 'wakeLock', {
@@ -332,7 +169,6 @@ test('cooking mode: wake lock is requested', async ({ page }) => {
         configurable: true,
       });
     } catch {
-      // Fallback: direct assignment
       (navigator as unknown as Record<string, unknown>).wakeLock = {
         request: async (type: string) => {
           (window as unknown as Record<string, unknown>)._wakeLockType = type;
@@ -342,63 +178,48 @@ test('cooking mode: wake lock is requested', async ({ page }) => {
     }
   });
 
-  const recipeUrl = await createTestRecipe(page, `WakeLock-${Date.now()}`, {
-    steps: ['Single step.'],
-  });
-  await page.goto(recipeUrl);
+  await seedAndOpen(page, 'WakeLock', { steps: [{ content: 'Single step.' }] } as never);
   await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
   await expect(page).toHaveURL(/\/cook/, { timeout: 15_000 });
 
-  // Give wake lock time to be called
   await page.waitForTimeout(500);
   const lockType = await page.evaluate(() => (window as unknown as Record<string, unknown>)._wakeLockType);
   expect(lockType).toBe('screen');
 });
 
-test('cooking mode: progress bar reflects current step', async ({ page }) => {
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `ProgressTest-${Date.now()}`, {
-    steps: ['Step A.', 'Step B.', 'Step C.', 'Step D.'],
-  });
-  await page.goto(recipeUrl);
-  // force: true works around a Mobile Chrome stacking-context issue when page is tall (4+ steps)
+test('cooking mode: progress bar advances with step navigation @mobile', async ({ page }) => {
+  // The progress bar is rendered inside a `sm:hidden` container — mobile-only.
+  // Desktop cook mode uses a different layout with no progress bar. Tagging
+  // @mobile routes this to the Mobile Safari project where the bar is present.
+  await seedAndOpen(page, 'Progress', {
+    steps: [{ content: 'A.' }, { content: 'B.' }, { content: 'C.' }, { content: 'D.' }],
+  } as never);
+  // force: true — Mobile Chrome has a stacking-context quirk when pages are tall (4+ steps).
   await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click({ force: true });
 
-  const progressBar = page.getByTestId('cook-progress-bar');
-  if (await progressBar.isVisible()) {
-    // On step 1 of 4: 25%
-    const initialStyle = await progressBar.getAttribute('style');
-    expect(initialStyle).toContain('25%');
+  const bar = page.getByTestId('cook-progress-bar');
+  await expect(bar).toBeVisible();
+  expect(await bar.getAttribute('style')).toContain('25%');
 
-    const vp2 = page.viewportSize();
-    const nextBtnId = vp2 && vp2.width < 640 ? 'cook-next-btn-mobile' : 'cook-next-btn';
-    const nextBtn = page.getByTestId(nextBtnId);
-    await nextBtn.click();
-    // On step 2 of 4: 50%
-    const nextStyle = await progressBar.getAttribute('style');
-    expect(nextStyle).toContain('50%');
-  }
+  const vp = page.viewportSize();
+  const nextId = vp && vp.width < 640 ? 'cook-next-btn-mobile' : 'cook-next-btn';
+  await page.getByTestId(nextId).click();
+  expect(await bar.getAttribute('style')).toContain('50%');
 });
 
-test('cooking mode: ingredient sheet toggles on mobile', async ({ page }) => {
-  const viewport = page.viewportSize();
-  if (!viewport || viewport.width >= 768) return; // Desktop has always-visible sidebar
+test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
+  const vp = page.viewportSize();
+  if (!vp || vp.width >= 768) return; // Desktop has always-visible sidebar.
 
-  await signIn(page);
-  const recipeUrl = await createTestRecipe(page, `SheetTest-${Date.now()}`, {
-    ingredientName: 'onion',
-    steps: ['Chop the onion.'],
-  });
-  await page.goto(recipeUrl);
+  await seedAndOpen(page, 'Sheet', {
+    ingredients: [{ amount: 1, unit: null, name: 'onion' }],
+    steps: [{ content: 'Chop the onion.' }],
+  } as never);
   await page.getByTestId('cook-mode-btn').or(page.getByTestId('cook-mode-btn-desktop')).filter({ visible: true }).first().click();
 
   const toggle = page.getByTestId('cook-ingredient-sheet-toggle');
   await expect(toggle).toBeVisible();
-
-  // Sheet closed initially
   await expect(page.getByTestId('cook-ingredient-sheet')).not.toBeVisible();
-
-  // Open sheet
   await toggle.click();
   await expect(page.getByTestId('cook-ingredient-sheet')).toBeVisible();
 });

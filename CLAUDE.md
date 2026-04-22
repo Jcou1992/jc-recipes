@@ -1,9 +1,11 @@
-Build ✓ | Playwright e2e 96/96 ✓ | No blocking issues
+Build ✓ | Jest 91/91 ✓ | Playwright 28/28 (desktop 23, mobile 5) ✓ | No blocking issues
 
 ## Technical Notes
 - Middleware uses cookie-presence check (no API calls) for routing; server actions use getSession() (JWT local validation); RLS enforces data security
-- playwright.config.ts: timeout=60s, workers=1 (Mobile Safari WebKit is slower; startTransition defers URL updates, so use networkidle waits + element-level timeouts instead of waitForURL for search/filter tests)
+- playwright.config.ts: timeout=60s, fullyParallel=true, workers=50% locally (2 on CI). Setup project writes storageState to tests/e2e/.auth/user.json; all non-auth projects reuse it. Desktop Chrome runs @regression/@smoke/untagged; Mobile Safari runs @mobile|@cross-browser only; Mobile Chrome runs @cross-browser only. WebKit/Mobile Safari is slower; startTransition defers URL updates → use networkidle + element-level timeouts, not waitForURL, for search/filter tests
+- E2E seeding: tests/e2e/helpers.ts exports seedRecipe() (Supabase JS API, ~200ms). Never fill /recipes/new by hand unless the test itself covers the form — gate enforces this
 - Test user: test@jc-recipes.local (password in .env.local TEST_USER_PASSWORD)
+- QA optimization gate: .githooks/pre-commit + scripts/test-gate.mjs run on every commit. Rules and override procedure in CONTRIBUTING_TESTS.md. Baseline in .test-gate/baseline.json (regenerate: `npm run test:gate:bootstrap`)
 - Phase 2 features: search+tag filter+sort, serving scaler, unit conversion toggle, cooking mode (/cook), toast system, unsaved-changes warning, copy ingredients, unit autocomplete, print view
 
 ## graphify

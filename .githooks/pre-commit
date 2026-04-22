@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Test optimization gate — pre-commit hook.
+# See CONTRIBUTING_TESTS.md for the policy and override procedure.
+set -euo pipefail
+
+# Only run on staged add/modify of test files.
+CHANGED=$(git diff --cached --name-only --diff-filter=AM \
+  | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' \
+  || true)
+
+if [ -z "$CHANGED" ]; then
+  exit 0
+fi
+
+# Pre-commit fires BEFORE git writes the new -m message to COMMIT_EDITMSG,
+# so we cannot read the current commit message from disk here (the file
+# contains the previous commit's text). To override the gate on this commit:
+#
+#     GATE_COMMIT_MSG="... [test-gate-override: reason]" git commit -m "..."
+#
+# The env var is respected directly; we never clobber it with stale file data.
+if [ -z "${GATE_COMMIT_MSG:-}" ]; then
+  # Commit-msg hook path ($1 = path to message file) — also exposes it to
+  # interactive editor commits. For `git commit -m` this code does not run
+  # because pre-commit is not invoked with an argument.
+  COMMIT_MSG_FILE="${1:-}"
+  if [ -n "$COMMIT_MSG_FILE" ] && [ -f "$COMMIT_MSG_FILE" ]; then
+    export GATE_COMMIT_MSG="$(cat "$COMMIT_MSG_FILE")"
+  fi
+fi
+
+echo "[test-gate] changed test files:"
+echo "$CHANGED" | sed 's/^/  - /'
+
+# shellcheck disable=SC2086
+exec node scripts/test-gate.mjs $CHANGED

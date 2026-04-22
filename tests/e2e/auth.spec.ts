@@ -1,87 +1,65 @@
 /**
- * Auth tests — happy path, error state, redirect, mobile layout.
- * Test user: test@jc-recipes.local (created in Supabase dashboard before first run).
- * Password stored in TEST_USER_PASSWORD env var (never committed).
+ * Auth tests — UI login, logout, route protection, mobile layout.
+ *
+ * This spec owns the login *form* interactions and runs in its own Playwright
+ * project without shared storageState (see playwright.config.ts "Auth (Desktop Chrome)").
+ * All other specs reuse storageState captured by global.setup.ts, so they
+ * never re-sign-in and don't need to duplicate these assertions.
  */
 import { test, expect } from '@playwright/test';
+import { TEST_EMAIL, TEST_PASSWORD, signIn } from './helpers';
 
-const EMAIL    = 'test@jc-recipes.local';
-const PASSWORD = process.env.TEST_USER_PASSWORD ?? 'changeme';
+// ── Login ─────────────────────────────────────────────────────────────────────
 
-// ── Login ──────────────────────────────────────────────────────────────────────
-
-test('login page renders', async ({ page }) => {
+test('login page renders and rejects wrong password @smoke', async ({ page }) => {
   await page.goto('/login');
   await expect(page.getByRole('heading', { name: 'jc-recipes' })).toBeVisible();
   await expect(page.getByLabel('Email')).toBeVisible();
   await expect(page.getByLabel('Password')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-});
+  const submit = page.getByRole('button', { name: 'Sign in' });
+  await expect(submit).toBeVisible();
 
-test('login with wrong credentials shows error', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
+  await page.getByLabel('Email').fill(TEST_EMAIL);
   await page.getByLabel('Password').fill('wrongpassword');
-  await page.getByRole('button', { name: 'Sign in' }).click();
+  await submit.click();
   await expect(page.locator('p.bg-red-50')).toBeVisible({ timeout: 8_000 });
 });
 
-test('login with correct credentials redirects to /recipes', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/recipes$/, { timeout: 10_000 });
-});
+// ── Login success + logout round trip ─────────────────────────────────────────
 
-test('authenticated user visiting /login is redirected to /recipes', async ({ page, context }) => {
-  // Login first
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/recipes$/, { timeout: 10_000 });
+test('successful login → /recipes, logout → /login, still-authed visit to /login redirects @regression', async ({ page }) => {
+  await signIn(page);
 
-  // Visiting login again should redirect
+  // Authed user hitting /login must be redirected back to /recipes.
   await page.goto('/login');
   await expect(page).toHaveURL(/\/recipes$/, { timeout: 5_000 });
-});
 
-// ── Logout ─────────────────────────────────────────────────────────────────────
-
-test('sign-out redirects to /login and protects /recipes', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/recipes$/, { timeout: 10_000 });
-
+  // Logout must return to /login and protect /recipes afterwards.
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/, { timeout: 8_000 });
-
   await page.goto('/recipes');
   await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
 });
 
-// ── Route protection ───────────────────────────────────────────────────────────
+// ── Route protection ──────────────────────────────────────────────────────────
 
-test('unauthenticated request to /recipes redirects to /login', async ({ page }) => {
+test('unauthenticated request to /recipes redirects to /login @smoke', async ({ page }) => {
   await page.goto('/recipes');
   await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });
 });
 
-// ── Mobile layout ──────────────────────────────────────────────────────────────
+// ── Mobile layout ─────────────────────────────────────────────────────────────
 
-test('login form is full-width and usable on mobile', async ({ page }) => {
+test('login form is full-width and touch-friendly on mobile @mobile', async ({ page }) => {
   await page.goto('/login');
   const vw = page.viewportSize()!.width;
   const emailBox = await page.getByLabel('Email').boundingBox();
-  // On mobile (<= 768px): form should fill most of the screen.
-  // On desktop: form is centered with max-w-sm (~384px) — just verify it's substantial.
   const minWidth = vw <= 768 ? vw * 0.5 : 300;
   expect(emailBox!.width).toBeGreaterThan(minWidth);
 
-  const btn = page.getByRole('button', { name: 'Sign in' });
-  const btnBox = await btn.boundingBox();
+  const btnBox = await page.getByRole('button', { name: 'Sign in' }).boundingBox();
   expect(btnBox!.height).toBeGreaterThanOrEqual(44);
 });
+
+// Note: TEST_PASSWORD ref keeps helper import side-effect-free under tsc strict.
+void TEST_PASSWORD;

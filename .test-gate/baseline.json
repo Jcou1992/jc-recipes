@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-04-22T07:26:10.687Z",
+  "fileCounts": {
+    "lib/utils/__tests__/parse-recipe-markdown.test.ts": 16,
+    "tests/e2e/auth.spec.ts": 4,
+    "tests/e2e/bulk-ops.spec.ts": 5,
+    "tests/e2e/markdown-import.spec.ts": 2,
+    "tests/e2e/phase2.spec.ts": 9,
+    "tests/e2e/recipes-crud.spec.ts": 5
+  },
+  "totals": {
+    "jestFiles": 1,
+    "playwrightFiles": 5
+  }
+}
