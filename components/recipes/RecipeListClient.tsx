@@ -195,6 +195,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   }, [filtered]);
 
   const handleOptimisticHide = useCallback((ids: string[]) => {
+    if (!Array.isArray(ids)) return;
     setHiddenIds(prev => {
       const next = new Set(prev);
       for (const id of ids) next.add(id);
@@ -203,6 +204,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   }, []);
 
   const handleOptimisticRestore = useCallback((ids: string[]) => {
+    if (!Array.isArray(ids)) return;
     setHiddenIds(prev => {
       const next = new Set(prev);
       for (const id of ids) next.delete(id);

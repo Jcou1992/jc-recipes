@@ -242,7 +242,7 @@ export default function BulkActionBar({
         description={t.bulkDeleteDescription(count)}
         confirmLabel={isPending ? t.bulkDeleting : t.bulkConfirmDelete}
         cancelLabel={t.confirmCancelBtn}
-        onConfirm={handleDelete}
+        onConfirm={() => handleDelete()}
         onCancel={() => setConfirmOpen(false)}
       >
         {selectedRecipes.length > 0 && (
