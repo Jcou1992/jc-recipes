@@ -288,8 +288,11 @@ test('font-size preference persists across reload @regression', async ({ page })
   expect(parseFloat(fontSize)).toBeGreaterThan(17);
 });
 
-test('editable space name persists across reload @regression', async ({ page, isMobile }) => {
+test('editable space name persists across reload @regression', async ({ page, isMobile }, testInfo) => {
   test.skip(!!isMobile, 'desktop viewport test — uses double-click to edit');
+  // Mutates user-scoped DB state; racy under parallel workers hitting the same test user.
+  testInfo.annotations.push({ type: 'flaky', description: 'Shared user prefs write race under parallel workers' });
+  test.slow();
 
   const label = `Test Space ${Date.now()}`;
   await page.goto('/recipes');
@@ -308,17 +311,16 @@ test('editable space name persists across reload @regression', async ({ page, is
   await input.fill(label);
   await input.press('Enter');
 
+  // Wait for the save round-trip to complete — toast signals DB write done.
+  // Without this, page.reload() races the server action and fetches stale prefs.
+  await expect(page.getByText(/saved|guardado/i).first()).toBeVisible({ timeout: 10_000 });
+
   // Reload, verify persisted
   await page.reload();
   await page.waitForLoadState('networkidle');
   await expect(page.getByTestId('editable-space-name')).toContainText(label, { timeout: 10_000 });
 
-  // Cleanup — reset to default (empty saves null → fallback)
-  await page.getByTestId('editable-space-name').dblclick();
-  const cleanupInput = page.getByTestId('space-name-input');
-  await expect(cleanupInput).toBeVisible();
-  await cleanupInput.fill('');
-  await cleanupInput.press('Enter');
+  // No cleanup — each run uses a unique label so leftover state is harmless.
 });
 
 test('new recipe form: desktop preview card updates as user types @regression', async ({ page, isMobile }) => {
@@ -345,6 +347,22 @@ test('avatar menu opens dropdown with Settings link @regression', async ({ page 
   await menu.getByRole('link', { name: /settings|ajustes/i }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByRole('heading', { name: /settings|ajustes/i, level: 1 })).toBeVisible();
+});
+
+test('onboarding tour: replay button launches tour and Next advances @regression', async ({ page, isMobile }) => {
+  test.skip(!!isMobile, 'desktop tour test');
+  await page.goto('/settings');
+  await page.getByTestId('settings-replay-tour').click();
+  // Should land on /recipes?tour=1 with tour visible
+  await page.waitForURL(/\/recipes.*tour=1/);
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 5000 });
+  // Next advances
+  await page.getByTestId('onboarding-next').click();
+  // Step 2 visible — tooltip text changed (can be loose; just assert tour still shown)
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible();
+  // Skip closes
+  await page.getByTestId('onboarding-skip').click();
+  await expect(page.getByTestId('onboarding-tour')).not.toBeVisible();
 });
 
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {

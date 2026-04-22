@@ -38,3 +38,31 @@ export async function updateUserPreferences(
   revalidatePath('/recipes');
   return { ok: true };
 }
+
+export async function markTourCompleted(): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert(
+      { user_id: user.id, tour_completed_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    );
+  return { ok: !error };
+}
+
+export async function dismissTour(days: number): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+  const until = new Date();
+  until.setDate(until.getDate() + days);
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert(
+      { user_id: user.id, tour_dismissed_until: until.toISOString() },
+      { onConflict: 'user_id' },
+    );
+  return { ok: !error };
+}

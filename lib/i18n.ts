@@ -234,6 +234,23 @@ export interface Translations {
   avatarMenuSignedInAs: string;
   avatarMenuSettings: string;
   avatarMenuQuick: string;
+
+  // Onboarding tour
+  tourStep1Title: string;
+  tourStep1Body: string;
+  tourStep2Title: string;
+  tourStep2Body: string;
+  tourStep3Title: string;
+  tourStep3Body: string;
+  tourStep4Title: string;
+  tourStep4Body: string;
+  tourStep5Title: string;
+  tourStep5Body: string;
+  tourNext: string;
+  tourBack: string;
+  tourSkip: string;
+  tourFinish: string;
+  tourStepCounter: (current: number, total: number) => string;
 }
 
 export const en: Translations = {
@@ -454,6 +471,22 @@ export const en: Translations = {
   avatarMenuSignedInAs: 'Signed in as',
   avatarMenuSettings: 'Settings',
   avatarMenuQuick: 'Quick toggles',
+
+  tourStep1Title: 'Welcome to SEKAI',
+  tourStep1Body: 'Your workspace lives here. Click the avatar for settings, theme, and language.',
+  tourStep2Title: 'Find anything fast',
+  tourStep2Body: 'Press / to jump here. Search by name or description.',
+  tourStep3Title: 'Filter by tag and sort',
+  tourStep3Body: 'Open this panel to narrow the list. Also reachable via F.',
+  tourStep4Title: 'Create recipes',
+  tourStep4Body: 'Press N or tap here to add a new recipe. You can also paste from Markdown.',
+  tourStep5Title: 'Tap a recipe to cook',
+  tourStep5Body: 'Scale servings, switch units, and enter cook mode for step-by-step guidance.',
+  tourNext: 'Next',
+  tourBack: 'Back',
+  tourSkip: 'Skip',
+  tourFinish: 'Finish',
+  tourStepCounter: (current, total) => `Step ${current} of ${total}`,
 };
 
 export const es: Translations = {
@@ -674,6 +707,22 @@ export const es: Translations = {
   avatarMenuSignedInAs: 'Sesión iniciada como',
   avatarMenuSettings: 'Ajustes',
   avatarMenuQuick: 'Ajustes rápidos',
+
+  tourStep1Title: 'Bienvenido a SEKAI',
+  tourStep1Body: 'Tu espacio vive aquí. Abre el avatar para ajustes, tema e idioma.',
+  tourStep2Title: 'Encuentra rápido',
+  tourStep2Body: 'Pulsa / para saltar aquí. Busca por nombre o descripción.',
+  tourStep3Title: 'Filtra por etiqueta y ordena',
+  tourStep3Body: 'Abre este panel para acotar la lista. También con F.',
+  tourStep4Title: 'Crea recetas',
+  tourStep4Body: 'Pulsa N o toca aquí para añadir una receta. También puedes pegar desde Markdown.',
+  tourStep5Title: 'Toca una receta para cocinar',
+  tourStep5Body: 'Escala raciones, cambia unidades y entra en modo cocina paso a paso.',
+  tourNext: 'Siguiente',
+  tourBack: 'Atrás',
+  tourSkip: 'Omitir',
+  tourFinish: 'Terminar',
+  tourStepCounter: (current, total) => `Paso ${current} de ${total}`,
 };
 
 export const translations: Record<Language, Translations> = { en, es };

@@ -7,17 +7,24 @@ import { getUserPreferences } from '@/app/actions/preferences';
 import RecipeListClient from '@/components/recipes/RecipeListClient';
 import RetryButton from '@/components/ui/RetryButton';
 import EditableSpaceName from '@/components/recipes/EditableSpaceName';
+import OnboardingTourGate from '@/components/onboarding/OnboardingTour';
 
 export const metadata: Metadata = { title: 'My Recipes — SEKAI' };
 
-export default async function RecipesPage() {
+export default async function RecipesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tour?: string }>;
+}) {
   const supabase = await createClient();
-  const [recipesRes, prefs, t] = await Promise.all([
+  const [recipesRes, prefs, t, sp] = await Promise.all([
     supabase.from('recipes').select('*').order('created_at', { ascending: false }),
     getUserPreferences(),
     getServerT(),
+    searchParams,
   ]);
   const { data: recipes, error } = recipesRes;
+  const tourActive = sp?.tour === '1';
 
   const spaceName = prefs?.space_name || t.recipesPageTitle;
 
@@ -53,6 +60,7 @@ export default async function RecipesPage() {
 
   return (
     <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
+      {tourActive && <OnboardingTourGate />}
       <div className="flex items-center justify-between mb-8">
         <EditableSpaceName
           initial={spaceName}
