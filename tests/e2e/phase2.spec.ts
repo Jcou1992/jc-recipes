@@ -209,6 +209,85 @@ test('cooking mode: progress bar advances with step navigation @mobile', async (
   expect(await bar.getAttribute('style')).toContain('50%');
 });
 
+// ── Responsive fluid containers (Plan A) ──────────────────────────────────────
+
+test('desktop list grid scales to ultra-wide viewports @regression', async ({ page, isMobile }) => {
+  test.skip(!!isMobile, 'desktop viewport test');
+
+  // Seed 10 recipes so the grid has enough cards to fill wide rows.
+  // (If the account already has ≥10 recipes, seeding is still safe — list is
+  // ordered by created_at desc, so the fresh seeds surface at the top.)
+  const stamp = Date.now();
+  await Promise.all(
+    Array.from({ length: 10 }, (_, i) =>
+      seedRecipe({ name: `WideGrid-${stamp}-${i}` }),
+    ),
+  );
+
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  // Count cards that share the first card's Y-offset — that's a single row.
+  const cardsInFirstRow = async (): Promise<number> => {
+    return await page.evaluate(() => {
+      const cards = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-testid^="recipe-card-"]'),
+      );
+      if (cards.length === 0) return 0;
+      // Skip the featured card (spans ≥2 cols, distorts row math) by finding
+      // the first non-featured card and using its top as the row baseline.
+      const tops = cards.map(c => Math.round(c.getBoundingClientRect().top));
+      // Pick the most common top — that's the first full row of equal cards.
+      const freq = new Map<number, number>();
+      tops.forEach(t => freq.set(t, (freq.get(t) ?? 0) + 1));
+      let bestTop = tops[0];
+      let bestCount = 0;
+      freq.forEach((count, top) => {
+        if (count > bestCount) {
+          bestCount = count;
+          bestTop = top;
+        }
+      });
+      return tops.filter(t => Math.abs(t - bestTop) <= 2).length;
+    });
+  };
+
+  // 1920×900 → grid should show ≥4 cards in a row.
+  await page.setViewportSize({ width: 1920, height: 900 });
+  await page.waitForTimeout(150); // let layout settle after resize
+  await expect.poll(cardsInFirstRow, { timeout: 5_000 }).toBeGreaterThanOrEqual(4);
+
+  // 2560×1080 → ≥6 cards in a row.
+  await page.setViewportSize({ width: 2560, height: 1080 });
+  await page.waitForTimeout(150);
+  await expect.poll(cardsInFirstRow, { timeout: 5_000 }).toBeGreaterThanOrEqual(6);
+});
+
+test('font-size preference persists across reload @regression', async ({ page }) => {
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  // Simulate user having set preference to 'lg' via FontSizeToggle.
+  await page.evaluate(() => {
+    localStorage.setItem('preferred-font-size', 'lg');
+  });
+
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+
+  // FontSizeBootstrap mounted in layout should re-apply data-font-size from localStorage.
+  const attr = await page.evaluate(() =>
+    document.documentElement.getAttribute('data-font-size'),
+  );
+  expect(attr).toBe('lg');
+
+  // And computed font-size on <html> should reflect the 'lg' token (1.1875rem ≈ 19px).
+  const fontSize = await page.evaluate(
+    () => getComputedStyle(document.documentElement).fontSize,
+  );
+  expect(parseFloat(fontSize)).toBeGreaterThan(17);
+});
+
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
   const vp = page.viewportSize();
   if (!vp || vp.width >= 768) return; // Desktop has always-visible sidebar.

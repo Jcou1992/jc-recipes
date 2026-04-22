@@ -6,6 +6,7 @@ import AppProviders from '@/components/ui/AppProviders';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
+import FontSizeBootstrap from '@/components/ui/FontSizeBootstrap';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           className="nav-frosted sticky top-0 z-10"
           style={{ borderBottom: '1px solid var(--border)' }}
         >
-          <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 py-3 flex items-center justify-between">
             <a
               href="/recipes"
               className="font-display text-xl font-bold tracking-tight"
@@ -46,6 +47,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
         </nav>
         <GlobalShortcuts />
+        <FontSizeBootstrap />
         <main>{children}</main>
       </AppProviders>
     </div>

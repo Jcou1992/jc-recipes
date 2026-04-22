@@ -33,7 +33,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   const t = await getServerT();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up">
+    <div className="max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up">
       <div className="flex items-start justify-between gap-4 mb-4">
         <h1 className="font-display text-4xl font-bold leading-tight" style={{ color: 'var(--text-1)' }}>
           {recipe.name}

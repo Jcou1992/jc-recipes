@@ -9,6 +9,11 @@
   --color-gold:                oklch(86.5% 0.089 89);
   --color-bone:                oklch(95.3% 0.014 85);
   --color-ink:                 oklch(11% 0.004 285);
+
+  /* ── Container widths — fluid with ceilings ───────────────────────────── */
+  --container-narrow:  40rem;
+  --container-default: 68rem;
+  --container-wide:    96rem;
 }
 
 /* ── Semantic tokens: dark default ─────────────────────────────────────────── */
@@ -100,8 +105,13 @@ body::after {
   html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
-    font-size: 1rem;
+    font-size: 1.0625rem;
   }
+
+  /* ── Font-size preference override (FontSizeToggle → data-font-size on <html>) */
+  :root[data-font-size="sm"] { font-size: 0.9375rem; }
+  :root[data-font-size="md"] { font-size: 1.0625rem; }
+  :root[data-font-size="lg"] { font-size: 1.1875rem; }
 
   body {
     background-color: var(--bg);
@@ -109,7 +119,7 @@ body::after {
     font-family: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif);
     font-size: 1rem;
     font-weight: 400;
-    line-height: 1.65;
+    line-height: 1.7;
     min-height: 100svh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

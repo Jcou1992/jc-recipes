@@ -195,6 +195,12 @@ export interface Translations {
   shortcutClear: string;
   shortcutHelp: string;
   shortcutClose: string;
+
+  // Font-size toggle
+  fontSizeLabel: string;
+  fontSizeSm: string;
+  fontSizeMd: string;
+  fontSizeLg: string;
 }
 
 export const en: Translations = {
@@ -381,6 +387,11 @@ export const en: Translations = {
   shortcutClear: 'Esc — Clear filters',
   shortcutHelp: '? — Show this help',
   shortcutClose: 'Close',
+
+  fontSizeLabel: 'Font size',
+  fontSizeSm: 'SM',
+  fontSizeMd: 'MD',
+  fontSizeLg: 'LG',
 };
 
 export const es: Translations = {
@@ -567,6 +578,11 @@ export const es: Translations = {
   shortcutClear: 'Esc — Limpiar filtros',
   shortcutHelp: '? — Mostrar esta ayuda',
   shortcutClose: 'Cerrar',
+
+  fontSizeLabel: 'Tamaño de texto',
+  fontSizeSm: 'SM',
+  fontSizeMd: 'MD',
+  fontSizeLg: 'LG',
 };
 
 export const translations: Record<Language, Translations> = { en, es };

@@ -19,7 +19,7 @@ export default async function RecipesPage() {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
         <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
           {t.recipesPageTitle}
         </h1>
@@ -44,7 +44,7 @@ export default async function RecipesPage() {
   ).sort();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
           {t.recipesPageTitle}

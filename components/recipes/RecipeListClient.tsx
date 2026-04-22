@@ -507,14 +507,14 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         </div>
       ) : (
         <div
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 transition-opacity"
+          className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 transition-opacity"
           style={{ opacity: isPending ? 0.6 : 1 }}
           aria-busy={isPending}
         >
           {filtered.map((recipe, index) => (
             <div
               key={recipe.id}
-              className={`animate-fade-up${!selectMode && index === 0 ? ' sm:col-span-2' : ''}`}
+              className={`animate-fade-up${!selectMode && index === 0 ? ' col-span-full md:col-span-2' : ''}`}
               style={{ animationDelay: `${Math.min(index, 6) * 60}ms`, animationFillMode: 'both' }}
             >
               <RecipeCard

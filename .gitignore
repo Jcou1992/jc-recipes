@@ -17,3 +17,8 @@ test-results/
 playwright-report/
 .test-gate/last-report.md
 .test-gate/overrides.log
+
+# supabase local CLI scratch
+supabase/.temp/
+supabase/.branches/
+

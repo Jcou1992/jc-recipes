@@ -194,7 +194,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
       </div>
 
       {/* Two-column body on md+ */}
-      <div className="md:grid md:grid-cols-[2fr_3fr] md:gap-10 md:items-start">
+      <div className="md:grid md:grid-cols-[1fr_2fr] xl:grid-cols-[1fr_3fr] md:gap-12 md:items-start">
 
         {(recipe.ingredients.length > 0 || recipe.steps.length > 0) && (
           <aside className="md:sticky md:top-20 mb-10 md:mb-0">
