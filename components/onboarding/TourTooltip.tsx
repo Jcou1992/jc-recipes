@@ -77,6 +77,7 @@ const TourTooltip = forwardRef<HTMLDivElement, Props>(function TourTooltip(
         border: '1px solid color-mix(in oklch, var(--color-terracotta) 40%, transparent)',
         boxShadow: 'var(--shadow-dialog)',
       }}
+      data-force-theme="dark"
       data-testid="onboarding-tour"
     >
       <p
