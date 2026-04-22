@@ -193,6 +193,22 @@ body::after {
     border-color: var(--color-terracotta);
     box-shadow: 0 0 0 3px var(--ring);
   }
+  /* Neutralize browser autofill — Chrome/Safari force white bg + dark text via
+     :-webkit-autofill, which breaks the dark theme. The inset box-shadow trick
+     repaints the background; text-fill-color restores our token; the 9999s
+     transition prevents the browser's restore animation from flashing. */
+  .input-base:-webkit-autofill,
+  .input-base:-webkit-autofill:hover,
+  .input-base:-webkit-autofill:focus,
+  .input-base:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset !important;
+    -webkit-text-fill-color: var(--text-1) !important;
+    caret-color: var(--text-1);
+    transition: background-color 9999s ease-in-out 0s;
+  }
+  .input-base:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-input) inset, 0 0 0 3px var(--ring) !important;
+  }
 
   /* Buttons */
   .btn-primary {
