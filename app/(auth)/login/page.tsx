@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import LoginForm from '@/components/auth/LoginForm';
 
-export const metadata: Metadata = { title: 'Log in - jc-recipes' };
+export const metadata: Metadata = { title: 'Log in — SEKAI' };
 
 export default function LoginPage() {
   return (
@@ -16,15 +16,34 @@ export default function LoginPage() {
           boxShadow: 'var(--shadow-dialog)',
         }}
       >
-        <h1 className="font-display text-3xl font-bold mb-1" style={{ color: 'var(--text-1)' }}>
-          jc-recipes
-        </h1>
-        <p
-          className="font-label text-xs tracking-widest uppercase mb-8"
-          style={{ color: 'var(--text-3)' }}
-        >
-          Your recipe collection
-        </p>
+        <header className="mb-10">
+          <div className="flex items-baseline gap-3">
+            <h1
+              className="font-label text-5xl font-bold tracking-widest uppercase leading-none"
+              style={{ color: 'var(--color-terracotta)' }}
+            >
+              SEKAI
+            </h1>
+            <span
+              className="font-display text-3xl leading-none"
+              style={{ color: 'var(--color-gold)' }}
+              aria-hidden="true"
+            >
+              世界
+            </span>
+          </div>
+          <div
+            className="mt-4 mb-3 h-px w-10"
+            style={{ background: 'color-mix(in oklch, var(--color-terracotta) 45%, transparent)' }}
+            aria-hidden="true"
+          />
+          <p
+            className="font-label text-xs tracking-widest uppercase"
+            style={{ color: 'var(--text-3)' }}
+          >
+            Recipe tool
+          </p>
+        </header>
         <LoginForm />
       </div>
     </main>
