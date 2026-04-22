@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
+import FontSizeToggle from './FontSizeToggle';
 import { logout } from '@/app/actions/auth';
 import { useT } from './LanguageContext';
 
@@ -95,6 +96,7 @@ export default function AvatarMenu({ initial, email }: Props) {
               {t.avatarMenuQuick}
             </span>
             <div className="ml-auto flex items-center gap-1">
+              <FontSizeToggle />
               <ThemeToggle />
               <LanguageToggle />
             </div>

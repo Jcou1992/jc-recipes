@@ -93,9 +93,9 @@ export default function RecipeFormPreview({ preview }: Props) {
                   key={tag}
                   className="font-label text-xs tracking-wider uppercase px-2 py-0.5 rounded-full"
                   style={{
-                    background: 'color-mix(in oklch, var(--color-gold) 18%, transparent)',
-                    color: 'var(--color-gold)',
-                    border: '1px solid color-mix(in oklch, var(--color-gold) 40%, transparent)',
+                    background: 'var(--tag-bg)',
+                    color: 'var(--tag-text)',
+                    border: '1px solid var(--tag-border)',
                   }}
                 >
                   {tag}

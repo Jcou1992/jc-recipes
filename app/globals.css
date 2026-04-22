@@ -30,6 +30,10 @@
   --ring:          oklch(63.2% 0.148 45 / 0.45);
   --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
   --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
+  /* Tag pill (passive): gold on dark reads well */
+  --tag-bg:     color-mix(in oklch, var(--color-gold) 18%, transparent);
+  --tag-border: color-mix(in oklch, var(--color-gold) 40%, transparent);
+  --tag-text:   var(--color-gold);
 }
 
 /* ── Semantic tokens: light override ───────────────────────────────────────── */
@@ -47,6 +51,10 @@
     --ring:          oklch(63.2% 0.148 45 / 0.35);
     --shadow-card:   0 0 0 1px oklch(11% 0.004 285 / 0.07), 0 2px 12px oklch(0 0 0 / 0.06);
     --shadow-dialog: 0 0 0 1px oklch(11% 0.004 285 / 0.08), 0 24px 64px oklch(0 0 0 / 0.15);
+    /* Tag pill (passive): terracotta-contrast on bone passes AA (~5.2:1) */
+    --tag-bg:     color-mix(in oklch, var(--color-terracotta-contrast) 10%, transparent);
+    --tag-border: color-mix(in oklch, var(--color-terracotta-contrast) 35%, transparent);
+    --tag-text:   var(--color-terracotta-contrast);
   }
 }
 
@@ -68,6 +76,9 @@
   --ring:          oklch(63.2% 0.148 45 / 0.35);
   --shadow-card:   0 0 0 1px oklch(11% 0.004 285 / 0.07), 0 2px 12px oklch(0 0 0 / 0.06);
   --shadow-dialog: 0 0 0 1px oklch(11% 0.004 285 / 0.08), 0 24px 64px oklch(0 0 0 / 0.15);
+  --tag-bg:     color-mix(in oklch, var(--color-terracotta-contrast) 10%, transparent);
+  --tag-border: color-mix(in oklch, var(--color-terracotta-contrast) 35%, transparent);
+  --tag-text:   var(--color-terracotta-contrast);
 }
 
 :root[data-theme="dark"] {
@@ -83,6 +94,9 @@
   --ring:          oklch(63.2% 0.148 45 / 0.45);
   --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
   --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
+  --tag-bg:     color-mix(in oklch, var(--color-gold) 18%, transparent);
+  --tag-border: color-mix(in oklch, var(--color-gold) 40%, transparent);
+  --tag-text:   var(--color-gold);
 }
 
 /* ── Grain texture overlay ──────────────────────────────────────────────────── */
