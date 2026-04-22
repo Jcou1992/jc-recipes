@@ -22,15 +22,15 @@ Rules:
 
 ## Design Context
 
-**Brand:** Personal recipe app. May carry the name "Sakai" (JC's restaurant) — design should be worthy of that name whether it appears or not.
+**Brand:** Recipe tool branded **SEKAI 世界** (adjacent to JC's restaurant Sakai). Design worthy of both names whether SEKAI or Sakai ever appears prominently.
 
-**Users:** JC only. Phone on kitchen counter mid-cook. Hands dirty, pace fast. Job: find recipe, scale it, cook it.
+**Users:** JC primary (phone on kitchen counter, hands dirty, pace fast). Plus demo@ showcase account. May grow to a small circle of shared users (invited chefs/friends). Not a mass-consumer product — no public signup — but every surface must scale gracefully to multiple named users without losing the single-chef voice.
 
 **Personality:** precise, proud, functional. Metaphor: restaurant mise en place — everything visible and within reach, no decorative clutter.
 
-**Palette:** Terracotta (#D4703F) + Gold (#EDD18E) + Ink/Bone. Dark default. Keep and polish — do not rethink.
+**Palette:** Terracotta (#D4703F) + Gold (#EDD18E) + Ink/Bone. Dark default, light override via `data-theme`. OKLCH tokens throughout.
 
-**Typography:** Cormorant Garamond (body) + Noto Serif JP (display) + Barlow Condensed (labels). Keep and tighten hierarchy.
+**Typography:** Cormorant Garamond (body) + Noto Serif JP (display) + Barlow Condensed (labels). Font-size preference SM/MD/LG stored per-browser.
 
 **Principles:**
 1. Every pixel earns its place — no decoration without function
@@ -39,7 +39,11 @@ Rules:
 4. Restaurant-grade finish — worthy of the Sakai name
 5. Speed over everything — optimistic UI, no waiting
 
-**Anti-references:** AllRecipes/Yummly consumer UX, lifestyle cooking blogs, generic notes apps
+**Anti-references** (resist even as audience grows):
+- Engagement-driven consumer feed (streaks, badges, social counts, recommendation carousels, stock hero photos, upsell CTAs)
+- Lifestyle cooking blog (soft watercolor, "rustic" illustration, long narrative preambles)
+- Generic notes app with a recipe plugin (every field exists because cooking needs it)
+- SaaS marketing homepage (no pricing tables, testimonial rows, landing-page patterns — users arrive logged-in, not landing)
 
 Full context: `.impeccable.md`
 
