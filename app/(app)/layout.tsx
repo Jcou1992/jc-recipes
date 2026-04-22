@@ -25,12 +25,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           style={{ borderBottom: '1px solid var(--border)' }}
         >
           <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 py-3 flex items-center justify-between">
-            <a
-              href="/recipes"
-              className="font-display text-xl font-bold tracking-tight"
-              style={{ color: 'var(--color-terracotta)' }}
-            >
-              jc-recipes
+            <a href="/recipes" className="flex items-baseline gap-1.5">
+              <span
+                className="font-label text-lg font-bold tracking-widest uppercase"
+                style={{ color: 'var(--color-terracotta)' }}
+              >
+                SEKAI
+              </span>
+              <span
+                className="font-display text-sm"
+                style={{ color: 'var(--text-3)' }}
+              >
+                世界
+              </span>
             </a>
             <div className="flex items-center gap-1">
               <ThemeToggle />

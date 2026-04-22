@@ -3,26 +3,34 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
+import { getUserPreferences } from '@/app/actions/preferences';
 import RecipeListClient from '@/components/recipes/RecipeListClient';
 import RetryButton from '@/components/ui/RetryButton';
+import EditableSpaceName from '@/components/recipes/EditableSpaceName';
 
-export const metadata: Metadata = { title: 'My Recipes - jc-recipes' };
+export const metadata: Metadata = { title: 'My Recipes — SEKAI' };
 
 export default async function RecipesPage() {
   const supabase = await createClient();
-  const { data: recipes, error } = await supabase
-    .from('recipes')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const [recipesRes, prefs, t] = await Promise.all([
+    supabase.from('recipes').select('*').order('created_at', { ascending: false }),
+    getUserPreferences(),
+    getServerT(),
+  ]);
+  const { data: recipes, error } = recipesRes;
 
-  const t = await getServerT();
+  const spaceName = prefs?.space_name || t.recipesPageTitle;
 
   if (error) {
     return (
       <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
-        <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
-          {t.recipesPageTitle}
-        </h1>
+        <EditableSpaceName
+          initial={spaceName}
+          fallback={t.recipesPageTitle}
+          ariaLabel={t.spaceNameEditAriaLabel}
+          savedToast={t.spaceNameSaved}
+          failedToast={t.spaceNameSaveFailed}
+        />
         <div data-testid="recipes-error-state" className="py-20 text-center">
           <p className="font-display text-xl font-semibold mb-3" style={{ color: 'var(--text-2)' }}>
             Can&apos;t load recipes.
@@ -46,9 +54,13 @@ export default async function RecipesPage() {
   return (
     <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--text-1)' }}>
-          {t.recipesPageTitle}
-        </h1>
+        <EditableSpaceName
+          initial={spaceName}
+          fallback={t.recipesPageTitle}
+          ariaLabel={t.spaceNameEditAriaLabel}
+          savedToast={t.spaceNameSaved}
+          failedToast={t.spaceNameSaveFailed}
+        />
         <Link href="/recipes/new" className="btn-primary min-h-[44px]">
           {t.newRecipeBtn}
         </Link>

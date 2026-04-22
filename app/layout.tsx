@@ -25,8 +25,8 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: 'jc-recipes',
-  description: 'Personal recipe manager',
+  title: 'SEKAI — recipe tool',
+  description: 'Personal recipe space — precise, proud, functional.',
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

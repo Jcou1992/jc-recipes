@@ -201,6 +201,12 @@ export interface Translations {
   fontSizeSm: string;
   fontSizeMd: string;
   fontSizeLg: string;
+
+  // Editable space name
+  spaceNameEditAriaLabel: string;
+  spaceNameSaved: string;
+  spaceNameSaveFailed: string;
+  spaceNameCharLimit: string;
 }
 
 export const en: Translations = {
@@ -392,6 +398,11 @@ export const en: Translations = {
   fontSizeSm: 'SM',
   fontSizeMd: 'MD',
   fontSizeLg: 'LG',
+
+  spaceNameEditAriaLabel: 'Double-click to rename this space',
+  spaceNameSaved: 'Space name saved',
+  spaceNameSaveFailed: 'Could not save space name',
+  spaceNameCharLimit: '30 characters max',
 };
 
 export const es: Translations = {
@@ -583,6 +594,11 @@ export const es: Translations = {
   fontSizeSm: 'SM',
   fontSizeMd: 'MD',
   fontSizeLg: 'LG',
+
+  spaceNameEditAriaLabel: 'Doble clic para renombrar este espacio',
+  spaceNameSaved: 'Nombre del espacio guardado',
+  spaceNameSaveFailed: 'No se pudo guardar',
+  spaceNameCharLimit: '30 caracteres máximo',
 };
 
 export const translations: Record<Language, Translations> = { en, es };

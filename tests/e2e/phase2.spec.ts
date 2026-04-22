@@ -288,6 +288,39 @@ test('font-size preference persists across reload @regression', async ({ page })
   expect(parseFloat(fontSize)).toBeGreaterThan(17);
 });
 
+test('editable space name persists across reload @regression', async ({ page, isMobile }) => {
+  test.skip(!!isMobile, 'desktop viewport test — uses double-click to edit');
+
+  const label = `Test Space ${Date.now()}`;
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+
+  // Find the editable h1
+  const h1 = page.getByTestId('editable-space-name');
+  await expect(h1).toBeVisible();
+
+  // Trigger edit mode (double-click on desktop)
+  await h1.dblclick();
+
+  // Fill the input that appears
+  const input = page.getByTestId('space-name-input');
+  await expect(input).toBeVisible();
+  await input.fill(label);
+  await input.press('Enter');
+
+  // Reload, verify persisted
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  await expect(page.getByTestId('editable-space-name')).toContainText(label, { timeout: 10_000 });
+
+  // Cleanup — reset to default (empty saves null → fallback)
+  await page.getByTestId('editable-space-name').dblclick();
+  const cleanupInput = page.getByTestId('space-name-input');
+  await expect(cleanupInput).toBeVisible();
+  await cleanupInput.fill('');
+  await cleanupInput.press('Enter');
+});
+
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
   const vp = page.viewportSize();
   if (!vp || vp.width >= 768) return; // Desktop has always-visible sidebar.
