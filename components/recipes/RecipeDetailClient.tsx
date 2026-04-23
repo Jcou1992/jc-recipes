@@ -230,13 +230,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
                   {displayedIngredients.map((ing, i) => (
                     <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
                       <span
-                        className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right"
+                        className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right tabular-nums"
                         style={{ color: 'var(--color-gold)' }}
                         data-testid={`ingredient-amount-${i}`}
                       >
                         {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
                       </span>
-                      <span className="font-body text-base" style={{ color: 'var(--text-1)' }}>
+                      <span className="ingredient-name font-body text-base" style={{ color: 'var(--text-1)' }}>
                         {ing.name}
                       </span>
                     </li>
