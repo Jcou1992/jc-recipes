@@ -6,6 +6,7 @@ import { getServerT } from '@/lib/i18n-server';
 import DeleteRecipeButton from '@/components/recipes/DeleteRecipeButton';
 import RecipeDetailClient from '@/components/recipes/RecipeDetailClient';
 import ScrollParallaxCover from '@/components/motion/ScrollParallaxCover';
+import FirstSaveCelebration from '@/components/motion/FirstSaveCelebration';
 import type { Recipe } from '@/types/recipe';
 
 interface PageProps {
@@ -40,15 +41,18 @@ export default async function RecipeDetailPage({ params }: PageProps) {
     >
       <ScrollParallaxCover>
         <div className="flex items-start justify-between gap-4 mb-4">
-          <h1
-            className="recipe-title font-display text-4xl font-bold leading-tight"
-            style={{
-              color: 'var(--text-1)',
-              viewTransitionName: `recipe-title-${id}`,
-            } as React.CSSProperties}
-          >
-            {recipe.name}
-          </h1>
+          <div>
+            <h1
+              className="recipe-title font-display text-4xl font-bold leading-tight"
+              style={{
+                color: 'var(--text-1)',
+                viewTransitionName: `recipe-title-${id}`,
+              } as React.CSSProperties}
+            >
+              {recipe.name}
+            </h1>
+            <FirstSaveCelebration recipeId={id} />
+          </div>
           <div className="flex gap-2 flex-shrink-0 mt-1">
             <Link href={`/recipes/${id}/edit`} className="btn-ghost">
               {t.editBtn}

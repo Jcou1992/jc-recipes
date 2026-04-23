@@ -8,6 +8,7 @@ import RecipeListClient from '@/components/recipes/RecipeListClient';
 import RetryButton from '@/components/ui/RetryButton';
 import EditableSpaceName from '@/components/recipes/EditableSpaceName';
 import OnboardingTourGate from '@/components/onboarding/OnboardingTour';
+import InkBrush from '@/components/motion/InkBrush';
 
 export const metadata: Metadata = { title: 'My Recipes — SEKAI' };
 
@@ -85,6 +86,9 @@ export default async function RecipesPage({
 
       {recipes.length === 0 ? (
         <div data-testid="empty-state" className="text-center py-20">
+          <div className="flex justify-center mb-6">
+            <InkBrush />
+          </div>
           <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
             {t.noRecipesYet}
           </p>
