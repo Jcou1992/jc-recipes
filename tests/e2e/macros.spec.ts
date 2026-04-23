@@ -1,12 +1,15 @@
 /**
- * F3 macros — detail-page integration smoke.
+ * F3 macros — detail-page integration.
  *
  * Assumes migrations 20260425003000..005 are applied and nutrition_facts
  * contains (at minimum) the hand-typed seed from 003002 (chicken breast
- * fdc_id=171477, rice 169704, etc.).
+ * fdc_id=171477, rice 169704, onions 1104067, etc.).
  *
- * Parameterized: each case drives one matcher through the macros card
- * state machine (computed / null / zero-matched / modal open).
+ * Split into:
+ *   1. @smoke — static-display state machine (matched / null / zero-matched).
+ *   2. @regression — real compute round-trips: triggerCompute from null,
+ *      and match-modal save from partial. These exercise the actual
+ *      compute path end-to-end (seed → click → compute → card transition).
  */
 import { test, expect, type Page } from '@playwright/test';
 import { seedRecipeWithMacros, uniqueName } from './helpers';
@@ -65,6 +68,12 @@ const CASES: Scenario[] = [
   },
 ];
 
+// All tests in this file share the same authed Supabase session (via the
+// setup project's storageState) and insert rows as the test user. Run
+// serially so a flake in one case can't leave hanging dialogs/state that
+// trip a peer running in parallel.
+test.describe.configure({ mode: 'serial' });
+
 test('macros card integration @smoke', async ({ page }) => {
   for (const scenario of CASES) {
     const recipe = await seedRecipeWithMacros(scenario.seed);
@@ -72,4 +81,73 @@ test('macros card integration @smoke', async ({ page }) => {
     await page.waitForLoadState('networkidle');
     await scenario.assert(page);
   }
+});
+
+test('Compute CTA on null macros runs compute → complete card @regression', async ({ page }) => {
+  // Both ingredients have fdc_ids in the seed (003002) so compute resolves
+  // everything → complete (green) card with non-zero per-serving kcal.
+  const recipe = await seedRecipeWithMacros({
+    name: uniqueName('F3-compute-roundtrip'),
+    ingredients: [
+      { amount: 500, unit: 'g', name: 'chicken breast', fdc_id: 171477 },
+      { amount: 200, unit: 'g', name: 'white rice',     fdc_id: 169704 },
+    ],
+    macros: null,
+  });
+
+  await page.goto(`/recipes/${recipe.id}`);
+  await page.waitForLoadState('networkidle');
+
+  await expect(page.getByTestId('macros-card-empty')).toBeVisible();
+  await page.getByTestId('macros-compute-btn').click();
+
+  // Card transitions null → complete once compute returns + router.refresh().
+  await expect(page.getByTestId('macros-card-complete')).toBeVisible({ timeout: 15_000 });
+  const kcal = page.getByTestId('macros-kcal');
+  await expect(kcal).toBeVisible();
+  await expect(kcal).not.toHaveText(/^0\s/);
+});
+
+test('match modal pick → save transitions partial → complete @regression', async ({ page }) => {
+  // Partial seed: chicken matched (171477) + onions unresolved (no fdc_id).
+  // Onions is in the seed as 1104067, so the modal will offer it as a
+  // candidate; selecting it and saving triggers compute which should
+  // resolve both and flip the card from partial (amber) to complete (green).
+  const recipe = await seedRecipeWithMacros({
+    name: uniqueName('F3-modal-save-roundtrip'),
+    ingredients: [
+      { amount: 500, unit: 'g', name: 'chicken breast', fdc_id: 171477 },
+      { amount: 100, unit: 'g', name: 'onions' }, // unresolved → will match via modal
+    ],
+    macros: {
+      kcal: 570,
+      protein_g: 106.2,
+      fat_g: 13.1,
+      carbs_g: 0,
+      fiber_g: 0,
+      matched_count: 1,
+      total_count: 2,
+      unresolved_ingredients: [{ index: 1, name: 'onions', reason: 'no match' }],
+    },
+  });
+
+  await page.goto(`/recipes/${recipe.id}`);
+  await page.waitForLoadState('networkidle');
+
+  await expect(page.getByTestId('macros-card-partial')).toBeVisible();
+  await page.getByTestId('macros-edit-btn').click();
+
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+
+  // Candidates load async — wait for at least one radio in the onions row
+  // (index 1), then pick the first one.
+  const onionsRow = page.getByTestId('match-row-1');
+  const firstRadio = onionsRow.locator('input[type="radio"]').first();
+  await expect(firstRadio).toBeVisible({ timeout: 10_000 });
+  await firstRadio.check();
+
+  await page.getByTestId('macros-save-btn').click();
+  await expect(dialog).toBeHidden({ timeout: 10_000 });
+  await expect(page.getByTestId('macros-card-complete')).toBeVisible({ timeout: 15_000 });
 });
