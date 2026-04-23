@@ -12,13 +12,14 @@ import type { ParsedRecipe } from '@/lib/utils/parse-recipe-markdown';
 
 function parsedToInitial(parsed: ParsedRecipe): Partial<Recipe> {
   return {
-    name:        parsed.title,
-    description: parsed.description ?? null,
-    servings:    parsed.servings ?? 1,
-    prep_time:   parsed.prep_time ?? null,
-    cook_time:   parsed.cook_time ?? null,
-    tags:        parsed.tags ?? null,
-    notes:       parsed.notes ?? null,
+    name:               parsed.title,
+    description:        parsed.description ?? null,
+    servings:           parsed.servings ?? 1,
+    serving_size_label: parsed.serving_size_label ?? null,
+    prep_time:          parsed.prep_time ?? null,
+    cook_time:          parsed.cook_time ?? null,
+    tags:               parsed.tags ?? null,
+    notes:              parsed.notes ?? null,
     ingredients: parsed.ingredients.map(ing => ({
       amount: parseFloat(ing.amount) || 0,
       unit:   ing.unit || null,
