@@ -29,14 +29,16 @@ export async function autoMatch(ingredientName: string): Promise<number | null> 
   if (tokenCount < AUTO_MATCH_TOKEN_MIN) return null;
 
   const candidates = await searchFdc(ingredientName, 2);
-  if (candidates.length === 0) return null;
+  // Require at least 2 candidates — the gap rule is the main safeguard
+  // against weak matches, and we can't compute a gap with <2 rows. A
+  // single-hit pass-through would bypass that check and risk auto-binding
+  // a confidently-wrong row. Unresolved → chef picks in the modal.
+  if (candidates.length < 2) return null;
   const top = candidates[0];
   if (top.similarity < AUTO_MATCH_TOP_MIN) return null;
 
-  if (candidates.length >= 2) {
-    const gap = top.similarity - candidates[1].similarity;
-    if (gap < AUTO_MATCH_GAP_MIN) return null;
-  }
+  const gap = top.similarity - candidates[1].similarity;
+  if (gap < AUTO_MATCH_GAP_MIN) return null;
 
   return top.fdc_id;
 }

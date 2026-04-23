@@ -72,6 +72,15 @@ describe('match behaviour truth table', () => {
       rows: [],
       expected: null,
     },
+    {
+      label: 'autoMatch: single-candidate rejected (need ≥2 for gap rule)',
+      fn: 'auto',
+      query: 'three known words',
+      rows: [
+        { fdc_id: 42, name: 'Some lone match', similarity: 0.95 },
+      ],
+      expected: null,
+    },
     // autoMatch — accept path
     {
       label: 'autoMatch: all three conditions hold → returns top fdc_id',
