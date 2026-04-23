@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { updateUserPreferences } from '@/app/actions/preferences';
+import { useRouter } from 'next/navigation';
+import { updateUserPreferences, replayOnboarding } from '@/app/actions/preferences';
 import { useToast } from '@/components/ui/ToastContext';
 import { useT } from '@/components/ui/LanguageContext';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import FontSizeToggle from '@/components/ui/FontSizeToggle';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { logout } from '@/app/actions/auth';
 
 interface Props {
@@ -19,8 +21,11 @@ interface Props {
 export default function SettingsClient({ email, initialSpaceName, spaceNameFallback }: Props) {
   const t = useT();
   const { showToast } = useToast();
+  const router = useRouter();
   const [spaceName, setSpaceName] = useState(initialSpaceName);
   const [saving, setSaving] = useState(false);
+  const [confirmReplayOpen, setConfirmReplayOpen] = useState(false);
+  const [replayPending, setReplayPending] = useState(false);
 
   async function saveSpaceName() {
     const trimmed = spaceName.trim();
@@ -37,6 +42,18 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
   function handleReplayTour() {
     // Navigate to recipes with tour=1 (Wave 4 implements).
     window.location.href = '/recipes?tour=1';
+  }
+
+  async function confirmReplay() {
+    setReplayPending(true);
+    const result = await replayOnboarding();
+    setReplayPending(false);
+    if (!result.ok) {
+      showToast(t.spaceNameSaveFailed, 'error');
+      return;
+    }
+    setConfirmReplayOpen(false);
+    router.push('/recipes?tour=1');
   }
 
   return (
@@ -121,6 +138,36 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
         </button>
       </section>
 
+      {/* Preferences */}
+      <section>
+        <h2 className="section-label mb-4">{t.settingsReplayOnboardingSection}</h2>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <p
+              className="font-body text-base mb-1"
+              style={{ color: 'var(--text-1)' }}
+            >
+              {t.settingsReplayOnboardingLabel}
+            </p>
+            <p
+              className="font-body text-sm"
+              style={{ color: 'var(--text-3)' }}
+            >
+              {t.settingsReplayOnboardingDescription}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setConfirmReplayOpen(true)}
+            className="btn-ghost flex-shrink-0"
+            data-testid="settings-replay-onboarding-btn"
+            disabled={replayPending}
+          >
+            {t.settingsReplayOnboardingBtn}
+          </button>
+        </div>
+      </section>
+
       {/* Account */}
       <section>
         <h2 className="section-label mb-4">{t.settingsAccountSection}</h2>
@@ -143,6 +190,16 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
       <Link href="/recipes" className="btn-ghost inline-block">
         {t.settingsBackToRecipes}
       </Link>
+
+      <ConfirmDialog
+        open={confirmReplayOpen}
+        title={t.settingsReplayOnboardingConfirmTitle}
+        description={t.settingsReplayOnboardingConfirmBody}
+        confirmLabel={replayPending ? t.savingBtn : t.settingsReplayOnboardingConfirmBtn}
+        cancelLabel={t.settingsReplayOnboardingCancelBtn}
+        onConfirm={() => { void confirmReplay(); }}
+        onCancel={() => setConfirmReplayOpen(false)}
+      />
     </div>
   );
 }

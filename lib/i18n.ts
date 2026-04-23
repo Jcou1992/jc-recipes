@@ -262,6 +262,16 @@ export interface Translations {
   tourFinish: string;
   tourStepCounter: (current: number, total: number) => string;
 
+  // Settings — Replay onboarding section
+  settingsReplayOnboardingSection: string;
+  settingsReplayOnboardingLabel: string;
+  settingsReplayOnboardingDescription: string;
+  settingsReplayOnboardingBtn: string;
+  settingsReplayOnboardingConfirmTitle: string;
+  settingsReplayOnboardingConfirmBody: string;
+  settingsReplayOnboardingConfirmBtn: string;
+  settingsReplayOnboardingCancelBtn: string;
+
   // Onboarding wizard (step 0 of the tour)
   onboardingWelcomeTitle: string;
   onboardingWelcomeBody: string;
@@ -523,6 +533,16 @@ export const en: Translations = {
   tourFinish: 'Finish',
   tourStepCounter: (current, total) => `Step ${current} of ${total}`,
 
+  settingsReplayOnboardingSection: 'Preferences',
+  settingsReplayOnboardingLabel: 'Replay onboarding',
+  settingsReplayOnboardingDescription: 'Reset your preferences and walk through the setup wizard again.',
+  settingsReplayOnboardingBtn: 'Replay onboarding',
+  settingsReplayOnboardingConfirmTitle: 'Replay onboarding?',
+  settingsReplayOnboardingConfirmBody:
+    'This will reset your theme, language, text size, and units to defaults. Continue?',
+  settingsReplayOnboardingConfirmBtn: 'Continue',
+  settingsReplayOnboardingCancelBtn: 'Cancel',
+
   onboardingWelcomeTitle: 'Welcome, chef',
   onboardingWelcomeBody: 'Set your station before service.',
   onboardingNextButton: 'Next →',
@@ -782,6 +802,16 @@ export const es: Translations = {
   tourSkip: 'Omitir',
   tourFinish: 'Terminar',
   tourStepCounter: (current, total) => `Paso ${current} de ${total}`,
+
+  settingsReplayOnboardingSection: 'Preferencias',
+  settingsReplayOnboardingLabel: 'Reproducir bienvenida',
+  settingsReplayOnboardingDescription: 'Restablece tus preferencias y repite el asistente de configuración.',
+  settingsReplayOnboardingBtn: 'Reproducir bienvenida',
+  settingsReplayOnboardingConfirmTitle: '¿Reproducir bienvenida?',
+  settingsReplayOnboardingConfirmBody:
+    'Esto restablecerá tu tema, idioma, tamaño de texto y unidades a los valores predeterminados. ¿Continuar?',
+  settingsReplayOnboardingConfirmBtn: 'Continuar',
+  settingsReplayOnboardingCancelBtn: 'Cancelar',
 
   onboardingWelcomeTitle: 'Bienvenido, chef',
   onboardingWelcomeBody: 'Prepara tu estación antes del servicio.',
