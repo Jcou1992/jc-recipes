@@ -1,7 +1,29 @@
+export interface MacroValues {
+  kcal: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+}
+
 export interface Ingredient {
   amount: number;
   unit: string | null;
   name: string;
+  fdc_id?: number;
+  macros_override?: MacroValues;
+}
+
+export interface UnresolvedIngredient {
+  index: number;
+  name: string;
+  reason: string;
+}
+
+export interface RecipeMacros extends MacroValues {
+  matched_count: number;
+  total_count: number;
+  unresolved_ingredients: UnresolvedIngredient[];
 }
 
 export interface Step {
@@ -24,12 +46,17 @@ export interface Recipe {
   tags: string[] | null;
   notes: string | null;
   photos: string[] | null;
+  macros: RecipeMacros | null;
+  macros_computed_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 // Shape sent to the DB on create / update (no auto-generated fields)
-export type RecipePayload = Omit<Recipe, 'id' | 'user_id' | 'created_at' | 'updated_at'>;
+export type RecipePayload = Omit<
+  Recipe,
+  'id' | 'user_id' | 'created_at' | 'updated_at' | 'macros' | 'macros_computed_at'
+>;
 
 export interface BulkActionResult {
   succeeded: string[];
