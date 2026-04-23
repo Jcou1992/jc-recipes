@@ -88,6 +88,8 @@ export interface Translations {
   namePlaceholder: string;
   nameRequired: string;
   servingsLabel: string;
+  servingSizeLabel: string;
+  servingSizeHelper: string;
   ingredientsFormLabel: string;
   addIngredientBtn: string;
   ingredientDefault: string;
@@ -339,6 +341,8 @@ export const en: Translations = {
   namePlaceholder: 'Recipe name',
   nameRequired: 'Recipe name is required.',
   servingsLabel: 'Servings',
+  servingSizeLabel: 'Serving size label (optional)',
+  servingSizeHelper: 'example: "1 burger", "250 g", "1 slice", "150 ml"',
   ingredientsFormLabel: 'Ingredients',
   addIngredientBtn: '+ Add',
   ingredientDefault: 'Ingredient',
@@ -582,6 +586,8 @@ export const es: Translations = {
   namePlaceholder: 'Nombre de la receta',
   nameRequired: 'El nombre es requerido.',
   servingsLabel: 'Porciones',
+  servingSizeLabel: 'Etiqueta del tamaño de porción (opcional)',
+  servingSizeHelper: 'ejemplo: "1 hamburguesa", "250 g", "1 rebanada", "150 ml"',
   ingredientsFormLabel: 'Ingredientes',
   addIngredientBtn: '+ Agregar',
   ingredientDefault: 'Ingrediente',
