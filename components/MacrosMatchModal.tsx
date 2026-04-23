@@ -123,12 +123,89 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const searchTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const lastSearchedRef = useRef<Map<number, string>>(new Map());
 
   useFocusTrap(dialogRef, open, onClose);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Debounced re-query when a row's Search-again input changes. Uses refs to
+  // de-dupe identical queries and track per-row timers, so updates to row
+  // state (including setRows inside the fetch) don't create a feedback loop.
+  useEffect(() => {
+    if (!open) return;
+    rows.forEach((row, idx) => {
+      if (!row.searchOpen) return;
+      const q = row.searchQuery.trim();
+      const ing = recipe.ingredients[idx];
+      if (!ing) return;
+      // Initial candidates already reflect ing.name — skip the first auto-fire.
+      if (q === ing.name.trim() && lastSearchedRef.current.get(idx) === undefined) return;
+      if (lastSearchedRef.current.get(idx) === q) return;
+
+      const existing = searchTimersRef.current.get(idx);
+      if (existing) clearTimeout(existing);
+
+      const timer = setTimeout(async () => {
+        lastSearchedRef.current.set(idx, q);
+        setRows((prev) => {
+          const next = new Map(prev);
+          const r = next.get(idx);
+          if (!r) return prev;
+          next.set(idx, { ...r, searchLoading: true, candidatesError: false });
+          return next;
+        });
+        if (q === '') {
+          setRows((prev) => {
+            const next = new Map(prev);
+            const r = next.get(idx);
+            if (!r) return prev;
+            next.set(idx, { ...r, searchLoading: false, candidates: [] });
+            return next;
+          });
+          return;
+        }
+        const result = await searchFdcAction(q);
+        setRows((prev) => {
+          const next = new Map(prev);
+          const r = next.get(idx);
+          if (!r) return prev;
+          if ('error' in result) {
+            next.set(idx, { ...r, searchLoading: false, candidatesError: true });
+          } else {
+            next.set(idx, {
+              ...r,
+              searchLoading: false,
+              candidatesError: false,
+              candidates: result.candidates.slice(0, 3),
+            });
+          }
+          return next;
+        });
+      }, 250);
+      searchTimersRef.current.set(idx, timer);
+    });
+  }, [rows, recipe.ingredients, open]);
+
+  // Cleanup on unmount: clear any pending timers.
+  useEffect(() => {
+    const timers = searchTimersRef.current;
+    return () => timers.forEach((t) => clearTimeout(t));
+  }, []);
+
+  // Reset re-search refs whenever modal is reopened against a (possibly
+  // different) recipe — stale last-searched state from a prior session would
+  // suppress legitimate first queries.
+  useEffect(() => {
+    if (!open) {
+      searchTimersRef.current.forEach((t) => clearTimeout(t));
+      searchTimersRef.current.clear();
+      lastSearchedRef.current.clear();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
