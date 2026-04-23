@@ -15,6 +15,7 @@ const FULL_MD = `
 **Prep time:** 20 min
 **Cook time:** 30 min
 **Servings:** 4
+**Serving size label:** 1 bowl
 
 ## Ingredients
 - 200g spaghetti
@@ -110,6 +111,7 @@ describe('parseRecipeMarkdown — full recipe', () => {
     expect(parsed.prep_time).toBe(20);
     expect(parsed.cook_time).toBe(30);
     expect(parsed.servings).toBe(4);
+    expect(parsed.serving_size_label).toBe('1 bowl');
   });
 
   test('ingredients: 4 items parsed with amount/unit/name', () => {
@@ -188,5 +190,14 @@ describe('parseRecipeMarkdown — malformed lines', () => {
 
   test('multi-line notes are joined with newline', () => {
     expect(parseRecipeMarkdown('# T\n## Notes\nFirst note.\nSecond note.').notes).toBe('First note.\nSecond note.');
+  });
+
+  test('serving_size_label > 40 chars is rejected; <= 40 is accepted', () => {
+    const ok = parseRecipeMarkdown('# T\n**Serving size label:** 1 large burger with toppings\n## Ingredients\n- 1 egg');
+    expect(ok.serving_size_label).toBe('1 large burger with toppings');
+
+    const tooLong = 'x'.repeat(41);
+    const bad = parseRecipeMarkdown(`# T\n**Serving size label:** ${tooLong}\n## Ingredients\n- 1 egg`);
+    expect(bad.serving_size_label).toBeUndefined();
   });
 });

@@ -17,6 +17,7 @@ export interface ParsedRecipe {
   prep_time?: number;   // minutes
   cook_time?: number;   // minutes
   servings?: number;
+  serving_size_label?: string;
   ingredients: ParsedIngredient[];
   steps: ParsedStep[];
   notes?: string;
@@ -175,6 +176,8 @@ export function parseRecipeMarkdown(markdown: string): ParsedRecipe {
         } else if (key.includes('cook')) {
           const m = parseTimeToMinutes(val);
           if (m !== undefined) result.cook_time = m;
+        } else if (key.includes('serving size') || key.includes('size label') || key.includes('portion size')) {
+          if (val.length <= 40) result.serving_size_label = val;
         } else if (key.includes('serving') || key.includes('portion')) {
           const n = parseInt(val, 10);
           if (!isNaN(n)) result.servings = n;
