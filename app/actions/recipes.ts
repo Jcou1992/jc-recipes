@@ -6,14 +6,30 @@ import type { RecipePayload } from '@/types/recipe';
 
 export type ActionResult = { error: string } | null;
 
+const SERVING_SIZE_LABEL_MAX = 40;
+
+function normalizeServingSizeLabel(payload: RecipePayload): RecipePayload | { error: string } {
+  const raw = payload.serving_size_label;
+  if (raw == null) return payload;
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) return { ...payload, serving_size_label: null };
+  if (trimmed.length > SERVING_SIZE_LABEL_MAX) {
+    return { error: `Serving size label must be ${SERVING_SIZE_LABEL_MAX} characters or fewer.` };
+  }
+  return { ...payload, serving_size_label: trimmed };
+}
+
 export async function createRecipe(payload: RecipePayload): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect('/login');
 
+  const normalized = normalizeServingSizeLabel(payload);
+  if ('error' in normalized) return normalized;
+
   const { data, error } = await supabase
     .from('recipes')
-    .insert({ ...payload, user_id: session.user.id })
+    .insert({ ...normalized, user_id: session.user.id })
     .select('id')
     .single();
 
@@ -27,9 +43,12 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) redirect('/login');
 
+  const normalized = normalizeServingSizeLabel(payload);
+  if ('error' in normalized) return normalized;
+
   const { error } = await supabase
     .from('recipes')
-    .update(payload)
+    .update(normalized)
     .eq('id', id)
     .eq('user_id', session.user.id);
 
