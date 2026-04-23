@@ -64,8 +64,6 @@ export default function SortPills({ sort, onChange }: Props) {
       style={{
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
-        maskImage: 'linear-gradient(to right, black 94%, transparent)',
-        WebkitMaskImage: 'linear-gradient(to right, black 94%, transparent)',
       } as React.CSSProperties}
       data-testid="sort-pills"
     >

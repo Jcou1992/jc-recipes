@@ -51,12 +51,10 @@ export default function TagRail({
       {/* Mobile: horizontal scroll. Desktop: wrap. */}
       <div className="relative">
         <div
-          className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-x-visible py-1"
+          className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-x-visible py-1 [mask-image:linear-gradient(to_right,black_94%,transparent)] md:[mask-image:none] [-webkit-mask-image:linear-gradient(to_right,black_94%,transparent)] md:[-webkit-mask-image:none]"
           style={{
             WebkitOverflowScrolling: 'touch',
             scrollbarWidth: 'none',
-            maskImage: 'linear-gradient(to right, black 94%, transparent)',
-            WebkitMaskImage: 'linear-gradient(to right, black 94%, transparent)',
           } as React.CSSProperties}
           data-testid="tag-rail"
         >
