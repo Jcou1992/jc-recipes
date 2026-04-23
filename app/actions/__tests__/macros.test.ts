@@ -200,6 +200,72 @@ describe('macros server actions truth table', () => {
       expect: (r) => expect(r).toEqual({ ok: true }),
       postAssert: () => expect(computeSpy).toHaveBeenCalledTimes(1),
     },
+    // ── fdc_name + overrideBasis persistence ──────────────────────────────
+    {
+      label: 'setIngredientMatches persists fdcName alongside fdcId',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 600, unit: 'g', name: 'Beef' }] },
+      act: () =>
+        setIngredientMatches('r1', [
+          {
+            ingredientIndex: 0,
+            expectedName: 'Beef',
+            fdcId: 1001,
+            fdcName: 'Beef, ground, 80% lean, raw',
+          },
+        ]),
+      expect: (r) => expect(r).toEqual({ ok: true }),
+      postAssert: () => {
+        const last = updateSpy.mock.calls.at(-1)?.[0] as { ingredients: Ingredient[] };
+        expect(last.ingredients[0].fdc_id).toBe(1001);
+        expect(last.ingredients[0].fdc_name).toBe('Beef, ground, 80% lean, raw');
+      },
+    },
+    {
+      label: 'setIngredientMatches rejects override without overrideBasis',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 2, unit: 'pieces', name: 'Tomato' }] },
+      act: () =>
+        setIngredientMatches('r1', [
+          {
+            ingredientIndex: 0,
+            expectedName: 'Tomato',
+            override: { kcal: 22, protein_g: 1.1, fat_g: 0.2, carbs_g: 4.8, fiber_g: 1.5 },
+            // overrideBasis intentionally missing
+          },
+        ]),
+      expect: (r) => expect(r).toEqual({ error: 'Override basis missing' }),
+    },
+    {
+      label: 'setIngredientMatches accepts per_unit override exceeding the per_100g macro-sum rule',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'piece', name: 'Steak' }] },
+      act: () =>
+        setIngredientMatches('r1', [
+          {
+            ingredientIndex: 0,
+            expectedName: 'Steak',
+            override: { kcal: 600, protein_g: 55, fat_g: 40, carbs_g: 10, fiber_g: 0 },
+            overrideBasis: 'per_unit',
+          },
+        ]),
+      expect: (r) => expect(r).toEqual({ ok: true }),
+    },
+    {
+      label: 'setIngredientMatches rejects per_unit override with absurd kcal (>1500)',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'piece', name: 'Whole cake' }] },
+      act: () =>
+        setIngredientMatches('r1', [
+          {
+            ingredientIndex: 0,
+            expectedName: 'Whole cake',
+            override: { kcal: 9999, protein_g: 10, fat_g: 10, carbs_g: 10, fiber_g: 0 },
+            overrideBasis: 'per_unit',
+          },
+        ]),
+      expect: (r) => expect(r).toEqual({ error: 'kcal exceeds 1500 per unit (check input)' }),
+    },
   ])('macros action → $label', async ({ signedIn, recipe, act, expect: check, postAssert }) => {
     currentSession = signedIn ? { user: { id: 'u1' } } : null;
     currentRecipe = recipe ? JSON.parse(JSON.stringify(recipe)) : null;

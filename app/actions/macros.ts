@@ -5,18 +5,22 @@ import { computeRecipeMacros } from '@/lib/macros/compute';
 import { searchFdc } from '@/lib/macros/match';
 import type { Ingredient, MacroValues } from '@/types/recipe';
 
-function validateOverride(o: MacroValues): string | null {
+function validateOverride(o: MacroValues, basis: 'per_100g' | 'per_unit'): string | null {
   for (const k of ['kcal', 'protein_g', 'fat_g', 'carbs_g', 'fiber_g'] as const) {
     const v = o[k];
     if (!Number.isFinite(v)) return `Invalid ${k}`;
     if (v < 0) return `${k} cannot be negative`;
   }
-  if (o.kcal > 900) return 'kcal exceeds 900 per 100 g (check input)';
-  for (const k of ['protein_g', 'fat_g', 'carbs_g', 'fiber_g'] as const) {
-    if (o[k] > 100) return `${k} exceeds 100 per 100 g (impossible)`;
-  }
-  if (o.fat_g + o.carbs_g + o.protein_g > 100) {
-    return 'fat + carbs + protein cannot exceed 100 g per 100 g';
+  if (basis === 'per_100g') {
+    if (o.kcal > 900) return 'kcal exceeds 900 per 100 g (check input)';
+    for (const k of ['protein_g', 'fat_g', 'carbs_g', 'fiber_g'] as const) {
+      if (o[k] > 100) return `${k} exceeds 100 per 100 g (impossible)`;
+    }
+    if (o.fat_g + o.carbs_g + o.protein_g > 100) {
+      return 'fat + carbs + protein cannot exceed 100 g per 100 g';
+    }
+  } else {
+    if (o.kcal > 1500) return 'kcal exceeds 1500 per unit (check input)';
   }
   return null;
 }
@@ -60,12 +64,19 @@ export async function setIngredientMatch(
   recipeId: string,
   index: number,
   expectedName: string,
-  fdcId: number
+  fdcId: number,
+  fdcName?: string,
 ) {
   const res = await verifyAndGetIngredients(recipeId, index, expectedName);
   if ('error' in res) return res;
   const { supabase, ingredients } = res;
-  ingredients[index] = { ...ingredients[index], fdc_id: fdcId, macros_override: undefined };
+  ingredients[index] = {
+    ...ingredients[index],
+    fdc_id: fdcId,
+    fdc_name: fdcName,
+    macros_override: undefined,
+    macros_override_basis: undefined,
+  };
   await supabase.from('recipes').update({ ingredients }).eq('id', recipeId);
   await computeRecipeMacros(recipeId);
   return { ok: true };
@@ -75,10 +86,11 @@ export async function setIngredientOverride(
   recipeId: string,
   index: number,
   expectedName: string,
-  override: MacroValues | null
+  override: MacroValues | null,
+  basis: 'per_100g' | 'per_unit' = 'per_100g',
 ) {
   if (override !== null) {
-    const err = validateOverride(override);
+    const err = validateOverride(override, basis);
     if (err) return { error: err };
   }
   const res = await verifyAndGetIngredients(recipeId, index, expectedName);
@@ -87,6 +99,7 @@ export async function setIngredientOverride(
   ingredients[index] = {
     ...ingredients[index],
     macros_override: override ?? undefined,
+    macros_override_basis: override ? basis : undefined,
   };
   await supabase.from('recipes').update({ ingredients }).eq('id', recipeId);
   await computeRecipeMacros(recipeId);
@@ -123,19 +136,28 @@ export async function setIngredientMatches(recipeId: string, entries: BatchEntry
       };
     }
     if (entry.override !== undefined) {
+      if (entry.override !== null && !entry.overrideBasis) {
+        return { error: 'Override basis missing' };
+      }
       if (entry.override !== null) {
-        const err = validateOverride(entry.override);
+        const err = validateOverride(entry.override, entry.overrideBasis!);
         if (err) return { error: err };
       }
       ingredients[entry.ingredientIndex] = {
         ...ing,
         macros_override: entry.override ?? undefined,
+        macros_override_basis: entry.override ? entry.overrideBasis : undefined,
+        // switching to manual clears USDA match + name
+        fdc_id: undefined,
+        fdc_name: undefined,
       };
     } else if (entry.fdcId !== undefined) {
       ingredients[entry.ingredientIndex] = {
         ...ing,
         fdc_id: entry.fdcId,
+        fdc_name: entry.fdcName,
         macros_override: undefined,
+        macros_override_basis: undefined,
       };
     }
   }
