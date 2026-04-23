@@ -8,6 +8,7 @@ import {
   PREF_COOKIE_THEME,
   PREF_COOKIE_FONT_SIZE,
   PREF_COOKIE_LANGUAGE,
+  PREF_COOKIE_UNITS,
   PREF_COOKIE_MAX_AGE as COOKIE_MAX_AGE,
 } from '@/lib/preference-cookies';
 
@@ -71,7 +72,19 @@ export async function clearPrefCookies(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(PREF_COOKIE_THEME);
   cookieStore.delete(PREF_COOKIE_FONT_SIZE);
+  cookieStore.delete(PREF_COOKIE_UNITS);
   // preferred-language cookie stays — auth-agnostic visitors benefit from it
+}
+
+// Used by replay/reset flows that want a completely clean slate, including
+// the language cookie. Distinct from clearPrefCookies() which preserves
+// language on logout for next visitor on the same device.
+export async function clearAllPrefCookies(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(PREF_COOKIE_THEME);
+  cookieStore.delete(PREF_COOKIE_FONT_SIZE);
+  cookieStore.delete(PREF_COOKIE_UNITS);
+  cookieStore.delete(PREF_COOKIE_LANGUAGE);
 }
 
 // ── Write ───────────────────────────────────────────────────────────────────
