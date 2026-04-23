@@ -13,7 +13,7 @@ import { TEST_EMAIL, TEST_PASSWORD, signIn } from './helpers';
 
 test('login page renders and rejects wrong password @smoke', async ({ page }) => {
   await page.goto('/login');
-  await expect(page.getByRole('heading', { name: 'jc-recipes' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'SEKAI' })).toBeVisible();
   await expect(page.getByLabel('Email')).toBeVisible();
   await expect(page.getByLabel('Password')).toBeVisible();
   const submit = page.getByRole('button', { name: 'Sign in' });
@@ -22,7 +22,7 @@ test('login page renders and rejects wrong password @smoke', async ({ page }) =>
   await page.getByLabel('Email').fill(TEST_EMAIL);
   await page.getByLabel('Password').fill('wrongpassword');
   await submit.click();
-  await expect(page.locator('p.bg-red-50')).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByRole('alert')).toBeVisible({ timeout: 8_000 });
 });
 
 // ── Login success + logout round trip ─────────────────────────────────────────
@@ -34,8 +34,9 @@ test('successful login → /recipes, logout → /login, still-authed visit to /l
   await page.goto('/login');
   await expect(page).toHaveURL(/\/recipes$/, { timeout: 5_000 });
 
-  // Logout must return to /login and protect /recipes afterwards.
-  await page.getByRole('button', { name: 'Sign out' }).click();
+  // Logout lives inside the avatar dropdown — open it first.
+  await page.getByTestId('avatar-menu-btn').click();
+  await page.getByTestId('avatar-menu-signout').click();
   await expect(page).toHaveURL(/\/login$/, { timeout: 8_000 });
   await page.goto('/recipes');
   await expect(page).toHaveURL(/\/login/, { timeout: 5_000 });

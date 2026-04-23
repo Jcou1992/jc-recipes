@@ -25,7 +25,7 @@ jest.mock('next/cache', () => ({
   revalidatePath: jest.fn(),
 }));
 
-const upsertSpy = jest.fn(async () => ({ error: null }));
+const upsertSpy = jest.fn(async (..._args: unknown[]) => ({ error: null }));
 const updateEqSpy = jest.fn(async () => ({ error: null }));
 const updateArgSpy = jest.fn();
 const state: { user: { id: string; email: string } | null } = {
@@ -98,8 +98,7 @@ describe('preferences server actions', () => {
     // updateUserPreferences — invalid guard
     const upsertsBefore = upsertSpy.mock.calls.length;
     result = await updateUserPreferences({
-      // @ts-expect-error — deliberate invalid value for runtime guard.
-      preferred_units: 'furlongs',
+      preferred_units: 'furlongs' as unknown as 'metric',
     });
     expect(result.ok).toBe(false);
     expect(result.error).toBe('Invalid units value');

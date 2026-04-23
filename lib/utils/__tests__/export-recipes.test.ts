@@ -13,6 +13,9 @@ const META = {
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
   photos: null,
+  serving_size_label: null,
+  macros: null,
+  macros_computed_at: null,
 } as const;
 
 const FULL: Recipe = {

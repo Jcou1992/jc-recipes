@@ -19,7 +19,7 @@ test('create via form populates detail page with every persisted field @smoke', 
   const name = uniqueName('CreateUI');
   await page.locator('#name').fill(name);
   await page.getByLabel('Servings').fill('4');
-  await page.getByRole('textbox', { name: 'Ingredient name' }).first().fill('flour');
+  await page.getByRole('combobox', { name: 'Ingredient name' }).first().fill('flour');
   await page.getByRole('textbox', { name: 'Ingredient amount' }).first().fill('200');
   await page.getByRole('textbox', { name: 'Ingredient unit' }).first().fill('g');
   await page.getByRole('textbox', { name: 'Step 1' }).fill('Mix flour and water.');
@@ -35,7 +35,7 @@ test('create via form populates detail page with every persisted field @smoke', 
   );
 
   await expect(page.getByRole('heading', { name })).toBeVisible();
-  await expect(page.getByText('4 servings')).toBeVisible();
+  await expect(page.getByText('Serves 4')).toBeVisible();
   await expect(page.getByText('A test description')).toBeVisible();
   await expect(page.getByText('flour', { exact: true })).toBeVisible();
   await expect(page.getByText('Mix flour and water.')).toBeVisible();

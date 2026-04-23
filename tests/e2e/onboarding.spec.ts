@@ -27,6 +27,10 @@ async function signInAs(page: Page, email: string, password: string): Promise<vo
 }
 
 test.describe('onboarding wizard', () => {
+  // All tests mutate shared test-user prefs (tour_completed_at, preferred_*);
+  // serialize to avoid parallel-worker races on the same user.
+  test.describe.configure({ mode: 'serial' });
+
   test('new-style signup sees wizard, commits prefs, tour plays @smoke', async ({ browser }) => {
     // Fresh context — no stored auth, act as first-time sign-in for test user.
     // Preconditions: we nuke the test user's prefs via the supabase JS client
@@ -54,7 +58,7 @@ test.describe('onboarding wizard', () => {
       })
       .eq('user_id', auth!.user!.id);
 
-    const ctx = await browser.newContext();
+    const ctx = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page = await ctx.newPage();
     await signInAs(page, TEST_EMAIL, TEST_PASSWORD);
 
@@ -81,7 +85,7 @@ test.describe('onboarding wizard', () => {
     test.skip(!process.env.DEMO_USER_PASSWORD && !process.env.TEST_USER_PASSWORD,
       'demo password not configured');
 
-    const ctx = await browser.newContext();
+    const ctx = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page = await ctx.newPage();
     await signInAs(page, DEMO_EMAIL, DEMO_PASSWORD);
 
@@ -98,7 +102,7 @@ test.describe('onboarding wizard', () => {
     await ctx.close();
 
     // Second login on a clean context.
-    const ctx2 = await browser.newContext();
+    const ctx2 = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page2 = await ctx2.newPage();
     await signInAs(page2, DEMO_EMAIL, DEMO_PASSWORD);
     await expect(page2.getByTestId('onboarding-wizard')).toBeVisible({ timeout: 10_000 });
@@ -125,7 +129,7 @@ test.describe('onboarding wizard', () => {
   });
 
   test('language picked mid-wizard applies to step 1 of tour @regression', async ({ browser }) => {
-    const ctx = await browser.newContext();
+    const ctx = await browser.newContext({ storageState: { cookies: [], origins: [] } });
     const page = await ctx.newPage();
     await signInAs(page, TEST_EMAIL, TEST_PASSWORD);
     await page.goto('/recipes?tour=1');

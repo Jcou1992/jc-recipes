@@ -78,8 +78,9 @@ test('search: Clear filters button resets the filter @regression', async ({ page
 // ── Tag filter (combines tag + search) ────────────────────────────────────────
 
 test('tag rail chip marks as pressed and combines with search @regression', async ({ page }) => {
-  // Prefix with '0' so it sorts into the first 12 tags (alphabetical) and stays
-  // inline on the rail even when the account has many tags.
+  // Prefix with '0' so it sorts high alphabetically. Accounts that have
+  // accumulated many 0-prefixed tags may push ours into the overflow panel;
+  // the test handles both inline and overflow placements.
   const tag  = `0e2etag${Date.now()}`;
   const name = uniqueName('TagRecipe');
   await seedRecipe({ name, tags: [tag] });
@@ -87,8 +88,15 @@ test('tag rail chip marks as pressed and combines with search @regression', asyn
   await page.goto('/recipes');
   await page.waitForLoadState('networkidle');
 
-  // Tag chip is inline in the TagRail — no popover to open.
-  const chip = page.getByTestId(`tag-filter-${tag}`);
+  // If chip is in the overflow panel, open the "+N more" popover first.
+  // Chip may render in both filter-popover (desktop) and filter-sheet
+  // (mobile) — use .first() to disambiguate.
+  let chip = page.getByTestId(`tag-filter-${tag}`).first();
+  if (!(await chip.isVisible().catch(() => false))) {
+    const more = page.getByTestId('tag-rail-more');
+    if (await more.isVisible().catch(() => false)) await more.click();
+    chip = page.getByTestId(`tag-filter-${tag}`).first();
+  }
   await expect(chip).toBeVisible();
   await expect(chip).toHaveAttribute('aria-pressed', 'false');
   await chip.click();
@@ -393,6 +401,12 @@ test.describe('login-page preview (unauthenticated)', () => {
   });
 });
 
+// Tests below mutate shared test-user state (space_name, tour_completed_at,
+// onboarding replay flow). Parallel workers all auth as the same test user,
+// so these races reliably flake. Serialize them to keep the suite stable
+// without requiring per-worker user provisioning.
+test.describe.serial('shared user-state mutations', () => {
+
 test('editable space name persists across reload @regression', async ({ page, isMobile }, testInfo) => {
   test.skip(!!isMobile, 'desktop viewport test — uses double-click to edit');
   // Mutates user-scoped DB state; racy under parallel workers hitting the same test user.
@@ -461,12 +475,14 @@ test('onboarding tour: replay button launches tour and Next advances @regression
   // "Continue" runs replayOnboarding() then routes to /recipes?tour=1.
   await page.getByTestId('settings-replay-onboarding-btn').click();
   await page.getByRole('button', { name: /continue|continuar/i }).click();
-  // Should land on /recipes?tour=1 with tour visible
+  // Should land on /recipes?tour=1 with the wizard step visible first.
   await page.waitForURL(/\/recipes.*tour=1/);
-  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId('onboarding-wizard')).toBeVisible({ timeout: 10_000 });
+  // Advance past wizard → spotlight tour appears.
+  await page.getByTestId('wizard-next-btn').click();
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 10_000 });
   // Next advances
   await page.getByTestId('onboarding-next').click();
-  // Step 2 visible — tooltip text changed (can be loose; just assert tour still shown)
   await expect(page.getByTestId('onboarding-tour')).toBeVisible();
   // Skip closes
   await page.getByTestId('onboarding-skip').click();
@@ -486,7 +502,14 @@ test('onboarding tour: spotlight lands on the visible filter control, not the co
 
   await page.goto('/recipes?tour=1');
   await page.waitForLoadState('networkidle');
-  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 5000 });
+
+  // Tour starts with the preferences wizard — advance past it first.
+  const wizard = page.getByTestId('onboarding-wizard');
+  if (await wizard.isVisible().catch(() => false)) {
+    await page.getByTestId('wizard-next-btn').click();
+    await expect(wizard).not.toBeVisible({ timeout: 10_000 });
+  }
+  await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 15_000 });
 
   // Advance to step 3 of 5 (filter)
   await page.getByTestId('onboarding-next').click();
@@ -512,6 +535,8 @@ test('onboarding tour: spotlight lands on the visible filter control, not the co
   expect(cy).toBeGreaterThanOrEqual(tBox!.y);
   expect(cy).toBeLessThanOrEqual(tBox!.y + tBox!.height);
 });
+
+}); // end: shared user-state mutations (serial)
 
 test('cooking mode: ingredient sheet toggles on mobile viewports @mobile', async ({ page }) => {
   const vp = page.viewportSize();

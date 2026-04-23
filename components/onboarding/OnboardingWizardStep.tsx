@@ -36,7 +36,8 @@ function Pill({
 }) {
   return (
     <label
-      className="flex-shrink-0 flex items-center justify-center rounded-xl cursor-pointer transition-all px-4"
+      data-testid={testId}
+      className="chip-press flex-shrink-0 flex items-center justify-center rounded-xl cursor-pointer transition-all px-4"
       style={{
         minHeight: 44,
         minWidth: 72,
@@ -54,7 +55,6 @@ function Pill({
         checked={active}
         onChange={onClick}
         className="sr-only"
-        data-testid={testId}
       />
       <span className="font-label text-xs font-semibold tracking-widest uppercase">
         {children}

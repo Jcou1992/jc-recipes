@@ -46,7 +46,11 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
 
 export async function logout() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // scope: 'local' invalidates only this device's session. A global sign-out
+  // would revoke every session for this user — including Playwright workers
+  // and other devices — which is hostile when a small circle of users may be
+  // signed in on multiple devices simultaneously.
+  await supabase.auth.signOut({ scope: 'local' });
   // Drop the pref cookies so the next visitor on this device starts clean.
   // preferred-language is left alone — it's auth-agnostic and browsers hold it.
   await clearPrefCookies();
