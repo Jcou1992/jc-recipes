@@ -1,4 +1,5 @@
-export interface TourStep {
+export interface SpotlightStep {
+  kind: 'spotlight';
   id: string;
   targetSelector: string; // CSS selector — first match wins
   titleKey: string;
@@ -7,10 +8,24 @@ export interface TourStep {
   position?: 'top' | 'bottom' | 'left' | 'right' | 'center';
 }
 
-// 5 steps, /recipes only. If a step's target doesn't exist, skip to next.
-// Cross-page cook-mode step dropped for MVP to avoid navigation complexity.
+export interface WizardStep {
+  kind: 'wizard';
+  id: string;
+  page: string;
+}
+
+export type TourStep = WizardStep | SpotlightStep;
+
+// Step 0: preferences wizard. Steps 1-5: spotlight tour on /recipes.
+// If a spotlight step's target doesn't exist, skip to next.
 export const TOUR_STEPS: TourStep[] = [
   {
+    kind: 'wizard',
+    id: 'wizard',
+    page: '/recipes',
+  },
+  {
+    kind: 'spotlight',
     id: 'welcome',
     targetSelector: '[data-testid="avatar-menu-btn"]',
     titleKey: 'tourStep1Title',
@@ -19,6 +34,7 @@ export const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
+    kind: 'spotlight',
     id: 'search',
     targetSelector: '[data-testid="recipe-search"]',
     titleKey: 'tourStep2Title',
@@ -27,6 +43,7 @@ export const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
+    kind: 'spotlight',
     id: 'filter',
     targetSelector: '[data-testid="sort-pill-newest"]',
     titleKey: 'tourStep3Title',
@@ -35,6 +52,7 @@ export const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
+    kind: 'spotlight',
     id: 'new',
     targetSelector: 'a[href="/recipes/new"]',
     titleKey: 'tourStep4Title',
@@ -43,6 +61,7 @@ export const TOUR_STEPS: TourStep[] = [
     position: 'bottom',
   },
   {
+    kind: 'spotlight',
     id: 'card',
     targetSelector: '[data-testid^="recipe-card-"]',
     titleKey: 'tourStep5Title',
