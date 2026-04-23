@@ -18,11 +18,20 @@ interface RowState {
   candidates: Array<{ fdc_id: number; name: string }>;
   candidatesError: boolean;
   selectedFdcId?: number;
+  /** Cached FDC name so "Current match" can display even when the saved id
+   *  falls outside the current top-3 candidate window. */
+  fdcName?: string;
   showManual: boolean;
   manualValues: MacroValues;
   /** True when the row has never had a persisted override — inputs render with
    *  placeholders instead of literal "0" to avoid the illusion of real data. */
   manualPristine: boolean;
+  /** Re-search disclosure state — query is decoupled from recipe ingredient
+   *  name so a Spanish "tomate" can search USDA as "tomato" without mutating
+   *  authored intent. */
+  searchOpen: boolean;
+  searchQuery: string;
+  searchLoading: boolean;
 }
 
 type RowStatus = 'loading' | 'matched' | 'manual' | 'unmatched' | 'error';
@@ -37,9 +46,13 @@ function initialRow(ing: Ingredient): RowState {
     candidates: [],
     candidatesError: false,
     selectedFdcId: ing.fdc_id,
+    fdcName: ing.fdc_name,
     showManual: !!ing.macros_override,
     manualValues: ing.macros_override ?? defaultOverride(),
     manualPristine: !ing.macros_override,
+    searchOpen: false,
+    searchQuery: ing.name,
+    searchLoading: false,
   };
 }
 
@@ -377,7 +390,13 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                                   const next = new Map(prev);
                                   const r = next.get(idx);
                                   if (!r) return prev;
-                                  next.set(idx, { ...r, selectedFdcId: c.fdc_id, showManual: false });
+                                  next.set(idx, {
+                                    ...r,
+                                    selectedFdcId: c.fdc_id,
+                                    fdcName: c.name,
+                                    showManual: false,
+                                    searchOpen: false,
+                                  });
                                   return next;
                                 })
                               }
@@ -416,35 +435,107 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                   )}
 
                   {/* No-match warm copy */}
-                  {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && row.candidates.length === 0 && (
+                  {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && row.candidates.length === 0 && !row.searchOpen && (
                     <p
                       className="font-body text-sm italic"
                       style={{ color: 'var(--text-2)' }}
                     >
-                      Fresh ingredient — not in the USDA catalog. Enter macros manually below.
+                      Fresh ingredient — not in the USDA catalog. Enter macros manually below, or search differently.
                     </p>
                   )}
 
-                  {/* Manual toggle — only rendered when at least one USDA
-                      candidate exists, so a user with no matches never sees a
-                      "Use USDA match instead" link pointing at nothing. */}
-                  {row && !row.candidatesLoading && row.candidates.length > 0 && (
-                    <button
-                      type="button"
-                      className="mt-2 inline-flex items-center gap-1 font-label text-[11px] tracking-widest uppercase transition-opacity hover:opacity-80"
-                      style={{ color: 'var(--color-terracotta)', minHeight: '32px' }}
-                      onClick={() =>
-                        setRows((prev) => {
-                          const next = new Map(prev);
-                          const r = next.get(idx);
-                          if (!r) return prev;
-                          next.set(idx, { ...r, showManual: !r.showManual });
-                          return next;
-                        })
-                      }
+                  {/* Row action links — always rendered once candidates are
+                      loaded (even with zero results), since Search-again IS the
+                      escape hatch when the ingredient is in Spanish, spelled
+                      oddly, etc. */}
+                  {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && (
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                      <button
+                        type="button"
+                        aria-expanded={row.searchOpen}
+                        aria-controls={`search-again-${idx}`}
+                        data-testid={`search-again-btn-${idx}`}
+                        className="mt-2 inline-flex items-center gap-1 font-label text-[11px] tracking-widest uppercase transition-opacity hover:opacity-80"
+                        style={{ color: 'var(--color-terracotta)', minHeight: '32px' }}
+                        onClick={() =>
+                          setRows((prev) => {
+                            const next = new Map(prev);
+                            const r = next.get(idx);
+                            if (!r) return prev;
+                            next.set(idx, { ...r, searchOpen: !r.searchOpen });
+                            return next;
+                          })
+                        }
+                      >
+                        {row.searchOpen ? '↑ Close search' : 'Search again →'}
+                      </button>
+                      {row.candidates.length > 0 && (
+                        <button
+                          type="button"
+                          className="mt-2 inline-flex items-center gap-1 font-label text-[11px] tracking-widest uppercase transition-opacity hover:opacity-80"
+                          style={{ color: 'var(--color-terracotta)', minHeight: '32px' }}
+                          onClick={() =>
+                            setRows((prev) => {
+                              const next = new Map(prev);
+                              const r = next.get(idx);
+                              if (!r) return prev;
+                              next.set(idx, { ...r, showManual: !r.showManual });
+                              return next;
+                            })
+                          }
+                        >
+                          {row.showManual ? '← Use a USDA match' : 'Enter manually →'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Re-search disclosure panel */}
+                  {row?.searchOpen && !row.showManual && (
+                    <div
+                      id={`search-again-${idx}`}
+                      className="mt-2 p-3 rounded-lg"
+                      style={{
+                        background: 'color-mix(in oklch, var(--border) 28%, transparent)',
+                        border: '1px solid var(--border)',
+                      }}
+                      data-testid={`search-again-panel-${idx}`}
                     >
-                      {row.showManual ? '← Use a USDA match' : 'Enter manually →'}
-                    </button>
+                      <p
+                        className="font-label text-[10px] tracking-widest uppercase mb-2"
+                        style={{ color: 'var(--text-3)' }}
+                      >
+                        Search USDA differently
+                      </p>
+                      <input
+                        type="text"
+                        value={row.searchQuery}
+                        placeholder="Try a different name…"
+                        aria-label={`Search USDA differently for ${ing.name}`}
+                        data-testid={`search-again-input-${idx}`}
+                        className="input-base w-full"
+                        onChange={(e) =>
+                          setRows((prev) => {
+                            const next = new Map(prev);
+                            const r = next.get(idx);
+                            if (!r) return prev;
+                            next.set(idx, { ...r, searchQuery: e.target.value });
+                            return next;
+                          })
+                        }
+                      />
+                      {row.searchLoading && (
+                        <div className="space-y-2 mt-2" aria-busy="true" data-testid={`search-again-loading-${idx}`}>
+                          {[0, 1, 2].map((i) => (
+                            <div
+                              key={i}
+                              className="h-9 rounded-md animate-pulse"
+                              style={{ background: 'color-mix(in oklch, var(--border) 120%, transparent)' }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Manual entry form — shown when toggled on OR when no
