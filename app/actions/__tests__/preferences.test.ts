@@ -124,6 +124,7 @@ describe('preferences server actions', () => {
       preferred_language: null,
       preferred_units: null,
       tour_completed_at: null,
+      tour_dismissed_until: null,
     });
     expect(api.__store.get('preferred-theme')?.value).toBeNull();
     expect(api.__store.get('preferred-language')?.value).toBeNull();
@@ -142,6 +143,7 @@ describe('preferences server actions', () => {
       preferred_language: null,
       preferred_units: null,
       tour_completed_at: null,
+      tour_dismissed_until: null,
     });
     expect(api.__store.get('preferred-font-size')?.value).toBeNull();
     expect(api.__store.get('preferred-language')?.value).toBeNull();
