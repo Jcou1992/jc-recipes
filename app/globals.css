@@ -618,6 +618,27 @@ body::after {
   }
 }
 
+/* ── View Transitions API tuning ────────────────────────────────────────────── */
+@supports (view-transition-name: root) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  ::view-transition-group(*) {
+    animation-duration: 320ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  ::view-transition-old(*) {
+    animation-duration: 180ms;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  ::view-transition-new(*) {
+    animation-duration: 320ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *,

@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import type { MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
 import { useT } from '@/components/ui/LanguageContext';
+import ViewTransitionLink from '@/components/motion/ViewTransitionLink';
 
 interface Props {
   recipe: Recipe;
@@ -91,7 +91,10 @@ export default function RecipeCard({
       )}
       <h2
         className={`${titleClass} ${isSearchMatch ? 'animate-underscore-sweep' : ''}`.trim()}
-        style={{ color: 'var(--text-1)' }}
+        style={{
+          color: 'var(--text-1)',
+          viewTransitionName: selectMode ? undefined : `recipe-title-${recipe.id}`,
+        } as React.CSSProperties}
       >
         {recipe.name}
       </h2>
@@ -132,7 +135,7 @@ export default function RecipeCard({
   }
 
   return (
-    <Link
+    <ViewTransitionLink
       href={`/recipes/${recipe.id}`}
       className={`recipe-card relative block rounded-xl ${padClass} transition-all`}
       style={{
@@ -140,10 +143,11 @@ export default function RecipeCard({
         boxShadow: featured
           ? '0 0 0 1px oklch(100% 0 0 / 0.07), 0 4px 28px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(100% 0 0 / 0.05)'
           : 'var(--shadow-card)',
-      }}
+        viewTransitionName: `recipe-card-${recipe.id}`,
+      } as React.CSSProperties}
       data-testid={`recipe-card-${recipe.id}`}
     >
       {inner}
-    </Link>
+    </ViewTransitionLink>
   );
 }
