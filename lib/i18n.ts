@@ -261,6 +261,22 @@ export interface Translations {
   tourSkip: string;
   tourFinish: string;
   tourStepCounter: (current: number, total: number) => string;
+
+  // Onboarding wizard (step 0 of the tour)
+  onboardingWelcomeTitle: string;
+  onboardingWelcomeBody: string;
+  onboardingNextButton: string;
+  onboardingErrorSave: string;
+  onboardingThemeLabel: string;
+  onboardingThemeDark: string;
+  onboardingThemeLight: string;
+  onboardingThemeAuto: string;
+  onboardingLanguageLabel: string;
+  onboardingSizeLabel: string;
+  onboardingUnitsLabel: string;
+  onboardingUnitsMetric: string;
+  onboardingUnitsImperial: string;
+  onboardingUnitsHelper: string;
 }
 
 export const en: Translations = {
@@ -506,6 +522,21 @@ export const en: Translations = {
   tourSkip: 'Skip',
   tourFinish: 'Finish',
   tourStepCounter: (current, total) => `Step ${current} of ${total}`,
+
+  onboardingWelcomeTitle: 'Welcome, chef',
+  onboardingWelcomeBody: 'Set your station before service.',
+  onboardingNextButton: 'Next →',
+  onboardingErrorSave: "Couldn't save — try again",
+  onboardingThemeLabel: 'Theme',
+  onboardingThemeDark: 'Dark',
+  onboardingThemeLight: 'Light',
+  onboardingThemeAuto: 'Auto',
+  onboardingLanguageLabel: 'Language / 言語',
+  onboardingSizeLabel: 'Text size',
+  onboardingUnitsLabel: 'Units',
+  onboardingUnitsMetric: 'Metric',
+  onboardingUnitsImperial: 'Imperial',
+  onboardingUnitsHelper: 'Applies to ingredient amounts.',
 };
 
 export const es: Translations = {
@@ -751,6 +782,21 @@ export const es: Translations = {
   tourSkip: 'Omitir',
   tourFinish: 'Terminar',
   tourStepCounter: (current, total) => `Paso ${current} de ${total}`,
+
+  onboardingWelcomeTitle: 'Bienvenido, chef',
+  onboardingWelcomeBody: 'Prepara tu estación antes del servicio.',
+  onboardingNextButton: 'Siguiente →',
+  onboardingErrorSave: 'No se pudo guardar — reintentar',
+  onboardingThemeLabel: 'Tema',
+  onboardingThemeDark: 'Oscuro',
+  onboardingThemeLight: 'Claro',
+  onboardingThemeAuto: 'Automático',
+  onboardingLanguageLabel: 'Idioma / 言語',
+  onboardingSizeLabel: 'Tamaño de texto',
+  onboardingUnitsLabel: 'Unidades',
+  onboardingUnitsMetric: 'Métrico',
+  onboardingUnitsImperial: 'Imperial',
+  onboardingUnitsHelper: 'Aplica a cantidades de ingredientes.',
 };
 
 export const translations: Record<Language, Translations> = { en, es };
