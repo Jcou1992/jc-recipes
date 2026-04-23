@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 
 interface Props {
@@ -25,11 +26,16 @@ export default function ConfirmDialog({
   onCancel,
 }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
   useFocusTrap(dialogRef, open, onCancel);
 
-  if (!open) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!open || !mounted) return null;
+
+  const dialog = (
     <div
       role="dialog"
       aria-modal="true"
@@ -98,4 +104,6 @@ export default function ConfirmDialog({
       </div>
     </div>
   );
+
+  return createPortal(dialog, document.body);
 }

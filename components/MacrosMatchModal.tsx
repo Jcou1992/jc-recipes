@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { createPortal } from 'react-dom';
 import { searchFdcAction, setIngredientMatches, type BatchEntry } from '@/app/actions/macros';
+import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
 import type { Ingredient, MacroValues, Recipe } from '@/types/recipe';
 
 interface Props {
@@ -18,7 +20,12 @@ interface RowState {
   selectedFdcId?: number;
   showManual: boolean;
   manualValues: MacroValues;
+  /** True when the row has never had a persisted override — inputs render with
+   *  placeholders instead of literal "0" to avoid the illusion of real data. */
+  manualPristine: boolean;
 }
+
+type RowStatus = 'loading' | 'matched' | 'manual' | 'unmatched' | 'error';
 
 function defaultOverride(): MacroValues {
   return { kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0 };
@@ -32,6 +39,7 @@ function initialRow(ing: Ingredient): RowState {
     selectedFdcId: ing.fdc_id,
     showManual: !!ing.macros_override,
     manualValues: ing.macros_override ?? defaultOverride(),
+    manualPristine: !ing.macros_override,
   };
 }
 
@@ -41,15 +49,73 @@ function isCountableIngredient(ing: Ingredient): boolean {
   return ['pieces', 'piece', 'clove', 'cloves', 'slice', 'slices'].includes(normalized);
 }
 
+function formatIngredientContext(ing: Ingredient): string {
+  const parts: string[] = [];
+  if (ing.amount && ing.amount > 0) {
+    const amt = Number.isInteger(ing.amount) ? String(ing.amount) : ing.amount.toString();
+    parts.push(ing.unit ? `${amt} ${ing.unit}` : amt);
+  } else if (ing.unit) {
+    parts.push(ing.unit);
+  }
+  return parts.join(' ');
+}
+
+function rowStatus(ing: Ingredient, row: RowState | undefined): RowStatus {
+  if (!row || row.candidatesLoading) return 'loading';
+  if (row.candidatesError) return 'error';
+  if (row.showManual) return 'manual';
+  if (row.selectedFdcId) return 'matched';
+  return 'unmatched';
+}
+
+const STATUS_LABEL: Record<RowStatus, string> = {
+  loading: 'Searching',
+  matched: 'Matched',
+  manual: 'Manual',
+  unmatched: 'No match',
+  error: 'Error',
+};
+
+const STATUS_STYLE: Record<RowStatus, React.CSSProperties> = {
+  loading: {
+    background: 'color-mix(in oklch, var(--text-3) 12%, transparent)',
+    color: 'var(--text-3)',
+    border: '1px solid color-mix(in oklch, var(--text-3) 28%, transparent)',
+  },
+  matched: {
+    background: 'color-mix(in oklch, var(--color-gold) 16%, transparent)',
+    color: 'var(--color-gold)',
+    border: '1px solid color-mix(in oklch, var(--color-gold) 38%, transparent)',
+  },
+  manual: {
+    background: 'color-mix(in oklch, var(--color-terracotta) 14%, transparent)',
+    color: 'var(--color-terracotta)',
+    border: '1px solid color-mix(in oklch, var(--color-terracotta) 34%, transparent)',
+  },
+  unmatched: {
+    background: 'color-mix(in oklch, var(--color-terracotta) 10%, transparent)',
+    color: 'var(--color-terracotta)',
+    border: '1px solid color-mix(in oklch, var(--color-terracotta) 30%, transparent)',
+  },
+  error: {
+    background: 'color-mix(in oklch, var(--color-gold) 10%, transparent)',
+    color: 'var(--color-gold)',
+    border: '1px solid color-mix(in oklch, var(--color-gold) 30%, transparent)',
+  },
+};
+
 export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
   const [rows, setRows] = useState<Map<number, RowState>>(new Map());
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const firstUnmatchedRadioRef = useRef<HTMLInputElement | null>(null);
-  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
-  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useFocusTrap(dialogRef, open, onClose);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -91,93 +157,15 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
     };
   }, [open, recipe.ingredients]);
 
-  // Determine the index of the first unmatched ingredient so we can attach
-  // the initial-focus ref to its first radio input.
-  const firstUnmatchedIndex = (() => {
-    for (let i = 0; i < recipe.ingredients.length; i++) {
-      const ing = recipe.ingredients[i];
-      const row = rows.get(i);
-      // Unmatched when the ingredient has no persisted fdc_id/override and
-      // no selection has been made yet, or when there are no candidates at all.
-      const hasPersistedMatch = !!ing.fdc_id || !!ing.macros_override;
-      if (!hasPersistedMatch) return i;
-      if (row && !row.candidatesLoading && row.candidates.length === 0) return i;
-    }
-    return -1;
-  })();
-
-  // Capture previous focus on open; restore on close.
-  const hasFocusedRef = useRef(false);
-  useEffect(() => {
-    if (!open) {
-      hasFocusedRef.current = false;
-      return;
-    }
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-    // Defer initial focus to next tick so the dialog has rendered.
-    // Candidates load asynchronously — if no radio exists yet, focus the
-    // Save or Close button as a fallback (a second effect will hand off
-    // to the first radio once candidates arrive).
-    const handle = setTimeout(() => {
-      if (firstUnmatchedRadioRef.current) {
-        firstUnmatchedRadioRef.current.focus();
-        hasFocusedRef.current = true;
-      } else if (saveButtonRef.current) {
-        saveButtonRef.current.focus();
-      } else if (closeButtonRef.current) {
-        closeButtonRef.current.focus();
-      } else {
-        dialogRef.current?.focus();
-      }
-    }, 0);
-    return () => {
-      clearTimeout(handle);
-      const prev = previousFocusRef.current;
-      if (prev && typeof prev.focus === 'function') {
-        prev.focus();
-      }
-    };
-  }, [open]);
-
-  // Once the first unmatched radio renders (after async candidate loading),
-  // move focus to it — but only once, and only if focus is still inside the
-  // dialog (don't steal focus from a user who has tabbed elsewhere).
-  useEffect(() => {
-    if (!open) return;
-    if (hasFocusedRef.current) return;
-    const radio = firstUnmatchedRadioRef.current;
-    if (!radio) return;
-    const root = dialogRef.current;
-    const active = document.activeElement as HTMLElement | null;
-    if (root && (active === root || root.contains(active))) {
-      radio.focus();
-      hasFocusedRef.current = true;
-    }
-  }, [open, rows, firstUnmatchedIndex]);
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-      return;
-    }
-    if (e.key !== 'Tab') return;
-    const root = dialogRef.current;
-    if (!root) return;
-    const focusable = root.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusable.length === 0) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const active = document.activeElement as HTMLElement | null;
-    if (e.shiftKey && active === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && active === last) {
-      e.preventDefault();
-      first.focus();
-    }
-  };
+  const needsAttentionCount = useMemo(() => {
+    let n = 0;
+    recipe.ingredients.forEach((ing, idx) => {
+      const row = rows.get(idx);
+      const status = rowStatus(ing, row);
+      if (status === 'unmatched' || status === 'error') n++;
+    });
+    return n;
+  }, [recipe.ingredients, rows]);
 
   const save = () => {
     setError(null);
@@ -216,221 +204,344 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
     });
   };
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  const modal = (
     <div
       role="dialog"
       aria-modal="true"
       aria-labelledby="match-modal-title"
-      ref={dialogRef}
-      tabIndex={-1}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'color-mix(in srgb, var(--bg) 70%, black 40%)' }}
-      onKeyDown={onKeyDown}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       data-testid="macros-match-modal"
     >
+      {/* Full-bleed scrim, separate from panel so modal renders over any
+          transformed ancestor. Click dismisses. */}
       <div
-        className="dialog-panel-2xl max-h-[85svh] overflow-y-auto rounded-lg p-5"
+        className="absolute inset-0"
+        style={{ background: 'oklch(0 0 0 / 0.65)' }}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative w-full sm:dialog-panel-2xl flex flex-col h-[92dvh] sm:h-auto sm:max-h-[88dvh] rounded-t-2xl sm:rounded-2xl animate-scale-in overflow-hidden"
         style={{
-          background: 'var(--bg-raised)',
-          border: '1px solid var(--border)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+          background: 'var(--bg-card)',
+          boxShadow: 'var(--shadow-dialog)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
-        <div className="flex items-start justify-between mb-4">
-          <h2
-            id="match-modal-title"
-            className="font-display text-xl"
-            style={{ color: 'var(--text-1)' }}
-          >
-            Match ingredients
-          </h2>
+        {/* Header — sticky, shares bg so underline hairline reads as chrome */}
+        <header
+          className="flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 sm:pt-6 pb-4"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <div>
+            <h2
+              id="match-modal-title"
+              className="font-display text-xl sm:text-2xl leading-tight"
+              style={{ color: 'var(--text-1)' }}
+            >
+              Match ingredients
+            </h2>
+            <p
+              className="mt-1 font-label text-[11px] tracking-widest uppercase"
+              style={{ color: 'var(--text-3)' }}
+            >
+              {recipe.ingredients.length > 0 && (
+                needsAttentionCount === 0
+                  ? `All ${recipe.ingredients.length} ready to save`
+                  : `${needsAttentionCount} of ${recipe.ingredients.length} need attention`
+              )}
+            </p>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            ref={closeButtonRef}
-            className="font-label text-lg leading-none p-2 -m-2"
+            className="-m-2 p-3 rounded-full transition-colors"
             style={{ color: 'var(--text-3)' }}
           >
-            ×
+            <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M4 4 L14 14 M14 4 L4 14" />
+            </svg>
           </button>
-        </div>
+        </header>
 
-        {error && (
-          <p
-            className="mb-3 font-label text-xs tracking-wide"
-            style={{ color: 'var(--color-terracotta)' }}
-            role="alert"
-          >
-            {error}
-          </p>
-        )}
+        {/* Scrollable body — ingredient stations, mise en place */}
+        <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-4">
+          {error && (
+            <p
+              className="mb-4 font-label text-xs tracking-wide rounded-lg px-3 py-2"
+              style={{
+                color: 'var(--color-terracotta)',
+                background: 'color-mix(in oklch, var(--color-terracotta) 10%, transparent)',
+                border: '1px solid color-mix(in oklch, var(--color-terracotta) 30%, transparent)',
+              }}
+              role="alert"
+            >
+              {error}
+            </p>
+          )}
 
-        <div className="space-y-4">
-          {recipe.ingredients.map((ing, idx) => {
-            const row = rows.get(idx);
-            return (
-              <fieldset
-                key={idx}
-                className="rounded p-3"
-                style={{ border: '1px solid var(--border)' }}
-                data-testid={`match-row-${idx}`}
-              >
-                <legend
-                  className="px-2 font-label text-xs tracking-widest uppercase"
-                  style={{ color: 'var(--text-2)' }}
+          <ul className="flex flex-col">
+            {recipe.ingredients.map((ing, idx) => {
+              const row = rows.get(idx);
+              const status = rowStatus(ing, row);
+              const context = formatIngredientContext(ing);
+              const isLast = idx === recipe.ingredients.length - 1;
+              return (
+                <li
+                  key={idx}
+                  className="py-4 first:pt-0"
+                  style={!isLast ? { borderBottom: '1px solid color-mix(in oklch, var(--color-gold) 16%, transparent)' } : undefined}
+                  data-testid={`match-row-${idx}`}
                 >
-                  {ing.name}
-                </legend>
-
-                {row?.candidatesLoading && (
-                  <div className="space-y-2" aria-busy="true">
-                    {[0, 1, 2].map((i) => (
-                      <div
-                        key={i}
-                        className="h-8 rounded animate-pulse"
-                        style={{ background: 'color-mix(in srgb, var(--border) 60%, transparent)' }}
-                      />
-                    ))}
+                  {/* Station header */}
+                  <div className="flex items-baseline justify-between gap-3 mb-3">
+                    <div className="min-w-0">
+                      <h3
+                        className="font-label text-[11px] tracking-widest uppercase truncate"
+                        style={{ color: 'var(--text-2)' }}
+                      >
+                        {ing.name}
+                      </h3>
+                      {context && (
+                        <p
+                          className="font-body text-xs mt-0.5"
+                          style={{ color: 'var(--text-3)' }}
+                        >
+                          {context}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className="font-label text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full whitespace-nowrap"
+                      style={STATUS_STYLE[status]}
+                      aria-label={`Status: ${STATUS_LABEL[status]}`}
+                    >
+                      {STATUS_LABEL[status]}
+                    </span>
                   </div>
-                )}
 
-                {row && !row.candidatesLoading && row.candidatesError && (
-                  <p
-                    className="font-label text-xs tracking-wide"
-                    style={{ color: 'var(--color-gold)' }}
-                  >
-                    Couldn't load suggestions.
-                  </p>
-                )}
+                  {/* Loading skeleton */}
+                  {status === 'loading' && (
+                    <div className="space-y-2" aria-busy="true">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="h-9 rounded-md animate-pulse"
+                          style={{ background: 'color-mix(in oklch, var(--border) 120%, transparent)' }}
+                        />
+                      ))}
+                    </div>
+                  )}
 
-                {row &&
-                  !row.candidatesLoading &&
-                  !row.candidatesError &&
-                  row.candidates.length === 0 && (
+                  {/* Error */}
+                  {status === 'error' && (
                     <p
                       className="font-body text-sm"
-                      style={{ color: 'var(--text-3)' }}
+                      style={{ color: 'var(--text-2)' }}
                     >
-                      No close matches — enter manually below.
+                      Couldn&apos;t load USDA suggestions. Enter macros manually below.
                     </p>
                   )}
 
-                {row && !row.candidatesLoading && row.candidates.length > 0 && (
-                  <div className="space-y-1.5">
-                    {row.candidates.map((c, cIdx) => (
-                      <label
-                        key={c.fdc_id}
-                        className="flex items-start gap-2 font-body text-sm cursor-pointer"
-                        style={{ color: 'var(--text-1)' }}
-                      >
-                        <input
-                          type="radio"
-                          name={`match-${idx}`}
-                          ref={
-                            idx === firstUnmatchedIndex && cIdx === 0
-                              ? firstUnmatchedRadioRef
-                              : undefined
-                          }
-                          checked={row.selectedFdcId === c.fdc_id && !row.showManual}
-                          onChange={() =>
-                            setRows((prev) => {
-                              const next = new Map(prev);
-                              next.set(idx, { ...row, selectedFdcId: c.fdc_id, showManual: false });
-                              return next;
-                            })
-                          }
-                          className="mt-1"
-                        />
-                        <span>{c.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
+                  {/* USDA candidate list */}
+                  {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && row.candidates.length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      {row.candidates.map((c) => {
+                        const checked = row.selectedFdcId === c.fdc_id;
+                        return (
+                          <label
+                            key={c.fdc_id}
+                            className="relative flex items-start gap-3 cursor-pointer rounded-lg px-3 py-2.5 transition-colors"
+                            style={{
+                              minHeight: '44px',
+                              background: checked
+                                ? 'color-mix(in oklch, var(--color-terracotta) 9%, transparent)'
+                                : 'transparent',
+                              border: checked
+                                ? '1px solid color-mix(in oklch, var(--color-terracotta) 42%, transparent)'
+                                : '1px solid var(--border)',
+                            }}
+                          >
+                            <input
+                              type="radio"
+                              name={`match-${idx}`}
+                              checked={checked}
+                              onChange={() =>
+                                setRows((prev) => {
+                                  const next = new Map(prev);
+                                  const r = next.get(idx);
+                                  if (!r) return prev;
+                                  next.set(idx, { ...r, selectedFdcId: c.fdc_id, showManual: false });
+                                  return next;
+                                })
+                              }
+                              className="sr-only"
+                            />
+                            <span
+                              className="mt-[3px] shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-colors"
+                              aria-hidden="true"
+                              style={{
+                                border: checked
+                                  ? '1.5px solid var(--color-terracotta)'
+                                  : '1.5px solid var(--border-input)',
+                                background: 'transparent',
+                              }}
+                            >
+                              <span
+                                className="block rounded-full transition-transform"
+                                style={{
+                                  width: '8px',
+                                  height: '8px',
+                                  background: 'var(--color-terracotta)',
+                                  transform: checked ? 'scale(1)' : 'scale(0)',
+                                }}
+                              />
+                            </span>
+                            <span
+                              className="font-body text-sm leading-snug"
+                              style={{ color: 'var(--text-1)' }}
+                            >
+                              {c.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
 
-                <button
-                  type="button"
-                  className="mt-3 font-label text-[11px] tracking-widest uppercase"
-                  style={{ color: 'var(--color-terracotta)' }}
-                  onClick={() =>
-                    setRows((prev) => {
-                      const next = new Map(prev);
-                      const r = next.get(idx);
-                      if (!r) return prev;
-                      next.set(idx, { ...r, showManual: !r.showManual });
-                      return next;
-                    })
-                  }
-                >
-                  {row?.showManual ? 'Use a USDA match instead' : 'Enter manually →'}
-                </button>
-
-                {row?.showManual && (
-                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {(['kcal', 'fat_g', 'carbs_g', 'protein_g', 'fiber_g'] as const).map((k) => (
-                      <label key={k} className="flex flex-col font-label text-[11px] tracking-widest uppercase" style={{ color: 'var(--text-3)' }}>
-                        <span>{k.replace('_g', '')}</span>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          value={row.manualValues[k]}
-                          onChange={(e) =>
-                            setRows((prev) => {
-                              const next = new Map(prev);
-                              const r = next.get(idx);
-                              if (!r) return prev;
-                              next.set(idx, {
-                                ...r,
-                                manualValues: {
-                                  ...r.manualValues,
-                                  [k]: Number(e.target.value),
-                                },
-                              });
-                              return next;
-                            })
-                          }
-                          className="input-base mt-1"
-                        />
-                      </label>
-                    ))}
+                  {/* No-match warm copy */}
+                  {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && row.candidates.length === 0 && (
                     <p
-                      className="sm:col-span-5 font-body text-xs mt-1"
-                      style={{ color: 'var(--text-3)' }}
+                      className="font-body text-sm italic"
+                      style={{ color: 'var(--text-2)' }}
                     >
-                      Per 100 g of raw ingredient.
-                      {isCountableIngredient(ing) && (
-                        <> Tip: if your nutrition label lists values per piece, divide accordingly.</>
-                      )}
+                      Fresh ingredient — not in the USDA catalog. Enter macros manually below.
                     </p>
-                  </div>
-                )}
-              </fieldset>
-            );
-          })}
+                  )}
+
+                  {/* Manual toggle — only rendered when at least one USDA
+                      candidate exists, so a user with no matches never sees a
+                      "Use USDA match instead" link pointing at nothing. */}
+                  {row && !row.candidatesLoading && row.candidates.length > 0 && (
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 font-label text-[11px] tracking-widest uppercase transition-opacity hover:opacity-80"
+                      style={{ color: 'var(--color-terracotta)', minHeight: '32px' }}
+                      onClick={() =>
+                        setRows((prev) => {
+                          const next = new Map(prev);
+                          const r = next.get(idx);
+                          if (!r) return prev;
+                          next.set(idx, { ...r, showManual: !r.showManual });
+                          return next;
+                        })
+                      }
+                    >
+                      {row.showManual ? '← Use a USDA match' : 'Enter manually →'}
+                    </button>
+                  )}
+
+                  {/* Manual entry form — shown when toggled on OR when no
+                      candidates exist (so the user always has a path forward). */}
+                  {row && !row.candidatesLoading && (row.showManual || row.candidates.length === 0) && (
+                    <div className="mt-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                        {(['kcal', 'fat_g', 'carbs_g', 'protein_g', 'fiber_g'] as const).map((k) => {
+                          const value = row.manualValues[k];
+                          const displayValue = row.manualPristine && value === 0 ? '' : value;
+                          return (
+                            <label
+                              key={k}
+                              className="flex flex-col font-label text-[10px] tracking-widest uppercase gap-1"
+                              style={{ color: 'var(--text-3)' }}
+                            >
+                              <span>{k.replace('_g', '')}</span>
+                              <input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                inputMode="decimal"
+                                placeholder="0"
+                                value={displayValue}
+                                onChange={(e) =>
+                                  setRows((prev) => {
+                                    const next = new Map(prev);
+                                    const r = next.get(idx);
+                                    if (!r) return prev;
+                                    const v = e.target.value === '' ? 0 : Number(e.target.value);
+                                    next.set(idx, {
+                                      ...r,
+                                      manualValues: { ...r.manualValues, [k]: v },
+                                      manualPristine: false,
+                                    });
+                                    return next;
+                                  })
+                                }
+                                className="input-base"
+                              />
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {isCountableIngredient(ing) && (
+                        <p
+                          className="mt-2 font-body text-xs italic"
+                          style={{ color: 'var(--text-3)' }}
+                        >
+                          Values per 100 g of raw ingredient. If your label lists per piece, divide by piece weight.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Single global footnote re: per-100g convention — lives at bottom
+              of scroll area so it appears once, not per station. */}
+          <p
+            className="mt-4 font-body text-xs"
+            style={{ color: 'var(--text-3)' }}
+          >
+            Macros are stored per 100 g of the raw ingredient, so scaling a recipe or switching units stays accurate.
+          </p>
         </div>
 
-        <div className="mt-5 flex items-center justify-end gap-2">
-          <button type="button" onClick={onClose} className="btn-ghost font-label text-xs tracking-widest uppercase">
+        {/* Sticky footer — always reachable even mid-scroll */}
+        <footer
+          className="flex items-center justify-end gap-2 px-5 sm:px-6 py-4"
+          style={{
+            borderTop: '1px solid var(--border)',
+            background: 'var(--bg-card)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-ghost font-label text-xs tracking-widest uppercase"
+          >
             Cancel
           </button>
           <button
             type="button"
             onClick={save}
             disabled={isPending}
-            ref={saveButtonRef}
             className="btn-primary font-label text-xs tracking-widest uppercase"
             data-testid="macros-save-btn"
           >
             {isPending ? 'Saving…' : 'Save'}
           </button>
-        </div>
+        </footer>
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
