@@ -436,7 +436,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
             <div
               key={recipe.id}
               className={`animate-fade-up${!selectMode && index === 0 ? ' col-span-full md:col-span-2' : ''}`}
-              style={{ animationDelay: `${Math.min(index, 6) * 60}ms`, animationFillMode: 'both' }}
+              style={{ animationDelay: `${Math.min(index, 11) * 80}ms`, animationFillMode: 'both' }}
             >
               <RecipeCard
                 recipe={recipe}
@@ -444,6 +444,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                 selectMode={selectMode}
                 selected={selectedIds.has(recipe.id)}
                 onToggle={shift => toggleSelect(recipe.id, index, shift)}
+                isSearchMatch={!!q && index < 8}
               />
             </div>
           ))}

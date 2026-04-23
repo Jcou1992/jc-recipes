@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
 import DeleteRecipeButton from '@/components/recipes/DeleteRecipeButton';
 import RecipeDetailClient from '@/components/recipes/RecipeDetailClient';
+import ScrollParallaxCover from '@/components/motion/ScrollParallaxCover';
 import type { Recipe } from '@/types/recipe';
 
 interface PageProps {
@@ -33,42 +34,53 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   const t = await getServerT();
 
   return (
-    <div className="max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up">
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <h1 className="font-display text-4xl font-bold leading-tight" style={{ color: 'var(--text-1)' }}>
-          {recipe.name}
-        </h1>
-        <div className="flex gap-2 flex-shrink-0 mt-1">
-          <Link href={`/recipes/${id}/edit`} className="btn-ghost">
-            {t.editBtn}
-          </Link>
-          <DeleteRecipeButton id={id} name={recipe.name} />
+    <div
+      className="max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up"
+      style={{ viewTransitionName: `recipe-card-${id}` } as React.CSSProperties}
+    >
+      <ScrollParallaxCover>
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <h1
+            className="recipe-title font-display text-4xl font-bold leading-tight"
+            style={{
+              color: 'var(--text-1)',
+              viewTransitionName: `recipe-title-${id}`,
+            } as React.CSSProperties}
+          >
+            {recipe.name}
+          </h1>
+          <div className="flex gap-2 flex-shrink-0 mt-1">
+            <Link href={`/recipes/${id}/edit`} className="btn-ghost">
+              {t.editBtn}
+            </Link>
+            <DeleteRecipeButton id={id} name={recipe.name} />
+          </div>
         </div>
-      </div>
 
-      {recipe.description && (
-        <p className="font-body text-lg mb-5" style={{ color: 'var(--text-2)' }}>
-          {recipe.description}
-        </p>
-      )}
+        {recipe.description && (
+          <p className="font-body text-lg mb-5" style={{ color: 'var(--text-2)' }}>
+            {recipe.description}
+          </p>
+        )}
 
-      {recipe.tags && recipe.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-6">
-          {recipe.tags.map(tag => (
-            <span
-              key={tag}
-              className="font-label text-sm tracking-wider uppercase px-2.5 py-0.5 rounded-full"
-              style={{
-                background: 'color-mix(in oklch, var(--color-gold) 12%, transparent)',
-                color: 'var(--color-gold)',
-                border: '1px solid color-mix(in oklch, var(--color-gold) 20%, transparent)',
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
+        {recipe.tags && recipe.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-6">
+            {recipe.tags.map(tag => (
+              <span
+                key={tag}
+                className="font-label text-sm tracking-wider uppercase px-2.5 py-0.5 rounded-full"
+                style={{
+                  background: 'color-mix(in oklch, var(--color-gold) 12%, transparent)',
+                  color: 'var(--color-gold)',
+                  border: '1px solid color-mix(in oklch, var(--color-gold) 20%, transparent)',
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </ScrollParallaxCover>
 
       <RecipeDetailClient recipe={recipe} />
     </div>

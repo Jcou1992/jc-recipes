@@ -11,6 +11,7 @@ interface Props {
   selectMode?: boolean;
   selected?: boolean;
   onToggle?: (shift: boolean) => void;
+  isSearchMatch?: boolean;
 }
 
 export default function RecipeCard({
@@ -19,6 +20,7 @@ export default function RecipeCard({
   selectMode = false,
   selected = false,
   onToggle,
+  isSearchMatch = false,
 }: Props) {
   const t = useT();
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
@@ -87,7 +89,10 @@ export default function RecipeCard({
           )}
         </div>
       )}
-      <h2 className={titleClass} style={{ color: 'var(--text-1)' }}>
+      <h2
+        className={`${titleClass} ${isSearchMatch ? 'animate-underscore-sweep' : ''}`.trim()}
+        style={{ color: 'var(--text-1)' }}
+      >
         {recipe.name}
       </h2>
 

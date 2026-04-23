@@ -130,7 +130,7 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
       </p>
 
       <p
-        className="mt-2 font-body text-sm flex flex-wrap gap-x-3 gap-y-1"
+        className="mt-2 font-body text-sm flex flex-wrap gap-x-3 gap-y-1 tabular-nums"
         style={{ color: 'var(--text-2)' }}
       >
         <span>{prefix}{perServing.fat_g.toFixed(1)} g fat</span>
@@ -142,8 +142,26 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
         <span>{prefix}{perServing.fiber_g.toFixed(1)} g fiber</span>
       </p>
 
+      {(() => {
+        const total = perServing.protein_g + perServing.carbs_g + perServing.fat_g;
+        if (total <= 0) return null;
+        const p = (perServing.protein_g / total) * 100;
+        const c = (perServing.carbs_g / total) * 100;
+        return (
+          <div
+            className="macros-bar mt-3"
+            style={{
+              ['--macro-protein-pct' as string]: `${p.toFixed(2)}%`,
+              ['--macro-carb-pct' as string]: `${c.toFixed(2)}%`,
+            } as React.CSSProperties}
+            aria-hidden="true"
+            data-testid="macros-bar"
+          />
+        );
+      })()}
+
       <p
-        className="font-label mt-3 text-[11px] tracking-widest uppercase"
+        className="font-label mt-3 text-[11px] tracking-widest uppercase tabular-nums"
         style={{ color: 'var(--text-3)' }}
       >
         {servingsLabel} · {prefix}{Math.round(m.kcal)} kcal total ·{' '}

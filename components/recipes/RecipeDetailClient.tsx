@@ -33,6 +33,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
   const [matchOpen, setMatchOpen] = useState(false);
   const [copyShimmerKey, setCopyShimmerKey] = useState(0);
+  const [valueChanging, setValueChanging] = useState(false);
+
+  useEffect(() => {
+    setValueChanging(true);
+    const id = setTimeout(() => setValueChanging(false), 40);
+    return () => clearTimeout(id);
+  }, [targetServings, unitSystem]);
 
   useEffect(() => {
     try {
@@ -131,7 +138,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             −
           </button>
           <span
-            className="font-label text-sm tracking-wide"
+            className={`crossfade-number font-label text-sm tracking-wide tabular-nums ${valueChanging ? 'is-changing' : ''}`.trim()}
             style={{ color: 'var(--text-2)' }}
             data-testid="scaler-value"
           >
