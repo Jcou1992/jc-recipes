@@ -15,10 +15,12 @@ import {
 type ThemeValue    = 'light' | 'dark' | 'system';
 type FontSizeValue = 'sm' | 'md' | 'lg';
 type LanguageValue = 'en' | 'es';
+type UnitsValue    = 'metric' | 'imperial';
 
 const THEME_VALUES: ThemeValue[] = ['light', 'dark', 'system'];
 const FONT_SIZE_VALUES: FontSizeValue[] = ['sm', 'md', 'lg'];
 const LANGUAGE_VALUES: LanguageValue[] = ['en', 'es'];
+const UNITS_VALUES: UnitsValue[] = ['metric', 'imperial'];
 
 function isTheme(v: unknown): v is ThemeValue {
   return typeof v === 'string' && (THEME_VALUES as string[]).includes(v);
@@ -29,6 +31,19 @@ function isFontSize(v: unknown): v is FontSizeValue {
 function isLanguage(v: unknown): v is LanguageValue {
   return typeof v === 'string' && (LANGUAGE_VALUES as string[]).includes(v);
 }
+function isUnits(v: unknown): v is UnitsValue {
+  return typeof v === 'string' && (UNITS_VALUES as string[]).includes(v);
+}
+
+// Shared cookie options: long-lived, lax same-site (needed so auth-redirect
+// flows still carry the cookie), secure so production only ships over TLS,
+// path root so every route sees it.
+const COOKIE_OPTS = {
+  maxAge: COOKIE_MAX_AGE,
+  sameSite: 'lax',
+  secure: true,
+  path: '/',
+} as const;
 
 // ── Read ────────────────────────────────────────────────────────────────────
 export async function getUserPreferences(): Promise<Partial<UserPreferences> | null> {
@@ -45,23 +60,28 @@ export async function getUserPreferences(): Promise<Partial<UserPreferences> | n
 
 /**
  * Mirror a user's preferences into cookies so the root layout can SSR the
- * correct <html data-theme data-font-size lang> attributes without a flash.
- * Called on login success and on every preference change.
+ * correct <html data-theme data-font-size lang data-units> attributes without
+ * a flash. Called on login success and on every preference change.
  */
 export async function mirrorPrefsToCookies(prefs: Partial<UserPreferences> | null): Promise<void> {
   const cookieStore = await cookies();
   if (isTheme(prefs?.preferred_theme) && prefs.preferred_theme !== 'system') {
-    cookieStore.set(PREF_COOKIE_THEME, prefs.preferred_theme, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+    cookieStore.set(PREF_COOKIE_THEME, prefs.preferred_theme, COOKIE_OPTS);
   } else {
     cookieStore.delete(PREF_COOKIE_THEME);
   }
   if (isFontSize(prefs?.preferred_font_size)) {
-    cookieStore.set(PREF_COOKIE_FONT_SIZE, prefs.preferred_font_size, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+    cookieStore.set(PREF_COOKIE_FONT_SIZE, prefs.preferred_font_size, COOKIE_OPTS);
   } else {
     cookieStore.delete(PREF_COOKIE_FONT_SIZE);
   }
+  if (isUnits(prefs?.preferred_units)) {
+    cookieStore.set(PREF_COOKIE_UNITS, prefs.preferred_units, COOKIE_OPTS);
+  } else {
+    cookieStore.delete(PREF_COOKIE_UNITS);
+  }
   if (isLanguage(prefs?.preferred_language)) {
-    cookieStore.set(PREF_COOKIE_LANGUAGE, prefs.preferred_language, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+    cookieStore.set(PREF_COOKIE_LANGUAGE, prefs.preferred_language, COOKIE_OPTS);
   } else {
     // Language has an existing cookie-only path — leave it alone if the DB
     // has no value yet. Only overwrite when DB is authoritative.
@@ -93,6 +113,7 @@ interface UpdateInput {
   preferred_theme?:     ThemeValue | null;
   preferred_font_size?: FontSizeValue | null;
   preferred_language?:  LanguageValue | null;
+  preferred_units?:     UnitsValue | null;
 }
 
 export async function updateUserPreferences(
@@ -115,12 +136,16 @@ export async function updateUserPreferences(
   if (patch.preferred_language != null && !isLanguage(patch.preferred_language)) {
     return { ok: false, error: 'Invalid language value' };
   }
+  if (patch.preferred_units != null && !isUnits(patch.preferred_units)) {
+    return { ok: false, error: 'Invalid units value' };
+  }
 
   const upsert: Record<string, unknown> = { user_id: user.id };
   if ('space_name' in patch) upsert.space_name = patch.space_name?.trim() || null;
   if ('preferred_theme' in patch) upsert.preferred_theme = patch.preferred_theme;
   if ('preferred_font_size' in patch) upsert.preferred_font_size = patch.preferred_font_size;
   if ('preferred_language' in patch) upsert.preferred_language = patch.preferred_language;
+  if ('preferred_units' in patch) upsert.preferred_units = patch.preferred_units;
 
   const { error } = await supabase
     .from('user_preferences')
@@ -132,16 +157,19 @@ export async function updateUserPreferences(
   const cookieStore = await cookies();
   if ('preferred_theme' in patch) {
     if (patch.preferred_theme && patch.preferred_theme !== 'system') {
-      cookieStore.set(PREF_COOKIE_THEME, patch.preferred_theme, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+      cookieStore.set(PREF_COOKIE_THEME, patch.preferred_theme, COOKIE_OPTS);
     } else {
       cookieStore.delete(PREF_COOKIE_THEME);
     }
   }
   if ('preferred_font_size' in patch && patch.preferred_font_size) {
-    cookieStore.set(PREF_COOKIE_FONT_SIZE, patch.preferred_font_size, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+    cookieStore.set(PREF_COOKIE_FONT_SIZE, patch.preferred_font_size, COOKIE_OPTS);
   }
   if ('preferred_language' in patch && patch.preferred_language) {
-    cookieStore.set(PREF_COOKIE_LANGUAGE, patch.preferred_language, { maxAge: COOKIE_MAX_AGE, sameSite: 'lax', path: '/' });
+    cookieStore.set(PREF_COOKIE_LANGUAGE, patch.preferred_language, COOKIE_OPTS);
+  }
+  if ('preferred_units' in patch && patch.preferred_units) {
+    cookieStore.set(PREF_COOKIE_UNITS, patch.preferred_units, COOKIE_OPTS);
   }
 
   revalidatePath('/', 'layout');
