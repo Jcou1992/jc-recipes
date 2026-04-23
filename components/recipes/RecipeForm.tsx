@@ -86,6 +86,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
 
   const [name, setName]         = useState(initialData?.name ?? '');
   const [servings, setServings] = useState(String(initialData?.servings ?? 1));
+  const [servingSizeLabel, setServingSizeLabel] = useState(initialData?.serving_size_label ?? '');
 
   const [ingredientEntries, setIngredientEntries] = useState<IngredientEntry[]>(
     () => ingredientsToFields(initialData?.ingredients ?? []).map(field => ({ field }))
@@ -119,12 +120,13 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
     const dirty =
       name !== (initialData?.name ?? '') ||
       servings !== String(initialData?.servings ?? 1) ||
+      servingSizeLabel !== (initialData?.serving_size_label ?? '') ||
       description !== (initialData?.description ?? '') ||
       notes !== (initialData?.notes ?? '') ||
       activeIngredients.length !== (initialData?.ingredients?.length ?? 1) ||
       activeSteps.length !== (initialData?.steps?.length ?? 1);
     setIsDirty(dirty);
-  }, [name, servings, description, notes, activeIngredients.length, activeSteps.length, initialData]);
+  }, [name, servings, servingSizeLabel, description, notes, activeIngredients.length, activeSteps.length, initialData]);
 
   useUnsavedChanges(isDirty);
 
@@ -261,7 +263,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
     const payload: RecipePayload = {
       name:                name.trim(),
       servings:            parseInt(servings) || 1,
-      serving_size_label:  null,
+      serving_size_label:  servingSizeLabel.trim() || null,
       ingredients:         parsedIngredients,
       steps:               parsedSteps,
       description:         description.trim() || null,
@@ -336,6 +338,43 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
           required
           className="input-base"
         />
+      </div>
+
+      {/* Serving size label */}
+      <div>
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={labelStyle}
+          htmlFor="serving-size-label"
+        >
+          {t.servingSizeLabel}
+        </label>
+        <input
+          id="serving-size-label"
+          type="text"
+          value={servingSizeLabel}
+          onChange={e => setServingSizeLabel(e.target.value)}
+          maxLength={40}
+          className="input-base"
+          placeholder={t.servingSizeHelper}
+          aria-describedby="serving-size-helper"
+        />
+        <div
+          id="serving-size-helper"
+          className="mt-1 flex items-center justify-between text-xs"
+          style={{ color: 'var(--text-3)' }}
+        >
+          <span>{t.servingSizeHelper}</span>
+          <span
+            style={{
+              color: servingSizeLabel.length >= 31
+                ? 'var(--color-gold)'
+                : 'var(--text-3)',
+            }}
+          >
+            {servingSizeLabel.length}/40
+          </span>
+        </div>
       </div>
 
       {/* Ingredients */}
