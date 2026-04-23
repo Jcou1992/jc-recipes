@@ -97,7 +97,9 @@ export interface BatchEntry {
   ingredientIndex: number;
   expectedName: string;
   fdcId?: number;
+  fdcName?: string;
   override?: MacroValues | null;
+  overrideBasis?: 'per_100g' | 'per_unit';
 }
 
 export async function setIngredientMatches(recipeId: string, entries: BatchEntry[]) {

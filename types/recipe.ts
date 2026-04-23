@@ -11,7 +11,9 @@ export interface Ingredient {
   unit: string | null;
   name: string;
   fdc_id?: number;
+  fdc_name?: string;
   macros_override?: MacroValues;
+  macros_override_basis?: 'per_100g' | 'per_unit';
 }
 
 export interface UnresolvedIngredient {
