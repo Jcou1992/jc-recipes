@@ -495,35 +495,20 @@ body::after {
   }
 
   /* ── Signature B: wordmark reveal ─────────────────────────────────────── */
-  /* Calligraphic reveal on first session mount. Roman "SEKAI" does a L→R
-     clip-path wipe; the 世界 kanji SVG strokes in path-by-path in stroke
-     order via stroke-dashoffset — proper calligraphy, not a wipe. */
+  /* Calligraphic reveal on first session mount. Both the roman "SEKAI"
+     span and the 世界 kanji span (rendered in Noto Serif JP — real glyphs,
+     not SVG approximations) perform a L→R clip-path wipe. The kanji wipe
+     is staggered 80ms so it reads as a second brushstroke following the
+     roman mark, not a simultaneous curtain. */
   @keyframes stroke-reveal {
     from { clip-path: inset(0 100% 0 0); opacity: 0.3; }
     to   { clip-path: inset(0 0 0 0);    opacity: 1; }
-  }
-  @keyframes kanji-stroke-draw {
-    from { stroke-dashoffset: 1; opacity: 0.85; }
-    to   { stroke-dashoffset: 0; opacity: 1; }
   }
   .animate-stroke-in > * {
     animation: stroke-reveal var(--motion-xl) var(--ease-out-expo) both;
   }
   .animate-stroke-in > :nth-child(2) {
     animation-delay: var(--stagger-card);
-  }
-  /* SVG kanji: skip the clip-path wipe on the svg element and animate its
-     child paths instead. pathLength="1" on each <path> normalizes dash
-     math so every stroke lands on the same 1 → 0 timeline. */
-  .animate-stroke-in > svg.kanji-stroke-in {
-    animation: none;
-  }
-  svg.kanji-stroke-in path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
-  }
-  .animate-stroke-in > svg.kanji-stroke-in path {
-    animation: kanji-stroke-draw var(--motion-lg) var(--ease-out-expo) both;
   }
 
   /* ── Feedback tier ────────────────────────────────────────────────────── */

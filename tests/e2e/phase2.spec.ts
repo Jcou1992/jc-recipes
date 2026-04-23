@@ -131,7 +131,16 @@ test('result count updates and announces filter context @regression', async ({ p
   await expect(count).toBeVisible();
   const before = (await count.textContent()) ?? '';
 
-  await page.getByTestId(`tag-filter-${tag}`).click();
+  // Chip may be inline or in the overflow panel; open "+N more" if needed.
+  // Testid may render in both filter-popover and filter-sheet DOM branches
+  // so use .first() to disambiguate.
+  let chip = page.getByTestId(`tag-filter-${tag}`).first();
+  if (!(await chip.isVisible().catch(() => false))) {
+    const more = page.getByTestId('tag-rail-more');
+    if (await more.isVisible().catch(() => false)) await more.click();
+    chip = page.getByTestId(`tag-filter-${tag}`).first();
+  }
+  await chip.click();
   // After filter, count format flips to "X of Y"
   await expect(count).not.toHaveText(before, { timeout: 10_000 });
   await expect(count).toContainText(/\d+/);
