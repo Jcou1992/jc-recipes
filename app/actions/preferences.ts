@@ -215,6 +215,7 @@ export async function resetDemoPreferences(): Promise<{ ok: boolean; error?: str
       preferred_language: null,
       preferred_units: null,
       tour_completed_at: null,
+      tour_dismissed_until: null,
     })
     .eq('user_id', user.id);
 
@@ -241,6 +242,7 @@ export async function replayOnboarding(): Promise<{ ok: boolean; error?: string 
       preferred_language: null,
       preferred_units: null,
       tour_completed_at: null,
+      tour_dismissed_until: null,
     })
     .eq('user_id', user.id);
 
