@@ -128,7 +128,7 @@ export default function BulkActionBar({
         aria-label="Bulk actions"
         data-testid="bulk-action-bar"
       >
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-2 overflow-x-auto">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex flex-wrap items-center gap-2">
           {showProgress ? (
             <span
               className="font-label text-sm tracking-wide tabular-nums flex-shrink-0 pr-2 flex items-center gap-2"

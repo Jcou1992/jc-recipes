@@ -96,7 +96,7 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
       {/* Appearance */}
       <section>
         <h2 className="section-label mb-4">{t.settingsAppearanceSection}</h2>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 min-w-0">
           <span
             className="font-label text-sm tracking-wide"
             style={{ color: 'var(--text-2)' }}
@@ -105,7 +105,7 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
           </span>
           <ThemeToggle />
           <span
-            className="font-label text-sm tracking-wide ml-4"
+            className="font-label text-sm tracking-wide"
             style={{ color: 'var(--text-2)' }}
           >
             {t.fontSizeLabel}
@@ -123,8 +123,8 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
       {/* Preferences */}
       <section>
         <h2 className="section-label mb-4">{t.settingsReplayOnboardingSection}</h2>
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
             <p
               className="font-body text-base mb-1"
               style={{ color: 'var(--text-1)' }}
@@ -141,7 +141,7 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
           <button
             type="button"
             onClick={() => setConfirmReplayOpen(true)}
-            className="btn-ghost flex-shrink-0"
+            className="btn-ghost flex-shrink-0 self-start"
             data-testid="settings-replay-onboarding-btn"
             disabled={replayPending}
           >

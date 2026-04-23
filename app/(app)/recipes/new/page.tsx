@@ -66,14 +66,14 @@ export default function NewRecipePage() {
       </h1>
 
       <div
-        className="flex gap-0"
+        className="flex flex-wrap gap-x-0 gap-y-1 min-w-0"
         style={{ borderBottom: '1px solid var(--border)' }}
       >
         <button
           type="button"
           data-testid="manual-tab"
           onClick={() => setTab('manual')}
-          className="font-label text-xs tracking-widest uppercase px-4 py-2.5 transition-colors"
+          className="font-label text-xs tracking-widest uppercase px-3 sm:px-4 py-2.5 transition-colors whitespace-nowrap"
           style={{
             color: tab === 'manual' ? 'var(--color-terracotta)' : 'var(--text-3)',
             borderBottom: tab === 'manual' ? '2px solid var(--color-terracotta)' : '2px solid transparent',
@@ -86,7 +86,7 @@ export default function NewRecipePage() {
           type="button"
           data-testid="markdown-tab"
           onClick={() => setTab('markdown')}
-          className="font-label text-xs tracking-widest uppercase px-4 py-2.5 transition-colors"
+          className="font-label text-xs tracking-widest uppercase px-3 sm:px-4 py-2.5 transition-colors whitespace-nowrap"
           style={{
             color: tab === 'markdown' ? 'var(--color-terracotta)' : 'var(--text-3)',
             borderBottom: tab === 'markdown' ? '2px solid var(--color-terracotta)' : '2px solid transparent',

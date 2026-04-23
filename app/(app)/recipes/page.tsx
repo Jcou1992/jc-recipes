@@ -71,7 +71,7 @@ export default async function RecipesPage({
           }}
         />
       )}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between gap-3 mb-8 min-w-0">
         <EditableSpaceName
           initial={spaceName}
           fallback={t.recipesPageTitle}
@@ -79,7 +79,10 @@ export default async function RecipesPage({
           savedToast={t.spaceNameSaved}
           failedToast={t.spaceNameSaveFailed}
         />
-        <Link href="/recipes/new" className="btn-primary min-h-[44px]">
+        <Link
+          href="/recipes/new"
+          className="btn-primary min-h-[44px] flex-shrink-0 whitespace-nowrap"
+        >
           {t.newRecipeBtn}
         </Link>
       </div>

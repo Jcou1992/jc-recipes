@@ -60,11 +60,7 @@ export default function SortPills({ sort, onChange }: Props) {
     <div
       role="radiogroup"
       aria-label={t.sortByLabel}
-      className="flex gap-2 overflow-x-auto py-1"
-      style={{
-        WebkitOverflowScrolling: 'touch',
-        scrollbarWidth: 'none',
-      } as React.CSSProperties}
+      className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 py-1 min-w-0"
       data-testid="sort-pills"
     >
       {ORDER.map((k, idx) => {
@@ -79,10 +75,9 @@ export default function SortPills({ sort, onChange }: Props) {
             tabIndex={active ? 0 : -1}
             onClick={() => onChange(k)}
             onKeyDown={e => onKeyDown(e, idx)}
-            className="flex-shrink-0 flex flex-col items-start justify-center gap-0.5 px-3 rounded-xl transition-all"
+            className="chip-press flex flex-col items-start justify-center gap-0.5 px-3 rounded-xl transition-all min-w-0"
             style={{
               minHeight: 52,
-              minWidth: 104,
               background: active ? 'var(--color-terracotta-contrast)' : 'transparent',
               color: active ? 'var(--color-bone)' : 'var(--text-2)',
               border: active
@@ -94,11 +89,11 @@ export default function SortPills({ sort, onChange }: Props) {
             }}
             data-testid={`sort-pill-${k}`}
           >
-            <span className="font-label text-xs font-semibold tracking-widest uppercase leading-none">
+            <span className="font-label text-xs font-semibold tracking-widest uppercase leading-none whitespace-nowrap">
               {label(k)}
             </span>
             <span
-              className="font-label text-[10px] tracking-wide leading-tight"
+              className="font-label text-[10px] tracking-wide leading-tight truncate max-w-full"
               style={{
                 color: active
                   ? 'color-mix(in oklch, var(--color-bone) 75%, transparent)'

@@ -8,7 +8,6 @@ import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
 import EmailSync from '@/components/ui/EmailSync';
 import AvatarMenu from '@/components/ui/AvatarMenu';
 import WordmarkStrokeIn from '@/components/motion/WordmarkStrokeIn';
-import SeasonalKanji from '@/components/motion/SeasonalKanji';
 import type { ThemeValue, FontSizeValue, LanguageValue } from '@/lib/preferences-cache';
 
 function narrowTheme(v: unknown): ThemeValue | null {
@@ -59,15 +58,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             }}
           >
             <Link href="/recipes" aria-label="SEKAI — go to recipes">
-              <WordmarkStrokeIn>
-                <span
-                  className="font-label text-lg font-bold tracking-widest uppercase"
-                  style={{ color: 'var(--color-terracotta)' }}
-                >
-                  SEKAI
-                </span>
-                <SeasonalKanji />
-              </WordmarkStrokeIn>
+              <WordmarkStrokeIn />
             </Link>
             <AvatarMenu initial={initial} email={email} />
           </div>

@@ -504,11 +504,14 @@ test('onboarding tour: spotlight lands on the visible filter control, not the co
   await page.waitForLoadState('networkidle');
 
   // Tour starts with the preferences wizard — advance past it first.
+  // OnboardingTourGate has a 300ms hydration delay before mounting, so we
+  // must WAIT for the wizard to appear rather than do a synchronous
+  // isVisible() check (WebKit is slow enough that the check fires before
+  // the gate timer resolves).
   const wizard = page.getByTestId('onboarding-wizard');
-  if (await wizard.isVisible().catch(() => false)) {
-    await page.getByTestId('wizard-next-btn').click();
-    await expect(wizard).not.toBeVisible({ timeout: 10_000 });
-  }
+  await expect(wizard).toBeVisible({ timeout: 10_000 });
+  await page.getByTestId('wizard-next-btn').click();
+  await expect(wizard).not.toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 15_000 });
 
   // Advance to step 3 of 5 (filter)

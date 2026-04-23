@@ -71,14 +71,14 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
         {UNITS.map(u => <option key={u} value={u} />)}
       </datalist>
 
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center flex-wrap sm:flex-nowrap min-w-0">
         <input
           type="text"
           value={value.amount}
           onChange={e => set('amount', e.target.value)}
           placeholder={t.ingredientAmountPlaceholder}
           aria-label={t.ingredientAmountAriaLabel}
-          className="input-base w-20"
+          className="input-base w-16 sm:w-20"
         />
         <input
           type="text"
@@ -88,9 +88,9 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
           aria-label={t.ingredientUnitAriaLabel}
           list={UNIT_DATALIST_ID}
           role="textbox"
-          className="input-base w-24"
+          className="input-base w-20 sm:w-24"
         />
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-[140px] basis-full sm:basis-auto">
           <input
             ref={inputRef}
             type="text"

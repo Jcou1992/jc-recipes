@@ -1,10 +1,14 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FilterPopover from './FilterPopover';
 import { useT } from '@/components/ui/LanguageContext';
 
-const INLINE_LIMIT = 12;
+// Desktop gets up to 12 inline tag chips; mobile narrower viewports clip to
+// 4 so the rail never exceeds the width of the viewport. Anything beyond the
+// limit moves to the "+N more" popover / bottom sheet.
+const INLINE_LIMIT_DESKTOP = 12;
+const INLINE_LIMIT_MOBILE  = 4;
 
 interface Props {
   allTags: string[];
@@ -30,8 +34,21 @@ export default function TagRail({
   const t = useT();
   const overflowBtnRef = useRef<HTMLButtonElement>(null);
 
-  const overflowCount = Math.max(0, allTags.length - INLINE_LIMIT);
-  const inlineTags = allTags.slice(0, INLINE_LIMIT);
+  // Track viewport once on mount + on resize so inline tag count adapts.
+  // Avoids SSR/CSR mismatch by starting at the desktop limit and narrowing
+  // once the client can measure.
+  const [inlineLimit, setInlineLimit] = useState<number>(INLINE_LIMIT_DESKTOP);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 767px)');
+    const update = () => setInlineLimit(mql.matches ? INLINE_LIMIT_MOBILE : INLINE_LIMIT_DESKTOP);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  const overflowCount = Math.max(0, allTags.length - inlineLimit);
+  const inlineTags = allTags.slice(0, inlineLimit);
 
   const zeroTags = allTags.length === 0;
 
@@ -48,14 +65,11 @@ export default function TagRail({
 
   return (
     <>
-      {/* Mobile: horizontal scroll. Desktop: wrap. */}
+      {/* Always wrap — mobile clips to INLINE_LIMIT_MOBILE via state so the
+          rail never overflows its container. No horizontal scroll. */}
       <div className="relative">
         <div
-          className="flex gap-2 overflow-x-auto md:flex-wrap md:overflow-x-visible py-1 [mask-image:linear-gradient(to_right,black_94%,transparent)] md:[mask-image:none] [-webkit-mask-image:linear-gradient(to_right,black_94%,transparent)] md:[-webkit-mask-image:none]"
-          style={{
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none',
-          } as React.CSSProperties}
+          className="flex flex-wrap gap-2 py-1"
           data-testid="tag-rail"
         >
           {inlineTags.map(tag => {

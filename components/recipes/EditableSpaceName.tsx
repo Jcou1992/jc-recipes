@@ -93,10 +93,19 @@ export default function EditableSpaceName({
   }
 
   return (
-    <div className="group inline-flex items-center gap-2">
+    <div className="group flex items-center gap-2 min-w-0 flex-1">
       <h1
-        className="font-display text-3xl md:text-4xl font-bold cursor-pointer"
-        style={{ color: 'var(--text-1)' }}
+        className="font-display text-3xl md:text-4xl font-bold cursor-pointer min-w-0"
+        style={{
+          color: 'var(--text-1)',
+          // Single-line + ellipsis. Prevents ultra-long names (or pollution
+          // test suffixes) from forcing letter-by-letter line-breaks on
+          // narrow viewports.
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+          flex: '1 1 0',
+        }}
         onDoubleClick={startEdit}
         onClick={() => {
           // Mobile: single tap opens editor. Desktop: double-click (dblclick).

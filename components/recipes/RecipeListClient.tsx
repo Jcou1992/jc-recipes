@@ -429,7 +429,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
         </div>
       ) : (
         <div
-          className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4 transition-opacity"
+          className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-4 transition-opacity"
           style={{ opacity: isPending ? 0.6 : 1 }}
           aria-busy={isPending}
         >
