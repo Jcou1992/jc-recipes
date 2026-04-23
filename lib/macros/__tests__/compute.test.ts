@@ -182,6 +182,73 @@ describe('computeRecipeMacros truth table', () => {
         expect(r!.unresolved_ingredients).toHaveLength(1);
       },
     },
+    {
+      label: 'per_unit override: kcal = amount × override, no gram conversion',
+      recipe: {
+        id: 'r-per-unit',
+        servings: 1,
+        ingredients: [
+          {
+            amount: 2,
+            unit: 'pieces',
+            name: 'Tomato',
+            macros_override: { kcal: 22, protein_g: 1.1, fat_g: 0.2, carbs_g: 4.8, fiber_g: 1.5 },
+            macros_override_basis: 'per_unit',
+          },
+        ],
+      },
+      facts: {},
+      check: (r) => {
+        expect(r!.kcal).toBeCloseTo(44, 1);       // 2 × 22
+        expect(r!.protein_g).toBeCloseTo(2.2, 1); // 2 × 1.1
+        expect(r!.matched_count).toBe(1);
+        expect(r!.total_count).toBe(1);
+      },
+    },
+    {
+      label: 'legacy override without basis falls back to per_100g',
+      recipe: {
+        id: 'r-legacy',
+        servings: 1,
+        ingredients: [
+          {
+            amount: 200,
+            unit: 'g',
+            name: 'Tomato',
+            macros_override: { kcal: 20, protein_g: 1, fat_g: 0.2, carbs_g: 4, fiber_g: 1 },
+            // macros_override_basis intentionally omitted
+          },
+        ],
+      },
+      facts: {},
+      check: (r) => {
+        expect(r!.kcal).toBeCloseTo(40, 1); // 200g / 100 × 20
+      },
+    },
+    {
+      label: 'mixed per_100g (USDA) + per_unit override in one recipe',
+      recipe: {
+        id: 'r-mixed',
+        servings: 4,
+        ingredients: [
+          { amount: 600, unit: 'g', name: 'Ground beef', fdc_id: 1001 },
+          {
+            amount: 2,
+            unit: 'pieces',
+            name: 'Tomato',
+            macros_override: { kcal: 22, protein_g: 1.1, fat_g: 0.2, carbs_g: 4.8, fiber_g: 1.5 },
+            macros_override_basis: 'per_unit',
+          },
+        ],
+      },
+      facts: {
+        1001: { kcal: 254, protein_g: 17, fat_g: 20, carbs_g: 0, fiber_g: 0 },
+      },
+      check: (r) => {
+        expect(r!.kcal).toBeCloseTo(1524 + 44, 1); // 600/100 × 254 + 2 × 22
+        expect(r!.matched_count).toBe(2);
+      },
+    },
   ])('computeRecipeMacros → $label', async ({ recipe, facts, autoMatches, check }) => {
     currentRecipe = recipe;
     nutritionFacts = facts;

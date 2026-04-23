@@ -50,6 +50,19 @@ async function doCompute(recipeId: string): Promise<RecipeMacros | null> {
 
   for (let i = 0; i < ingredients.length; i++) {
     const ing = ingredients[i];
+
+    // Per-unit override: skip gram lookup — contribution is amount × override.
+    if (ing.macros_override && ing.macros_override_basis === 'per_unit') {
+      const n = ing.amount;
+      totals.kcal += ing.macros_override.kcal * n;
+      totals.protein_g += ing.macros_override.protein_g * n;
+      totals.fat_g += ing.macros_override.fat_g * n;
+      totals.carbs_g += ing.macros_override.carbs_g * n;
+      totals.fiber_g += ing.macros_override.fiber_g * n;
+      matched++;
+      continue;
+    }
+
     const g = await resolveGrams(ing);
     if ('unresolved' in g) {
       unresolved.push({ index: i, name: ing.name, reason: g.unresolved });
