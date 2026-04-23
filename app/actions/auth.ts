@@ -35,8 +35,9 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
 
   // Mirror this user's stored preferences into cookies so the root layout's
   // SSR paints correct theme/font-size/lang attributes on the first request.
-  // Zero flash, per-user scope (kills the localStorage-bleed bug). For demo
-  // this is a no-op (prefs were just nulled) but kept for shape parity.
+  // Zero flash, per-user scope (kills the localStorage-bleed bug).
+  // mirrorPrefsToCookies is safe here — nulled fields leave cookies unchanged
+  // per its existing semantics (see the language-cookie else branch).
   const prefs = await getUserPreferences();
   await mirrorPrefsToCookies(prefs);
 
