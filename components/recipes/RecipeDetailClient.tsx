@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { Recipe } from '@/types/recipe';
 import { useToast } from '@/components/ui/ToastContext';
 import { useT } from '@/components/ui/LanguageContext';
 import { recipeToMarkdown, triggerDownload } from '@/lib/utils/export-recipes';
 import { processIngredients, type UnitSystem } from '@/lib/utils/scaling';
 import { formatServings } from '@/lib/utils/format-servings';
+import { MacrosCard } from '@/components/MacrosCard';
+import { MacrosMatchModal } from '@/components/MacrosMatchModal';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -23,10 +26,12 @@ function formatTime(minutes: number): string {
 }
 
 export default function RecipeDetailClient({ recipe }: Props) {
+  const router = useRouter();
   const { showToast } = useToast();
   const t = useT();
   const [targetServings, setTargetServings] = useState(recipe.servings);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
+  const [matchOpen, setMatchOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -78,6 +83,14 @@ export default function RecipeDetailClient({ recipe }: Props) {
 
   return (
     <div>
+      <MacrosCard recipe={recipe} onOpenMatchModal={() => setMatchOpen(true)} />
+      <MacrosMatchModal
+        recipe={recipe}
+        open={matchOpen}
+        onClose={() => setMatchOpen(false)}
+        onSaved={() => router.refresh()}
+      />
+
       {/* Times micro-row */}
       {(recipe.prep_time != null || recipe.cook_time != null || totalTime > 0) && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 mb-4" data-testid="recipe-times">
