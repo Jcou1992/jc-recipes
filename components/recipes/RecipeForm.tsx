@@ -54,7 +54,12 @@ function formatAmount(n: number): string {
 
 function ingredientsToFields(ings: Ingredient[]): IngredientField[] {
   return ings.length > 0
-    ? ings.map(i => ({ amount: formatAmount(i.amount), unit: i.unit ?? '', name: i.name }))
+    ? ings.map(i => ({
+        amount: formatAmount(i.amount),
+        unit: i.unit ?? '',
+        name: i.name,
+        fdc_id: i.fdc_id,
+      }))
     : [{ amount: '', unit: '', name: '' }];
 }
 
@@ -148,6 +153,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
             amount: parseAmount(e.field.amount),
             unit: e.field.unit.trim() || null,
             name: e.field.name.trim(),
+            ...(e.field.fdc_id !== undefined ? { fdc_id: e.field.fdc_id } : {}),
           })),
         stepsCount: activeSteps.filter(e => e.field.content.trim()).length,
       });
@@ -246,6 +252,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
         amount: parseAmount(e.field.amount),
         unit:   e.field.unit.trim() || null,
         name:   e.field.name.trim(),
+        ...(e.field.fdc_id !== undefined ? { fdc_id: e.field.fdc_id } : {}),
       }));
 
     const parsedSteps: Step[] = activeSteps
