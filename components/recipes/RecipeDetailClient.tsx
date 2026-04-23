@@ -227,20 +227,40 @@ export default function RecipeDetailClient({ recipe }: Props) {
               <section data-testid="ingredients-section">
                 <h2 className="section-label mb-4">{t.ingredientsSectionLabel}</h2>
                 <ul className="space-y-2.5">
-                  {displayedIngredients.map((ing, i) => (
-                    <li key={i} className="flex gap-3 items-baseline" data-testid={`ingredient-${i}`}>
-                      <span
-                        className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right tabular-nums"
-                        style={{ color: 'var(--color-gold)' }}
-                        data-testid={`ingredient-amount-${i}`}
-                      >
-                        {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
-                      </span>
-                      <span className="ingredient-name font-body text-base" style={{ color: 'var(--text-1)' }}>
-                        {ing.name}
-                      </span>
-                    </li>
-                  ))}
+                  {displayedIngredients.map((ing, i) => {
+                    const raw = recipe.ingredients[i];
+                    const unmatched = !!raw && !raw.fdc_id && !raw.macros_override;
+                    return (
+                      <li key={i} className="flex gap-3 items-baseline flex-wrap" data-testid={`ingredient-${i}`}>
+                        <span
+                          className="font-label text-base font-semibold tracking-wide min-w-[4rem] text-right tabular-nums"
+                          style={{ color: 'var(--color-gold)' }}
+                          data-testid={`ingredient-amount-${i}`}
+                        >
+                          {ing.displayAmount}{ing.unit ? ` ${ing.unit}` : ''}
+                        </span>
+                        <span className="ingredient-name font-body text-base" style={{ color: 'var(--text-1)' }}>
+                          {ing.name}
+                        </span>
+                        {unmatched && (
+                          <button
+                            type="button"
+                            onClick={() => setMatchOpen(true)}
+                            aria-label={`Ingredient ${ing.name} unmatched — tap to resolve`}
+                            data-testid={`ingredient-unmatched-${i}`}
+                            className="font-label text-[10px] tracking-widest uppercase rounded-full px-2 py-0.5 transition-colors"
+                            style={{
+                              color: 'var(--color-gold)',
+                              background: 'color-mix(in oklch, var(--color-gold) 14%, transparent)',
+                              border: '1px solid color-mix(in oklch, var(--color-gold) 34%, transparent)',
+                            }}
+                          >
+                            unmatched
+                          </button>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               </section>
             )}
