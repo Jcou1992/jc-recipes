@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { computeRecipeMacros } from '@/lib/macros/compute';
 import type { RecipePayload } from '@/types/recipe';
 
 export type ActionResult = { error: string } | null;
@@ -19,6 +20,14 @@ function normalizeServingSizeLabel(payload: RecipePayload): RecipePayload | { er
   return { ...payload, serving_size_label: trimmed };
 }
 
+async function safeCompute(recipeId: string): Promise<void> {
+  try {
+    await computeRecipeMacros(recipeId);
+  } catch (err) {
+    console.error('macros compute failed', err);
+  }
+}
+
 export async function createRecipe(payload: RecipePayload): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -34,6 +43,8 @@ export async function createRecipe(payload: RecipePayload): Promise<ActionResult
     .single();
 
   if (error) return { error: error.message };
+
+  await safeCompute(data.id);
 
   redirect(`/recipes/${data.id}`);
 }
@@ -53,6 +64,8 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
     .eq('user_id', session.user.id);
 
   if (error) return { error: error.message };
+
+  await safeCompute(id);
 
   redirect(`/recipes/${id}`);
 }
