@@ -46,6 +46,10 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const firstUnmatchedRadioRef = useRef<HTMLInputElement | null>(null);
+  const saveButtonRef = useRef<HTMLButtonElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -87,10 +91,93 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
     };
   }, [open, recipe.ingredients]);
 
+  // Determine the index of the first unmatched ingredient so we can attach
+  // the initial-focus ref to its first radio input.
+  const firstUnmatchedIndex = (() => {
+    for (let i = 0; i < recipe.ingredients.length; i++) {
+      const ing = recipe.ingredients[i];
+      const row = rows.get(i);
+      // Unmatched when the ingredient has no persisted fdc_id/override and
+      // no selection has been made yet, or when there are no candidates at all.
+      const hasPersistedMatch = !!ing.fdc_id || !!ing.macros_override;
+      if (!hasPersistedMatch) return i;
+      if (row && !row.candidatesLoading && row.candidates.length === 0) return i;
+    }
+    return -1;
+  })();
+
+  // Capture previous focus on open; restore on close.
+  const hasFocusedRef = useRef(false);
+  useEffect(() => {
+    if (!open) {
+      hasFocusedRef.current = false;
+      return;
+    }
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    // Defer initial focus to next tick so the dialog has rendered.
+    // Candidates load asynchronously — if no radio exists yet, focus the
+    // Save or Close button as a fallback (a second effect will hand off
+    // to the first radio once candidates arrive).
+    const handle = setTimeout(() => {
+      if (firstUnmatchedRadioRef.current) {
+        firstUnmatchedRadioRef.current.focus();
+        hasFocusedRef.current = true;
+      } else if (saveButtonRef.current) {
+        saveButtonRef.current.focus();
+      } else if (closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      } else {
+        dialogRef.current?.focus();
+      }
+    }, 0);
+    return () => {
+      clearTimeout(handle);
+      const prev = previousFocusRef.current;
+      if (prev && typeof prev.focus === 'function') {
+        prev.focus();
+      }
+    };
+  }, [open]);
+
+  // Once the first unmatched radio renders (after async candidate loading),
+  // move focus to it — but only once, and only if focus is still inside the
+  // dialog (don't steal focus from a user who has tabbed elsewhere).
   useEffect(() => {
     if (!open) return;
-    dialogRef.current?.focus();
-  }, [open]);
+    if (hasFocusedRef.current) return;
+    const radio = firstUnmatchedRadioRef.current;
+    if (!radio) return;
+    const root = dialogRef.current;
+    const active = document.activeElement as HTMLElement | null;
+    if (root && (active === root || root.contains(active))) {
+      radio.focus();
+      hasFocusedRef.current = true;
+    }
+  }, [open, rows, firstUnmatchedIndex]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const root = dialogRef.current;
+    if (!root) return;
+    const focusable = root.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement as HTMLElement | null;
+    if (e.shiftKey && active === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
 
   const save = () => {
     setError(null);
@@ -140,9 +227,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
       tabIndex={-1}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: 'color-mix(in srgb, var(--bg) 70%, black 40%)' }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
-      }}
+      onKeyDown={onKeyDown}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -168,6 +253,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
             type="button"
             onClick={onClose}
             aria-label="Close"
+            ref={closeButtonRef}
             className="font-label text-lg leading-none p-2 -m-2"
             style={{ color: 'var(--text-3)' }}
           >
@@ -237,7 +323,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
 
                 {row && !row.candidatesLoading && row.candidates.length > 0 && (
                   <div className="space-y-1.5">
-                    {row.candidates.map((c) => (
+                    {row.candidates.map((c, cIdx) => (
                       <label
                         key={c.fdc_id}
                         className="flex items-start gap-2 font-body text-sm cursor-pointer"
@@ -246,6 +332,11 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                         <input
                           type="radio"
                           name={`match-${idx}`}
+                          ref={
+                            idx === firstUnmatchedIndex && cIdx === 0
+                              ? firstUnmatchedRadioRef
+                              : undefined
+                          }
                           checked={row.selectedFdcId === c.fdc_id && !row.showManual}
                           onChange={() =>
                             setRows((prev) => {
@@ -332,6 +423,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
             type="button"
             onClick={save}
             disabled={isPending}
+            ref={saveButtonRef}
             className="btn-primary font-label text-xs tracking-widest uppercase"
             data-testid="macros-save-btn"
           >
