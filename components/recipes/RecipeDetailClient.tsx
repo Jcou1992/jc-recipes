@@ -32,6 +32,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
   const [targetServings, setTargetServings] = useState(recipe.servings);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
   const [matchOpen, setMatchOpen] = useState(false);
+  const [copyShimmerKey, setCopyShimmerKey] = useState(0);
 
   useEffect(() => {
     try {
@@ -246,12 +247,14 @@ export default function RecipeDetailClient({ recipe }: Props) {
                       .join('\n');
                     try {
                       await navigator.clipboard.writeText(text);
+                      setCopyShimmerKey(k => k + 1);
                       showToast(t.ingredientsCopiedToast, 'success');
                     } catch {
                       showToast(t.copyFailedToast, 'error');
                     }
                   }}
-                  className="btn-ghost text-sm"
+                  key={`copy-${copyShimmerKey}`}
+                  className={`btn-ghost text-sm ${copyShimmerKey > 0 ? 'animate-shimmer' : ''}`.trim()}
                   data-testid="copy-ingredients-btn"
                 >
                   {t.copyIngredientsBtn}

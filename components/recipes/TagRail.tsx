@@ -65,7 +65,7 @@ export default function TagRail({
                 key={tag}
                 type="button"
                 onClick={() => onToggle(tag)}
-                className="flex-shrink-0 font-label text-xs font-semibold tracking-widest uppercase px-3 rounded-full transition-all"
+                className="chip-press flex-shrink-0 font-label text-xs font-semibold tracking-widest uppercase px-3 rounded-full transition-all"
                 style={{
                   minHeight: 44,
                   background: active ? 'var(--color-terracotta-contrast)' : 'transparent',
