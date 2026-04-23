@@ -1,3 +1,5 @@
+export type PreferredUnits = 'metric' | 'imperial';
+
 export interface UserPreferences {
   user_id: string;
   space_name: string | null;
@@ -6,6 +8,7 @@ export interface UserPreferences {
   preferred_font_size: 'sm' | 'md' | 'lg' | null;
   preferred_theme: 'system' | 'dark' | 'light' | null;
   preferred_language: 'en' | 'es' | null;
+  preferred_units: PreferredUnits | null;
   created_at: string;
   updated_at: string;
 }
