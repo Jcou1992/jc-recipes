@@ -51,31 +51,9 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
 
   const m = recipe.macros;
 
-  // State 2: zero matched → invite to match
-  if (m.matched_count === 0) {
-    return (
-      <div
-        className="rounded-lg p-4 mb-6 flex items-center justify-between flex-wrap gap-3"
-        style={panelStyle}
-        data-testid="macros-card-unmatched"
-      >
-        <p className="font-label text-xs tracking-widest uppercase" style={{ color: 'var(--text-3)' }}>
-          Ingredients need matching
-        </p>
-        <button
-          type="button"
-          onClick={onOpenMatchModal}
-          className="btn-ghost font-label text-xs tracking-widest uppercase"
-          style={{ color: 'var(--color-terracotta)' }}
-          data-testid="macros-match-btn"
-        >
-          Match ingredients →
-        </button>
-      </div>
-    );
-  }
-
   const isPartial = m.matched_count < m.total_count;
+  const remaining = m.total_count - m.matched_count;
+
   const perServing = {
     kcal: m.kcal / recipe.servings,
     protein_g: m.protein_g / recipe.servings,
@@ -99,7 +77,9 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
   return (
     <div
       role="group"
-      aria-label={`Macros per serving${isPartial ? ` — estimate, ${m.matched_count} of ${m.total_count} ingredients matched` : ''}`}
+      aria-label={`Macros per serving${
+        isPartial ? ` — estimate, ${m.matched_count} of ${m.total_count} ingredients matched` : ''
+      }`}
       className="rounded-lg p-4 mb-6"
       style={cardStyle}
       data-testid={isPartial ? 'macros-card-partial' : 'macros-card-complete'}
@@ -110,17 +90,18 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
           style={{ color: 'var(--text-3)' }}
         >
           Per serving{recipe.serving_size_label ? ` · ${recipe.serving_size_label}` : ''}
-          {isPartial && ' · ~estimate'}
         </span>
-        <button
-          type="button"
-          onClick={onOpenMatchModal}
-          className="font-label text-xs tracking-widest uppercase transition-colors"
-          style={{ color: 'var(--color-terracotta)' }}
-          data-testid="macros-edit-btn"
-        >
-          edit
-        </button>
+        {!isPartial && (
+          <button
+            type="button"
+            onClick={onOpenMatchModal}
+            className="font-label text-xs tracking-widest uppercase transition-colors"
+            style={{ color: 'var(--color-terracotta)' }}
+            data-testid="macros-edit-btn"
+          >
+            edit
+          </button>
+        )}
       </div>
 
       <p
@@ -128,7 +109,8 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
         style={{ color: 'var(--text-1)' }}
         data-testid="macros-kcal"
       >
-        {prefix}{Math.round(perServing.kcal)} <span className="text-base" style={{ color: 'var(--text-2)' }}>kcal</span>
+        {prefix}{Math.round(perServing.kcal)}{' '}
+        <span className="text-base" style={{ color: 'var(--text-2)' }}>kcal</span>
       </p>
 
       <p
@@ -165,18 +147,46 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
       <p
         className="font-label mt-3 text-[11px] tracking-widest uppercase tabular-nums"
         style={{ color: 'var(--text-3)' }}
+        data-testid="macros-totals-line"
       >
-        {servingsLabel} · {prefix}{Math.round(m.kcal)} kcal total ·{' '}
-        <span
-          style={{
-            color: isPartial ? 'var(--color-gold)' : 'var(--color-terracotta)',
-          }}
-        >
-          {isPartial
-            ? `${m.matched_count} of ${m.total_count} matched`
-            : `all ${m.total_count} matched`}
-        </span>
+        {servingsLabel} · {prefix}{Math.round(m.kcal)} kcal total
       </p>
+
+      {isPartial ? (
+        <div
+          className="mt-3 flex flex-col gap-2"
+          data-testid="macros-partial-footer"
+          aria-live="polite"
+        >
+          <p
+            className="font-label text-[11px] tracking-widest uppercase"
+            style={{ color: 'var(--color-gold)' }}
+          >
+            Estimate · {m.matched_count} of {m.total_count} ingredients matched
+          </p>
+          <button
+            type="button"
+            onClick={onOpenMatchModal}
+            data-testid="macros-match-btn"
+            className="self-start font-label text-[11px] tracking-widest uppercase rounded-full px-4 min-h-[44px] transition-colors"
+            style={{
+              color: 'var(--color-terracotta)',
+              background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
+              border: '1px solid color-mix(in oklch, var(--color-terracotta) 42%, transparent)',
+            }}
+          >
+            Match {remaining} remaining →
+          </button>
+        </div>
+      ) : (
+        <p
+          className="font-label mt-2 text-[11px] tracking-widest uppercase"
+          style={{ color: 'var(--text-3)' }}
+          data-testid="macros-provenance"
+        >
+          USDA FoodData Central
+        </p>
+      )}
     </div>
   );
 }
