@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { searchFdcAction, setIngredientMatches, type BatchEntry } from '@/app/actions/macros';
 import { useFocusTrap } from '@/lib/hooks/useFocusTrap';
+import { inferBasisForUnit, basisLabel } from '@/lib/macros/unit-basis';
 import type { Ingredient, MacroValues, Recipe } from '@/types/recipe';
 
 interface Props {
@@ -54,12 +55,6 @@ function initialRow(ing: Ingredient): RowState {
     searchQuery: ing.name,
     searchLoading: false,
   };
-}
-
-function isCountableIngredient(ing: Ingredient): boolean {
-  if (ing.unit === null) return true;
-  const normalized = ing.unit.trim().toLowerCase();
-  return ['pieces', 'piece', 'clove', 'cloves', 'slice', 'slices'].includes(normalized);
 }
 
 function formatIngredientContext(ing: Ingredient): string {
@@ -229,12 +224,17 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
           if ('error' in r) {
             next.set(idx, { ...existing, candidatesLoading: false, candidatesError: true });
           } else {
+            const top = r.candidates[0];
+            const autoSelected = existing.selectedFdcId ?? top?.fdc_id;
+            const autoName =
+              existing.fdcName ??
+              (top && autoSelected === top.fdc_id ? top.name : existing.fdcName);
             next.set(idx, {
               ...existing,
               candidatesLoading: false,
               candidates: r.candidates.slice(0, 3),
-              selectedFdcId:
-                existing.selectedFdcId ?? (r.candidates[0]?.fdc_id as number | undefined),
+              selectedFdcId: autoSelected,
+              fdcName: autoName,
             });
           }
           return next;
@@ -269,6 +269,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
             ingredientIndex: idx,
             expectedName: ing.name,
             override: row.manualValues,
+            overrideBasis: inferBasisForUnit(ing.unit),
           });
           return;
         }
@@ -277,6 +278,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
             ingredientIndex: idx,
             expectedName: ing.name,
             fdcId: row.selectedFdcId,
+            fdcName: row.fdcName,
           });
         }
       });
@@ -438,6 +440,28 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                       Couldn&apos;t load USDA suggestions. Enter macros manually below.
                     </p>
                   )}
+
+                  {/* Current match pill — saved fdc_id outside current top-3 */}
+                  {row &&
+                    !row.candidatesLoading &&
+                    !row.candidatesError &&
+                    !row.showManual &&
+                    row.fdcName &&
+                    row.selectedFdcId !== undefined &&
+                    !row.candidates.some((c) => c.fdc_id === row.selectedFdcId) && (
+                      <div
+                        data-testid={`current-match-pill-${idx}`}
+                        className="mb-2 font-label text-[11px] tracking-widest uppercase rounded-full px-3 py-1.5 inline-flex items-center gap-2"
+                        style={{
+                          color: 'var(--color-terracotta)',
+                          background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
+                          border: '1px solid color-mix(in oklch, var(--color-terracotta) 42%, transparent)',
+                        }}
+                      >
+                        <span>Current match:</span>
+                        <span style={{ textTransform: 'none' }}>{row.fdcName}</span>
+                      </div>
+                    )}
 
                   {/* USDA candidate list */}
                   {row && !row.candidatesLoading && !row.candidatesError && !row.showManual && row.candidates.length > 0 && (
@@ -619,6 +643,13 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                       candidates exist (so the user always has a path forward). */}
                   {row && !row.candidatesLoading && (row.showManual || row.candidates.length === 0) && (
                     <div className="mt-3">
+                      <p
+                        className="font-label text-[10px] tracking-widest uppercase mb-2"
+                        style={{ color: 'var(--text-3)' }}
+                        data-testid={`basis-label-${idx}`}
+                      >
+                        {basisLabel(ing.unit, inferBasisForUnit(ing.unit))}
+                      </p>
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                         {(['kcal', 'fat_g', 'carbs_g', 'protein_g', 'fiber_g'] as const).map((k) => {
                           const value = row.manualValues[k];
@@ -657,14 +688,6 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
                           );
                         })}
                       </div>
-                      {isCountableIngredient(ing) && (
-                        <p
-                          className="mt-2 font-body text-xs italic"
-                          style={{ color: 'var(--text-3)' }}
-                        >
-                          Values per 100 g of raw ingredient. If your label lists per piece, divide by piece weight.
-                        </p>
-                      )}
                     </div>
                   )}
                 </li>
@@ -672,13 +695,13 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
             })}
           </ul>
 
-          {/* Single global footnote re: per-100g convention — lives at bottom
-              of scroll area so it appears once, not per station. */}
+          {/* Single global footnote — explains the mixed-basis storage model
+              so the chef understands why scaling + unit toggles stay accurate. */}
           <p
             className="mt-4 font-body text-xs"
             style={{ color: 'var(--text-3)' }}
           >
-            Macros are stored per 100 g of the raw ingredient, so scaling a recipe or switching units stays accurate.
+            Weight and volume ingredients stored per 100 g. Countable items stored per unit. Scaling stays accurate either way.
           </p>
         </div>
 
