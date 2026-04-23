@@ -2,7 +2,12 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { getUserPreferences, mirrorPrefsToCookies, clearPrefCookies } from './preferences';
+import {
+  getUserPreferences,
+  mirrorPrefsToCookies,
+  clearPrefCookies,
+  resetDemoPreferences,
+} from './preferences';
 
 type AuthState = { error: string } | null;
 
@@ -20,14 +25,22 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
 
   if (error) return { error: error.message };
 
+  const isDemo = email.trim().toLowerCase() === DEMO_EMAIL;
+
+  // Demo user always re-runs the onboarding wizard + tour on every sign-in.
+  // Reset wipes prefs + clears pref cookies so the next SSR paints defaults.
+  if (isDemo) {
+    await resetDemoPreferences();
+  }
+
   // Mirror this user's stored preferences into cookies so the root layout's
   // SSR paints correct theme/font-size/lang attributes on the first request.
-  // Zero flash, per-user scope (kills the localStorage-bleed bug).
+  // Zero flash, per-user scope (kills the localStorage-bleed bug). For demo
+  // this is a no-op (prefs were just nulled) but kept for shape parity.
   const prefs = await getUserPreferences();
   await mirrorPrefsToCookies(prefs);
 
-  const landing = email.trim().toLowerCase() === DEMO_EMAIL ? '/recipes?tour=1' : '/recipes';
-  redirect(landing);
+  redirect(isDemo ? '/recipes?tour=1' : '/recipes');
 }
 
 export async function logout() {
