@@ -34,7 +34,31 @@
   --tag-bg:     color-mix(in oklch, var(--color-gold) 18%, transparent);
   --tag-border: color-mix(in oklch, var(--color-gold) 40%, transparent);
   --tag-text:   var(--color-gold);
+
+  /* ── Motion tokens ──────────────────────────────────────────────────────── */
+  /* Exponential easing curves. Never use bounce/elastic — they feel dated. */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Durations */
+  --motion-xs: 120ms;
+  --motion-sm: 180ms;
+  --motion-md: 260ms;
+  --motion-lg: 320ms;
+  --motion-xl: 400ms;
+
+  /* Staggers */
+  --stagger-card:   80ms;
+  --stagger-stroke: 60ms;
 }
+
+/* ── @property registrations (animatable custom props) ──────────────────────── */
+@property --macro-protein-pct { syntax: "<percentage>"; initial-value: 0%; inherits: false; }
+@property --macro-carb-pct    { syntax: "<percentage>"; initial-value: 0%; inherits: false; }
+@property --macro-fat-pct     { syntax: "<percentage>"; initial-value: 0%; inherits: false; }
+@property --shimmer-pos       { syntax: "<percentage>"; initial-value: -20%; inherits: false; }
+@property --field-flash       { syntax: "<number>";     initial-value: 0; inherits: false; }
 
 /* ── Semantic tokens: light override ───────────────────────────────────────── */
 @media (prefers-color-scheme: light) {
@@ -432,11 +456,24 @@ body::after {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
   body::after { display: none !important; }
   .animate-fade-up,
   .animate-scale-in,
+  .animate-stroke-in,
+  .animate-ink-brush,
+  .animate-shimmer,
+  .animate-ring-breath,
+  .animate-underscore-sweep,
+  .animate-step-slide,
+  .animate-field-flash,
   .drain-bar { animation: none !important; }
+  [data-motion-optional] { animation: none !important; transition: none !important; }
+  .scroll-parallax { transform: none !important; }
+  .ingredient-ripple,
+  .gold-sweep,
+  .first-save-underline { display: none !important; }
 }
