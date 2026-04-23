@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { computeRecipeMacros } from '@/lib/macros/compute';
-import type { RecipePayload } from '@/types/recipe';
+import { inferBasisForUnit } from '@/lib/macros/unit-basis';
+import type { Ingredient, RecipePayload } from '@/types/recipe';
 
 export type ActionResult = { error: string } | null;
 
@@ -56,6 +57,30 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
 
   const normalized = normalizeServingSizeLabel(payload);
   if ('error' in normalized) return normalized;
+
+  // Read existing ingredients so we can clear stale overrides when a unit
+  // change flips the macros basis.
+  const { data: existing } = await supabase
+    .from('recipes')
+    .select('ingredients')
+    .eq('id', id)
+    .eq('user_id', session.user.id)
+    .single();
+
+  if (existing) {
+    const prev = (existing.ingredients ?? []) as Ingredient[];
+    const next = (normalized.ingredients ?? []) as Ingredient[];
+    for (let i = 0; i < next.length; i++) {
+      const p = prev[i];
+      const n = next[i];
+      if (!p || !n) continue;
+      if (!n.macros_override) continue;
+      if (inferBasisForUnit(p.unit) !== inferBasisForUnit(n.unit)) {
+        delete n.macros_override;
+        delete n.macros_override_basis;
+      }
+    }
+  }
 
   const { error } = await supabase
     .from('recipes')
