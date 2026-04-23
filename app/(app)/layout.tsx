@@ -5,9 +5,19 @@ import { getServerT } from '@/lib/i18n-server';
 import { getUserPreferences } from '@/app/actions/preferences';
 import AppProviders from '@/components/ui/AppProviders';
 import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
-import FontSizeBootstrap from '@/components/ui/FontSizeBootstrap';
-import ThemeBootstrap from '@/components/ui/ThemeBootstrap';
+import EmailSync from '@/components/ui/EmailSync';
 import AvatarMenu from '@/components/ui/AvatarMenu';
+import type { ThemeValue, FontSizeValue, LanguageValue } from '@/lib/preferences-cache';
+
+function narrowTheme(v: unknown): ThemeValue | null {
+  return v === 'light' || v === 'dark' || v === 'system' ? v : null;
+}
+function narrowFontSize(v: unknown): FontSizeValue | null {
+  return v === 'sm' || v === 'md' || v === 'lg' ? v : null;
+}
+function narrowLanguage(v: unknown): LanguageValue | null {
+  return v === 'en' || v === 'es' ? v : null;
+}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -21,11 +31,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const email = session.user.email ?? '';
   const initial = (prefs?.space_name || email || '?').charAt(0).toUpperCase();
 
+  // Feed the per-email client cache from authoritative server state so the
+  // login-page preview on this device has accurate data even before the user
+  // clicks any toggle.
+  const theme = narrowTheme(prefs?.preferred_theme);
+  const fontSize = narrowFontSize(prefs?.preferred_font_size);
+  const language = narrowLanguage(prefs?.preferred_language) ?? initialLanguage;
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <AppProviders initialLanguage={initialLanguage}>
-        <ThemeBootstrap />
-        <FontSizeBootstrap />
+        <EmailSync email={email} theme={theme} fontSize={fontSize} language={language} />
         <nav
           className="nav-frosted sticky top-0 z-10"
           style={{ borderBottom: '1px solid var(--border)' }}

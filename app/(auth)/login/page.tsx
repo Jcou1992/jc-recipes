@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import LoginForm from '@/components/auth/LoginForm';
+import EmailPreviewBootstrap from '@/components/auth/EmailPreviewBootstrap';
 
 export const metadata: Metadata = { title: 'Log in — SEKAI' };
 
@@ -45,6 +46,7 @@ export default function LoginPage() {
           </p>
         </header>
         <LoginForm />
+        <EmailPreviewBootstrap />
       </div>
     </main>
   );

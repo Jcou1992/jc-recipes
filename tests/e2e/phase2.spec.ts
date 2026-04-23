@@ -112,7 +112,9 @@ test('sort pills change URL sort param @regression', async ({ page }) => {
 });
 
 test('result count updates and announces filter context @regression', async ({ page }) => {
-  const tag = `countTag${Date.now()}`;
+  // Prefix with '0' so the tag sorts into the first 12 (alphabetical) and
+  // appears inline on the TagRail even on the populated test account.
+  const tag = `0countTag${Date.now()}`;
   await seedRecipe({ name: uniqueName('CountA'), tags: [tag] });
   await page.goto('/recipes');
   await page.waitForLoadState('networkidle');
@@ -285,44 +287,47 @@ test('desktop list grid scales to ultra-wide viewports @regression', async ({ pa
   await expect.poll(cardsInFirstRow, { timeout: 5_000 }).toBeGreaterThanOrEqual(6);
 });
 
-test('font-size preference persists across reload @regression', async ({ page }) => {
+test('font-size preference persists across reload @regression', async ({ page, context }) => {
+  // Post-refactor: preferences are cookie-authoritative (DB-mirrored into
+  // preferred-font-size cookie on login + every toggle). Root layout's SSR
+  // reads the cookie and sets <html data-font-size>. This test verifies the
+  // cookie → SSR path, which is the authoritative flow.
+  await context.addCookies([{
+    name: 'preferred-font-size',
+    value: 'lg',
+    domain: 'localhost',
+    path: '/',
+    sameSite: 'Lax',
+  }]);
   await page.goto('/recipes');
   await page.waitForLoadState('networkidle');
 
-  // Simulate user having set preference to 'lg' via FontSizeToggle.
-  await page.evaluate(() => {
-    localStorage.setItem('preferred-font-size', 'lg');
-  });
-
-  await page.reload();
-  await page.waitForLoadState('networkidle');
-
-  // FontSizeBootstrap mounted in layout should re-apply data-font-size from localStorage.
   const attr = await page.evaluate(() =>
     document.documentElement.getAttribute('data-font-size'),
   );
   expect(attr).toBe('lg');
 
-  // And computed font-size on <html> should reflect the 'lg' token (1.1875rem ≈ 19px).
   const fontSize = await page.evaluate(
     () => getComputedStyle(document.documentElement).fontSize,
   );
   expect(parseFloat(fontSize)).toBeGreaterThan(17);
+
+  // Cleanup
+  await context.clearCookies({ name: 'preferred-font-size' });
 });
 
-test('theme preference re-applies after full reload @regression', async ({ page }) => {
-  // Regression: ThemeToggle only mounts inside the avatar dropdown. Any plain-anchor
-  // navigation (or hard reload) returned server HTML without data-theme, so the user's
-  // chosen theme silently flipped back to prefers-color-scheme until they reopened the
-  // menu. ThemeBootstrap re-applies the stored theme on every page mount.
+test('theme preference re-applies after full reload @regression', async ({ page, context }) => {
+  // Post-refactor: theme is cookie-authoritative. Set the cookie directly
+  // (mirrors what the server action does after a toggle) and verify the root
+  // layout's SSR paints <html data-theme> on the next load.
+  await context.addCookies([{
+    name: 'preferred-theme',
+    value: 'light',
+    domain: 'localhost',
+    path: '/',
+    sameSite: 'Lax',
+  }]);
   await page.goto('/recipes');
-  await page.waitForLoadState('networkidle');
-
-  await page.evaluate(() => {
-    localStorage.setItem('preferred-theme', 'light');
-  });
-
-  await page.reload();
   await page.waitForLoadState('networkidle');
 
   const attr = await page.evaluate(() =>
@@ -330,8 +335,62 @@ test('theme preference re-applies after full reload @regression', async ({ page 
   );
   expect(attr).toBe('light');
 
-  // Cleanup so we don't poison other tests.
-  await page.evaluate(() => localStorage.removeItem('preferred-theme'));
+  // Cleanup
+  await context.clearCookies({ name: 'preferred-theme' });
+});
+
+test('no theme bleed: clearing cookie drops the data-theme attr @regression', async ({ page, context }) => {
+  // Simulates user A setting theme, user B signing in (cookies cleared by
+  // logout action). The second visit must NOT inherit A's theme.
+  await context.addCookies([{
+    name: 'preferred-theme',
+    value: 'dark',
+    domain: 'localhost',
+    path: '/',
+    sameSite: 'Lax',
+  }]);
+  await page.goto('/recipes');
+  await page.waitForLoadState('networkidle');
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe('dark');
+
+  // logout action clears the cookie → next request renders no data-theme.
+  await context.clearCookies({ name: 'preferred-theme' });
+  await page.reload();
+  await page.waitForLoadState('networkidle');
+  const after = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  expect(after).toBeNull();
+});
+
+test.describe('login-page preview (unauthenticated)', () => {
+  // Use a fresh browser context (no shared auth state) so /login renders the
+  // form instead of redirecting to /recipes.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test('login page applies cached theme on email blur @regression', async ({ page }) => {
+    const email = 'preview-user@sakai.app';
+
+    // Seed the per-email cache BEFORE navigating.
+    await page.addInitScript((em) => {
+      localStorage.setItem('theme-by-email', JSON.stringify({ [em]: 'dark' }));
+    }, email);
+
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+
+    // No cookie / no session → no data-theme yet.
+    expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBeNull();
+
+    const input = page.locator('#email');
+    await expect(input).toBeVisible();
+    await input.fill(email);
+    await input.blur();
+
+    // EmailPreviewBootstrap applies cached theme on blur.
+    await expect.poll(
+      async () => page.evaluate(() => document.documentElement.getAttribute('data-theme')),
+      { timeout: 5000 },
+    ).toBe('dark');
+  });
 });
 
 test('editable space name persists across reload @regression', async ({ page, isMobile }, testInfo) => {

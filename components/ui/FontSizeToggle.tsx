@@ -1,28 +1,37 @@
 'use client';
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useTransition } from 'react';
 import { useT } from './LanguageContext';
+import { updateUserPreferences } from '@/app/actions/preferences';
+import { getCurrentEmail, writeFontSizeForEmail } from '@/lib/preferences-cache';
 
 type Size = 'sm' | 'md' | 'lg';
+
+function readInitialSize(): Size {
+  if (typeof document === 'undefined') return 'md';
+  const attr = document.documentElement.getAttribute('data-font-size');
+  if (attr === 'sm' || attr === 'md' || attr === 'lg') return attr;
+  return 'md';
+}
 
 export default function FontSizeToggle() {
   const t = useT();
   const [size, setSize] = useState<Size>('md');
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
-    const stored = localStorage.getItem('preferred-font-size') as Size | null;
-    if (stored === 'sm' || stored === 'md' || stored === 'lg') {
-      setSize(stored);
-      document.documentElement.setAttribute('data-font-size', stored);
-    }
+    setSize(readInitialSize());
   }, []);
 
   function cycle() {
     const next: Size = size === 'sm' ? 'md' : size === 'md' ? 'lg' : 'sm';
     setSize(next);
     document.documentElement.setAttribute('data-font-size', next);
-    try {
-      localStorage.setItem('preferred-font-size', next);
-    } catch {}
+    const email = getCurrentEmail();
+    if (email) writeFontSizeForEmail(email, next);
+    startTransition(() => {
+      void updateUserPreferences({ preferred_font_size: next });
+    });
   }
 
   const label = size === 'sm' ? t.fontSizeSm : size === 'md' ? t.fontSizeMd : t.fontSizeLg;

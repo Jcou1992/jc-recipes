@@ -1,8 +1,10 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { type Language, type Translations, LANGUAGE_COOKIE, DEFAULT_LANGUAGE, getT } from '@/lib/i18n';
+import { updateUserPreferences } from '@/app/actions/preferences';
+import { getCurrentEmail, writeLanguageForEmail } from '@/lib/preferences-cache';
 
 interface LanguageContextValue {
   language: Language;
@@ -31,6 +33,7 @@ interface Props {
 export function LanguageProvider({ children, initialLanguage }: Props) {
   const [language, setLanguageState] = useState<Language>(initialLanguage ?? DEFAULT_LANGUAGE);
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     const cookieLang = readCookie();
@@ -41,6 +44,14 @@ export function LanguageProvider({ children, initialLanguage }: Props) {
   function setLanguage(lang: Language) {
     setLanguageState(lang);
     writeCookie(lang);
+    const email = getCurrentEmail();
+    if (email) writeLanguageForEmail(email, lang);
+    // Persist to DB for authenticated users so preference survives across
+    // devices. Action is a no-op (returns { ok: false }) when unauthenticated
+    // — cookie + client state already reflect the change by then.
+    startTransition(() => {
+      void updateUserPreferences({ preferred_language: lang });
+    });
     router.refresh();
   }
 
