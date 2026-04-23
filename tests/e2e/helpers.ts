@@ -13,7 +13,7 @@
  */
 import { expect, type Page } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { RecipePayload } from '@/types/recipe';
+import type { Ingredient, RecipeMacros, RecipePayload } from '@/types/recipe';
 
 export const TEST_EMAIL    = 'test@jc-recipes.local';
 export const TEST_PASSWORD = process.env.TEST_USER_PASSWORD ?? 'changeme';
@@ -101,6 +101,70 @@ export async function seedRecipe(opts: SeedOptions): Promise<{ id: string; name:
     .single();
 
   if (error) throw new Error(`seedRecipe insert failed: ${error.message}`);
+  return data as { id: string; name: string };
+}
+
+export interface SeedMacrosOptions extends SeedOptions {
+  ingredients?: Ingredient[];
+  macros?: RecipeMacros | null;
+}
+
+export async function seedRecipeWithMacros(
+  opts: SeedMacrosOptions
+): Promise<{ id: string; name: string }> {
+  const client = await getAuthedClient();
+  const { data: { user }, error: userErr } = await client.auth.getUser();
+  if (userErr || !user) throw new Error('seedRecipeWithMacros: no authenticated user');
+
+  const ingredients: Ingredient[] = opts.ingredients ?? [
+    { amount: 500, unit: 'g', name: 'chicken breast', fdc_id: 171477 },
+    { amount: 200, unit: 'g', name: 'white rice', fdc_id: 169704 },
+  ];
+
+  const macros: RecipeMacros | null = opts.macros === undefined
+    ? {
+        kcal: 1085,
+        protein_g: 160.4,
+        fat_g: 18.6,
+        carbs_g: 56,
+        fiber_g: 0.8,
+        matched_count: ingredients.filter(i => i.fdc_id || i.macros_override).length,
+        total_count: ingredients.length,
+        unresolved_ingredients: ingredients
+          .map((ing, i) => ({ ing, i }))
+          .filter(({ ing }) => !ing.fdc_id && !ing.macros_override)
+          .map(({ ing, i }) => ({ index: i, name: ing.name, reason: 'no match' })),
+      }
+    : opts.macros;
+
+  const payload = {
+    name: opts.name,
+    ingredients,
+    steps: (opts.steps ?? [{ content: 'Cook.' }]).map((s, i) => ({
+      order: i,
+      content: s.content,
+      timer_seconds: s.timer_seconds ?? null,
+    })),
+    servings: opts.servings ?? 4,
+    serving_size_label: opts.serving_size_label ?? null,
+    description: opts.description ?? null,
+    prep_time: opts.prep_time ?? null,
+    cook_time: opts.cook_time ?? null,
+    tags: opts.tags ?? null,
+    notes: opts.notes ?? null,
+    photos: null,
+    macros,
+    macros_computed_at: macros ? new Date().toISOString() : null,
+    user_id: user.id,
+  };
+
+  const { data, error } = await client
+    .from('recipes')
+    .insert(payload)
+    .select('id, name')
+    .single();
+
+  if (error) throw new Error(`seedRecipeWithMacros insert failed: ${error.message}`);
   return data as { id: string; name: string };
 }
 
