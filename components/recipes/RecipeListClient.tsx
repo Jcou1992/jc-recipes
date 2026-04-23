@@ -432,22 +432,30 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           style={{ opacity: isPending ? 0.6 : 1 }}
           aria-busy={isPending}
         >
-          {filtered.map((recipe, index) => (
-            <div
-              key={recipe.id}
-              className={`animate-fade-up${!selectMode && index === 0 ? ' col-span-full md:col-span-2' : ''}`}
-              style={{ animationDelay: `${Math.min(index, 11) * 80}ms`, animationFillMode: 'both' }}
-            >
-              <RecipeCard
-                recipe={recipe}
-                featured={!selectMode && index === 0}
-                selectMode={selectMode}
-                selected={selectedIds.has(recipe.id)}
-                onToggle={shift => toggleSelect(recipe.id, index, shift)}
-                isSearchMatch={!!q && index < 8}
-              />
-            </div>
-          ))}
+          {filtered.map((recipe, index) => {
+            const isMatch =
+              !!q &&
+              index < 8 &&
+              (normalise(recipe.name).includes(normalise(q)) ||
+                (recipe.description != null &&
+                  normalise(recipe.description).includes(normalise(q))));
+            return (
+              <div
+                key={recipe.id}
+                className={`animate-fade-up${!selectMode && index === 0 ? ' col-span-full md:col-span-2' : ''}`}
+                style={{ animationDelay: `${Math.min(index, 11) * 80}ms`, animationFillMode: 'both' }}
+              >
+                <RecipeCard
+                  recipe={recipe}
+                  featured={!selectMode && index === 0}
+                  selectMode={selectMode}
+                  selected={selectedIds.has(recipe.id)}
+                  onToggle={shift => toggleSelect(recipe.id, index, shift)}
+                  isSearchMatch={isMatch}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 
