@@ -47,7 +47,6 @@ async function doCompute(recipeId: string): Promise<RecipeMacros | null> {
   const unresolved: UnresolvedIngredient[] = [];
   const totals: MacroValues = { kcal: 0, protein_g: 0, fat_g: 0, carbs_g: 0, fiber_g: 0 };
   let matched = 0;
-  const updatedIngredients: Ingredient[] = ingredients.map((i) => ({ ...i }));
 
   for (let i = 0; i < ingredients.length; i++) {
     const ing = ingredients[i];
@@ -63,10 +62,16 @@ async function doCompute(recipeId: string): Promise<RecipeMacros | null> {
     } else if (ing.fdc_id) {
       per100 = await fetchFactsById(supabase, ing.fdc_id);
     } else {
+      // Auto-match is recomputed on every call. We deliberately do NOT
+      // persist the auto-matched fdc_id back to the ingredient row — doing
+      // so would race with concurrent user edits (e.g. a chef saving a
+      // different match via setIngredientMatch mid-compute would be
+      // clobbered by the writeback). Auto-match is a cheap (~20ms) pg_trgm
+      // lookup, so recomputing is acceptable. Any chef-confirmed match is
+      // persisted only through setIngredientMatch.
       const autoId = await autoMatch(ing.name);
       if (autoId !== null) {
         per100 = await fetchFactsById(supabase, autoId);
-        if (per100) updatedIngredients[i] = { ...ing, fdc_id: autoId };
       }
     }
 
@@ -95,10 +100,11 @@ async function doCompute(recipeId: string): Promise<RecipeMacros | null> {
     unresolved_ingredients: unresolved,
   };
 
+  // Only persist the computed macros + timestamp. Never write back
+  // ingredients — see auto-match comment above.
   await supabase
     .from('recipes')
     .update({
-      ingredients: updatedIngredients,
       macros: result,
       macros_computed_at: new Date().toISOString(),
     })

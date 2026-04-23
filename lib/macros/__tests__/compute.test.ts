@@ -73,7 +73,10 @@ type Case = {
   recipe: RecipeRow;
   facts: Record<number, MacroValues>;
   autoMatches?: Record<string, number | null>;
-  check: (result: { kcal: number; matched_count: number; total_count: number; unresolved_ingredients: unknown[] } | null) => void;
+  check: (
+    result: { kcal: number; matched_count: number; total_count: number; unresolved_ingredients: unknown[] } | null,
+    ctx: { updatePayload: Record<string, unknown> | null }
+  ) => void;
 };
 
 const CHICKEN: MacroValues = { kcal: 165, protein_g: 31, fat_g: 3.6, carbs_g: 0, fiber_g: 0 };
@@ -146,7 +149,7 @@ describe('computeRecipeMacros truth table', () => {
       },
     },
     {
-      label: 'autoMatch hit stamps fdc_id into persisted ingredients',
+      label: 'autoMatch hit contributes to totals but is NOT written back to ingredients',
       recipe: {
         id: 'r5',
         servings: 1,
@@ -154,9 +157,15 @@ describe('computeRecipeMacros truth table', () => {
       },
       facts: { 171477: CHICKEN },
       autoMatches: { 'chicken breast raw fresh': 171477 },
-      check: (r) => {
+      check: (r, { updatePayload }) => {
         expect(r!.matched_count).toBe(1);
         expect(r!.kcal).toBeCloseTo(165, 1);
+        // Concurrent-edit guard: never write ingredients back in the same
+        // UPDATE as macros — would clobber in-flight setIngredientMatch calls.
+        expect(updatePayload).not.toBeNull();
+        expect(updatePayload).not.toHaveProperty('ingredients');
+        expect(updatePayload).toHaveProperty('macros');
+        expect(updatePayload).toHaveProperty('macros_computed_at');
       },
     },
     {
@@ -178,6 +187,8 @@ describe('computeRecipeMacros truth table', () => {
     nutritionFacts = facts;
     autoMatchMap = autoMatches ?? {};
     const result = await computeRecipeMacros(recipe.id);
-    check(result);
+    const calls = updateSpy.mock.calls as Array<[Record<string, unknown>]>;
+    const updatePayload = calls.length ? calls[calls.length - 1][0] : null;
+    check(result, { updatePayload });
   });
 });
