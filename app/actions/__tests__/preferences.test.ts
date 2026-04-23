@@ -52,7 +52,7 @@ jest.mock('@/lib/supabase/server', () => ({
 
 // Import AFTER mocks are registered.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { updateUserPreferences, resetDemoPreferences } = require('../preferences');
+const { updateUserPreferences, resetDemoPreferences, replayOnboarding } = require('../preferences');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const headers = require('next/headers');
 
@@ -78,7 +78,7 @@ describe('preferences server actions', () => {
     state.user = { id: 'user-1', email: 'jc@sakai.app' };
   });
 
-  it('validates + mirrors units; resetDemoPreferences is demo-only', async () => {
+  it('units validate + mirror; resetDemo demo-only; replayOnboarding any-user', async () => {
     const api = await headers.cookies();
 
     // updateUserPreferences — metric
@@ -127,6 +127,31 @@ describe('preferences server actions', () => {
     });
     expect(api.__store.get('preferred-theme')?.value).toBeNull();
     expect(api.__store.get('preferred-language')?.value).toBeNull();
+
+    // replayOnboarding — any authenticated caller nulls prefs + clears cookies.
+    updateArgSpy.mockClear();
+    state.user = { id: 'user-42', email: 'chef@sakai.app' };
+    api.__store.set('preferred-font-size', { value: 'lg' });
+    api.__store.set('preferred-language', { value: 'es' });
+
+    result = await replayOnboarding();
+    expect(result.ok).toBe(true);
+    expect(updateArgSpy).toHaveBeenCalledWith({
+      preferred_theme: null,
+      preferred_font_size: null,
+      preferred_language: null,
+      preferred_units: null,
+      tour_completed_at: null,
+    });
+    expect(api.__store.get('preferred-font-size')?.value).toBeNull();
+    expect(api.__store.get('preferred-language')?.value).toBeNull();
+
+    // replayOnboarding — unauthenticated caller: no writes.
+    updateArgSpy.mockClear();
+    state.user = null;
+    result = await replayOnboarding();
+    expect(result.ok).toBe(false);
+    expect(updateArgSpy).not.toHaveBeenCalled();
   });
 });
 

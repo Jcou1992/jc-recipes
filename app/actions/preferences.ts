@@ -223,6 +223,32 @@ export async function resetDemoPreferences(): Promise<{ ok: boolean; error?: str
   return { ok: true };
 }
 
+/**
+ * User-initiated "Replay onboarding" from settings. Same shape as the demo
+ * reset but scoped to whoever is calling — unguarded beyond the session
+ * check because resetting one's own prefs is harmless.
+ */
+export async function replayOnboarding(): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'Not authenticated' };
+
+  const { error } = await supabase
+    .from('user_preferences')
+    .update({
+      preferred_theme: null,
+      preferred_font_size: null,
+      preferred_language: null,
+      preferred_units: null,
+      tour_completed_at: null,
+    })
+    .eq('user_id', user.id);
+
+  if (error) return { ok: false, error: error.message };
+  await clearAllPrefCookies();
+  return { ok: true };
+}
+
 export async function dismissTour(days: number): Promise<{ ok: boolean }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
