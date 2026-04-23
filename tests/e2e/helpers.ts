@@ -61,6 +61,7 @@ async function getAuthedClient(): Promise<SupabaseClient> {
 export interface SeedOptions {
   name: string;
   servings?: number;
+  serving_size_label?: string | null;
   ingredients?: Array<{ amount: number; unit: string | null; name: string }>;
   steps?: Array<{ content: string; timer_seconds?: number | null }>;
   description?: string;
@@ -84,6 +85,7 @@ export async function seedRecipe(opts: SeedOptions): Promise<{ id: string; name:
       timer_seconds: s.timer_seconds ?? null,
     })),
     servings: opts.servings ?? 1,
+    serving_size_label: opts.serving_size_label ?? null,
     description: opts.description ?? null,
     prep_time: opts.prep_time ?? null,
     cook_time: opts.cook_time ?? null,

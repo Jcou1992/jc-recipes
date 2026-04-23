@@ -259,11 +259,12 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
       });
 
     const payload: RecipePayload = {
-      name:        name.trim(),
-      servings:    parseInt(servings) || 1,
-      ingredients: parsedIngredients,
-      steps:       parsedSteps,
-      description: description.trim() || null,
+      name:                name.trim(),
+      servings:            parseInt(servings) || 1,
+      serving_size_label:  null,
+      ingredients:         parsedIngredients,
+      steps:               parsedSteps,
+      description:         description.trim() || null,
       prep_time:   prepTime ? (parseInt(prepTime) || null) : null,
       cook_time:   cookTime ? (parseInt(cookTime) || null) : null,
       tags:        tags.trim() ? tags.split(',').map(t => t.trim()).filter(Boolean) : null,
