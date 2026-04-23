@@ -22,6 +22,11 @@ const FONT_SIZE_VALUES: FontSizeValue[] = ['sm', 'md', 'lg'];
 const LANGUAGE_VALUES: LanguageValue[] = ['en', 'es'];
 const UNITS_VALUES: UnitsValue[] = ['metric', 'imperial'];
 
+// Must mirror DEMO_EMAIL in app/actions/auth.ts. Kept as a local constant
+// rather than re-exported because 'use server' files cannot export non-async
+// symbols.
+const DEMO_EMAIL = process.env.DEMO_USER_EMAIL?.toLowerCase() ?? 'demo@sakai.app';
+
 function isTheme(v: unknown): v is ThemeValue {
   return typeof v === 'string' && (THEME_VALUES as string[]).includes(v);
 }
@@ -187,6 +192,35 @@ export async function markTourCompleted(): Promise<{ ok: boolean }> {
       { onConflict: 'user_id' },
     );
   return { ok: !error };
+}
+
+/**
+ * Reset the demo account's preferences back to null so the tour + wizard
+ * re-fire on every demo@ login. Guarded to the demo user only — any other
+ * caller gets a forbidden result and no writes.
+ */
+export async function resetDemoPreferences(): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'Not authenticated' };
+  if ((user.email ?? '').toLowerCase() !== DEMO_EMAIL) {
+    return { ok: false, error: 'Forbidden' };
+  }
+
+  const { error } = await supabase
+    .from('user_preferences')
+    .update({
+      preferred_theme: null,
+      preferred_font_size: null,
+      preferred_language: null,
+      preferred_units: null,
+      tour_completed_at: null,
+    })
+    .eq('user_id', user.id);
+
+  if (error) return { ok: false, error: error.message };
+  await clearAllPrefCookies();
+  return { ok: true };
 }
 
 export async function dismissTour(days: number): Promise<{ ok: boolean }> {

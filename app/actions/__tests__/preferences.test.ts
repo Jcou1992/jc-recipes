@@ -26,6 +26,8 @@ jest.mock('next/cache', () => ({
 }));
 
 const upsertSpy = jest.fn(async () => ({ error: null }));
+const updateEqSpy = jest.fn(async () => ({ error: null }));
+const updateArgSpy = jest.fn();
 const state: { user: { id: string; email: string } | null } = {
   user: { id: 'user-1', email: 'jc@sakai.app' },
 };
@@ -40,13 +42,17 @@ jest.mock('@/lib/supabase/server', () => ({
         eq: () => ({ maybeSingle: async () => ({ data: null }) }),
       }),
       upsert: upsertSpy,
+      update: (patch: Record<string, unknown>) => {
+        updateArgSpy(patch);
+        return { eq: updateEqSpy };
+      },
     }),
   })),
 }));
 
 // Import AFTER mocks are registered.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { updateUserPreferences } = require('../preferences');
+const { updateUserPreferences, resetDemoPreferences } = require('../preferences');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const headers = require('next/headers');
 
@@ -60,20 +66,22 @@ function getCookieStore(): Map<string, { value: string | null }> {
 // Seed a helper so cookies() resolves to the same map each test
 const mockedCookiesApi = (async () => await headers.cookies())();
 
-describe('updateUserPreferences — preferred_units', () => {
+describe('preferences server actions', () => {
   beforeEach(async () => {
     const api = await headers.cookies();
     api.__store.clear();
     api.set.mockClear();
     api.delete.mockClear();
     upsertSpy.mockClear();
+    updateEqSpy.mockClear();
+    updateArgSpy.mockClear();
     state.user = { id: 'user-1', email: 'jc@sakai.app' };
   });
 
-  it('accepts valid units + mirrors to cookie; rejects invalid values pre-DB', async () => {
+  it('validates + mirrors units; resetDemoPreferences is demo-only', async () => {
     const api = await headers.cookies();
 
-    // metric
+    // updateUserPreferences — metric
     let result = await updateUserPreferences({ preferred_units: 'metric' });
     expect(result.ok).toBe(true);
     expect(upsertSpy).toHaveBeenLastCalledWith(
@@ -82,12 +90,12 @@ describe('updateUserPreferences — preferred_units', () => {
     );
     expect(api.__store.get('preferred-units')?.value).toBe('metric');
 
-    // imperial
+    // updateUserPreferences — imperial
     result = await updateUserPreferences({ preferred_units: 'imperial' });
     expect(result.ok).toBe(true);
     expect(api.__store.get('preferred-units')?.value).toBe('imperial');
 
-    // invalid — guard rejects pre-DB
+    // updateUserPreferences — invalid guard
     const upsertsBefore = upsertSpy.mock.calls.length;
     result = await updateUserPreferences({
       // @ts-expect-error — deliberate invalid value for runtime guard.
@@ -96,6 +104,29 @@ describe('updateUserPreferences — preferred_units', () => {
     expect(result.ok).toBe(false);
     expect(result.error).toBe('Invalid units value');
     expect(upsertSpy.mock.calls.length).toBe(upsertsBefore);
+
+    // resetDemoPreferences — non-demo caller forbidden
+    state.user = { id: 'user-1', email: 'jc@sakai.app' };
+    result = await resetDemoPreferences();
+    expect(result.ok).toBe(false);
+    expect(result.error).toBe('Forbidden');
+    expect(updateArgSpy).not.toHaveBeenCalled();
+
+    // resetDemoPreferences — demo caller nulls prefs + clears cookies
+    state.user = { id: 'demo-1', email: 'demo@sakai.app' };
+    api.__store.set('preferred-theme', { value: 'dark' });
+    api.__store.set('preferred-language', { value: 'es' });
+    result = await resetDemoPreferences();
+    expect(result.ok).toBe(true);
+    expect(updateArgSpy).toHaveBeenCalledWith({
+      preferred_theme: null,
+      preferred_font_size: null,
+      preferred_language: null,
+      preferred_units: null,
+      tour_completed_at: null,
+    });
+    expect(api.__store.get('preferred-theme')?.value).toBeNull();
+    expect(api.__store.get('preferred-language')?.value).toBeNull();
   });
 });
 
