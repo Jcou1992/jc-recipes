@@ -22,3 +22,6 @@ playwright-report/
 supabase/.temp/
 supabase/.branches/
 
+# superpowers brainstorming mockups
+.superpowers/
+
