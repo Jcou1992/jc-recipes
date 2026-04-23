@@ -6,6 +6,7 @@ import { getServerLanguage } from '@/lib/i18n-server';
 import {
   PREF_COOKIE_THEME,
   PREF_COOKIE_FONT_SIZE,
+  PREF_COOKIE_UNITS,
 } from '@/lib/preference-cookies';
 
 const notoSerifJP = Noto_Serif_JP({
@@ -36,6 +37,7 @@ export const metadata: Metadata = {
 
 const VALID_THEME: ReadonlyArray<string> = ['light', 'dark'];
 const VALID_FONT_SIZE: ReadonlyArray<string> = ['sm', 'md', 'lg'];
+const VALID_UNITS: ReadonlyArray<string> = ['metric', 'imperial'];
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Read all three preference signals server-side so the first paint matches
@@ -50,18 +52,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   let theme: string | null = null;
   let fontSize: string | null = null;
+  let units: string = 'metric';
   try {
     const cookieStore = await cookies();
     const themeRaw = cookieStore.get(PREF_COOKIE_THEME)?.value;
     if (themeRaw && VALID_THEME.includes(themeRaw)) theme = themeRaw;
     const fsRaw = cookieStore.get(PREF_COOKIE_FONT_SIZE)?.value;
     if (fsRaw && VALID_FONT_SIZE.includes(fsRaw)) fontSize = fsRaw;
+    const unitsRaw = cookieStore.get(PREF_COOKIE_UNITS)?.value;
+    if (unitsRaw && VALID_UNITS.includes(unitsRaw)) units = unitsRaw;
   } catch {
     // cookies() may throw in edge runtime during certain error paths; fall
     // back to unset attrs (system defaults).
   }
 
-  const htmlProps: Record<string, string> = {};
+  const htmlProps: Record<string, string> = { 'data-units': units };
   if (theme) htmlProps['data-theme'] = theme;
   if (fontSize) htmlProps['data-font-size'] = fontSize;
 
