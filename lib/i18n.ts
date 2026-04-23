@@ -229,12 +229,10 @@ export interface Translations {
   settingsAppearanceSection: string;
   settingsLanguageSection: string;
   settingsAccountSection: string;
-  settingsTourSection: string;
   settingsSpaceNameLabel: string;
   settingsThemeLabel: string;
   settingsEmailLabel: string;
   settingsSaveBtn: string;
-  settingsReplayTour: string;
   settingsSignOut: string;
   settingsBackToRecipes: string;
 
@@ -502,12 +500,10 @@ export const en: Translations = {
   settingsAppearanceSection: 'Appearance',
   settingsLanguageSection: 'Language',
   settingsAccountSection: 'Account',
-  settingsTourSection: 'Tour',
   settingsSpaceNameLabel: 'Space name',
   settingsThemeLabel: 'Theme',
   settingsEmailLabel: 'Email',
   settingsSaveBtn: 'Save',
-  settingsReplayTour: 'Replay tour',
   settingsSignOut: 'Sign out',
   settingsBackToRecipes: '← Back to recipes',
 
@@ -772,12 +768,10 @@ export const es: Translations = {
   settingsAppearanceSection: 'Apariencia',
   settingsLanguageSection: 'Idioma',
   settingsAccountSection: 'Cuenta',
-  settingsTourSection: 'Tour',
   settingsSpaceNameLabel: 'Nombre del espacio',
   settingsThemeLabel: 'Tema',
   settingsEmailLabel: 'Correo',
   settingsSaveBtn: 'Guardar',
-  settingsReplayTour: 'Reproducir tour',
   settingsSignOut: 'Cerrar sesión',
   settingsBackToRecipes: '← Volver a recetas',
 

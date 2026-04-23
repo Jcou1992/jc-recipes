@@ -457,7 +457,10 @@ test('avatar menu opens dropdown with Settings link @regression', async ({ page 
 test('onboarding tour: replay button launches tour and Next advances @regression', async ({ page, isMobile }) => {
   test.skip(!!isMobile, 'desktop tour test');
   await page.goto('/settings');
-  await page.getByTestId('settings-replay-tour').click();
+  // New flow: "Replay onboarding" button opens a ConfirmDialog; clicking
+  // "Continue" runs replayOnboarding() then routes to /recipes?tour=1.
+  await page.getByTestId('settings-replay-onboarding-btn').click();
+  await page.getByRole('button', { name: /continue|continuar/i }).click();
   // Should land on /recipes?tour=1 with tour visible
   await page.waitForURL(/\/recipes.*tour=1/);
   await expect(page.getByTestId('onboarding-tour')).toBeVisible({ timeout: 5000 });

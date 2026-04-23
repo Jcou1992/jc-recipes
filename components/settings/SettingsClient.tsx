@@ -39,11 +39,6 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
     showToast(t.spaceNameSaved, 'success');
   }
 
-  function handleReplayTour() {
-    // Navigate to recipes with tour=1 (Wave 4 implements).
-    window.location.href = '/recipes?tour=1';
-  }
-
   async function confirmReplay() {
     setReplayPending(true);
     const result = await replayOnboarding();
@@ -123,19 +118,6 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
       <section>
         <h2 className="section-label mb-4">{t.settingsLanguageSection}</h2>
         <LanguageToggle />
-      </section>
-
-      {/* Tour */}
-      <section>
-        <h2 className="section-label mb-4">{t.settingsTourSection}</h2>
-        <button
-          type="button"
-          onClick={handleReplayTour}
-          className="btn-ghost"
-          data-testid="settings-replay-tour"
-        >
-          {t.settingsReplayTour}
-        </button>
       </section>
 
       {/* Preferences */}
