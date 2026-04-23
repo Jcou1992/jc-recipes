@@ -7,6 +7,7 @@ import { useToast } from '@/components/ui/ToastContext';
 import { useT } from '@/components/ui/LanguageContext';
 import { recipeToMarkdown, triggerDownload } from '@/lib/utils/export-recipes';
 import { processIngredients, type UnitSystem } from '@/lib/utils/scaling';
+import { formatServings } from '@/lib/utils/format-servings';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -120,7 +121,10 @@ export default function RecipeDetailClient({ recipe }: Props) {
             style={{ color: 'var(--text-2)' }}
             data-testid="scaler-value"
           >
-            {t.servingScalerLabel(targetServings)}
+            {formatServings({
+              servings: targetServings,
+              serving_size_label: recipe.serving_size_label,
+            })}
           </span>
           <button
             onClick={() => updateTargetServings(targetServings + 1)}
