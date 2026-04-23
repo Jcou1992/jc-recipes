@@ -35,24 +35,24 @@ export default function SortPills({ sort, onChange }: Props) {
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>, idx: number) {
+    // WAI-ARIA radio-group pattern: arrow keys MOVE focus only. Commit
+    // happens on Space/Enter (or click). Committing on arrow fires
+    // router.replace per keystroke which was a measurable perf hit.
     if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
       e.preventDefault();
-      const next = (idx + 1) % ORDER.length;
-      refs.current[next]?.focus();
-      onChange(ORDER[next]);
+      refs.current[(idx + 1) % ORDER.length]?.focus();
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
-      const next = (idx - 1 + ORDER.length) % ORDER.length;
-      refs.current[next]?.focus();
-      onChange(ORDER[next]);
+      refs.current[(idx - 1 + ORDER.length) % ORDER.length]?.focus();
     } else if (e.key === 'Home') {
       e.preventDefault();
       refs.current[0]?.focus();
-      onChange(ORDER[0]);
     } else if (e.key === 'End') {
       e.preventDefault();
       refs.current[ORDER.length - 1]?.focus();
-      onChange(ORDER[ORDER.length - 1]);
+    } else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      onChange(ORDER[idx]);
     }
   }
 

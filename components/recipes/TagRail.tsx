@@ -5,10 +5,13 @@ import FilterPopover from './FilterPopover';
 import { useT } from '@/components/ui/LanguageContext';
 
 // Desktop gets up to 12 inline tag chips; mobile narrower viewports clip to
-// 4 so the rail never exceeds the width of the viewport. Anything beyond the
-// limit moves to the "+N more" popover / bottom sheet.
+// 6 so the rail wraps onto 2-3 rows without exceeding viewport width, while
+// keeping enough discoverability that the "+N more" popover isn't the
+// primary interaction path. Long tag names truncate with ellipsis to
+// prevent a single long tag from stealing the whole row.
 const INLINE_LIMIT_DESKTOP = 12;
-const INLINE_LIMIT_MOBILE  = 4;
+const INLINE_LIMIT_MOBILE  = 6;
+const CHIP_MAX_CH_MOBILE   = 14;
 
 interface Props {
   allTags: string[];
@@ -79,9 +82,12 @@ export default function TagRail({
                 key={tag}
                 type="button"
                 onClick={() => onToggle(tag)}
-                className="chip-press flex-shrink-0 font-label text-xs font-semibold tracking-widest uppercase px-3 rounded-full transition-all"
+                className="chip-press flex-shrink-0 font-label text-xs font-semibold tracking-widest uppercase px-3 rounded-full transition-all overflow-hidden"
                 style={{
                   minHeight: 44,
+                  maxWidth: `${CHIP_MAX_CH_MOBILE}ch`,
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
                   background: active ? 'var(--color-terracotta-contrast)' : 'transparent',
                   color: active ? 'var(--color-bone)' : 'var(--text-2)',
                   border: active
@@ -92,6 +98,7 @@ export default function TagRail({
                     : 'none',
                 }}
                 aria-pressed={active}
+                title={tag}
                 data-testid={`tag-filter-${tag}`}
               >
                 {tag}

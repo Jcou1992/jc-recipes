@@ -1,6 +1,6 @@
 'use client';
 
-import type { MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
 import { useT } from '@/components/ui/LanguageContext';
 import ViewTransitionLink from '@/components/motion/ViewTransitionLink';
@@ -111,26 +111,34 @@ export default function RecipeCard({
   );
 
   if (selectMode) {
-    const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
       onToggle?.(e.shiftKey);
     };
+    const handleKey = (e: KeyboardEvent<HTMLButtonElement>) => {
+      // Shift+Space triggers range-selection the same way Shift+Click does.
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        onToggle?.(e.shiftKey);
+      }
+    };
     return (
-      <div
-        className={`group relative block rounded-xl ${padClass} transition-colors cursor-pointer select-none`}
+      <button
+        type="button"
+        className={`group relative block rounded-xl ${padClass} transition-colors cursor-pointer select-none text-left w-full`}
         style={{
           background: 'var(--bg-card)',
           border: `2px solid ${selected ? 'var(--color-terracotta)' : 'var(--border)'}`,
           boxShadow: 'var(--shadow-card)',
         }}
         onClick={handleClick}
-        role="button"
+        onKeyDown={handleKey}
         aria-pressed={selected}
         aria-label={selected ? t.deselectRecipeAriaLabel(recipe.name) : t.selectRecipeAriaLabel(recipe.name)}
         data-testid={`recipe-card-${recipe.id}`}
         data-selected={selected ? 'true' : 'false'}
       >
         {inner}
-      </div>
+      </button>
     );
   }
 

@@ -98,6 +98,8 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
 
   return (
     <div
+      role="group"
+      aria-label={`Macros per serving${isPartial ? ` — estimate, ${m.matched_count} of ${m.total_count} ingredients matched` : ''}`}
       className="rounded-lg p-4 mb-6"
       style={cardStyle}
       data-testid={isPartial ? 'macros-card-partial' : 'macros-card-complete'}

@@ -279,6 +279,8 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
   return (
     <div
+      role="region"
+      aria-label={`${recipe.name} — cooking mode`}
       className="fixed inset-0 z-20 flex flex-col animate-scale-in"
       style={{
         background: 'var(--bg)',

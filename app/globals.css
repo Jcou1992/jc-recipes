@@ -124,14 +124,19 @@
 }
 
 /* ── Grain texture overlay ──────────────────────────────────────────────────── */
+/* Ambient paper-grain layer. Sits BEHIND content (z-index: 0, stacks under
+   everything positioned above it) but visually bleeds through thanks to
+   low opacity + mix-blend-mode. Previously at z-index: 9999 which was
+   stacking above modals, toasts, and the focus ring — a dimming layer
+   between the user's eyes and every interactive surface. */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 0;
   opacity: 0.025;
-  will-change: transform;
+  mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 200px 200px;
 }
@@ -377,15 +382,19 @@ body::after {
     color: var(--text-1);
   }
 
-  /* Recipe card hover border + lift */
+  /* Recipe card hover border + lift. Only apply under a real hover-capable
+     pointer — on touch devices :hover sticks after tap and leaves cards
+     visually "raised" forever until another tap. */
   .recipe-card {
     border: 1px solid var(--border);
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.15s;
   }
-  .recipe-card:hover {
-    border-color: color-mix(in oklch, var(--color-terracotta) 30%, transparent);
-    transform: translateY(-3px);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,0.55);
+  @media (hover: hover) and (pointer: fine) {
+    .recipe-card:hover {
+      border-color: color-mix(in oklch, var(--color-terracotta) 30%, transparent);
+      transform: translateY(-3px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px rgba(0,0,0,0.55);
+    }
   }
 
   /* Section label (Ingredientes, Pasos, etc.) */

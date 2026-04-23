@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const supabase = await createClient();
   const { data } = await supabase.from('recipes').select('name').eq('id', id).single();
-  return { title: data ? `${data.name} - jc-recipes` : 'Recipe' };
+  return { title: data ? `${data.name} — SEKAI` : 'Recipe — SEKAI' };
 }
 
 export default async function RecipeDetailPage({ params }: PageProps) {
@@ -40,13 +40,14 @@ export default async function RecipeDetailPage({ params }: PageProps) {
       style={{ viewTransitionName: `recipe-card-${id}` } as React.CSSProperties}
     >
       <ScrollParallaxCover>
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
+        <div className="flex items-start justify-between gap-4 mb-4 min-w-0">
+          <div className="min-w-0 flex-1">
             <h1
-              className="recipe-title font-display text-4xl font-bold leading-tight"
+              className="recipe-title font-display text-4xl font-bold leading-tight break-words min-w-0"
               style={{
                 color: 'var(--text-1)',
                 viewTransitionName: `recipe-title-${id}`,
+                overflowWrap: 'break-word',
               } as React.CSSProperties}
             >
               {recipe.name}
