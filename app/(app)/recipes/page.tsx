@@ -60,7 +60,16 @@ export default async function RecipesPage({
 
   return (
     <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 lg:px-8 py-8">
-      {tourActive && <OnboardingTourGate />}
+      {tourActive && (
+        <OnboardingTourGate
+          initialPrefs={{
+            preferred_theme: prefs?.preferred_theme ?? null,
+            preferred_font_size: prefs?.preferred_font_size ?? null,
+            preferred_language: prefs?.preferred_language ?? null,
+            preferred_units: prefs?.preferred_units ?? null,
+          }}
+        />
+      )}
       <div className="flex items-center justify-between mb-8">
         <EditableSpaceName
           initial={spaceName}

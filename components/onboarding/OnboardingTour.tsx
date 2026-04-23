@@ -2,49 +2,95 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { TOUR_STEPS } from './TourSteps';
+import { TOUR_STEPS, type SpotlightStep } from './TourSteps';
 import Spotlight from './Spotlight';
 import TourTooltip from './TourTooltip';
+import { OnboardingWizardStep } from './OnboardingWizardStep';
 import { useT } from '@/components/ui/LanguageContext';
 import { markTourCompleted, dismissTour } from '@/app/actions/preferences';
+import type { PreferredUnits } from '@/types/preferences';
+
+interface InitialPrefs {
+  preferred_theme: string | null;
+  preferred_font_size: string | null;
+  preferred_language: string | null;
+  preferred_units: PreferredUnits | null;
+}
 
 interface OnboardingTourProps {
   onClose: () => void;
+  initialPrefs: InitialPrefs;
 }
 
-export function OnboardingTour({ onClose }: OnboardingTourProps) {
-  const t = useT();
+export function OnboardingTour({ onClose, initialPrefs }: OnboardingTourProps) {
   const [stepIdx, setStepIdx] = useState(0);
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
   const current = TOUR_STEPS[stepIdx];
-  const isLast = stepIdx === TOUR_STEPS.length - 1;
-  const canGoBack = stepIdx > 0;
 
-  const next = useCallback(async () => {
+  const advance = useCallback(async () => {
     if (stepIdx >= TOUR_STEPS.length - 1) {
       await markTourCompleted();
       onCloseRef.current();
       return;
     }
-    setStepIdx(i => i + 1);
+    setStepIdx((i) => i + 1);
   }, [stepIdx]);
 
-  const back = useCallback(() => {
-    if (stepIdx > 0) setStepIdx(i => i - 1);
-  }, [stepIdx]);
+  if (!current) return null;
 
-  const skip = useCallback(async () => {
-    await dismissTour(30);
-    onCloseRef.current();
-  }, []);
+  if (current.kind === 'wizard') {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.6)' }}
+        data-testid="onboarding-wizard-backdrop"
+      >
+        <OnboardingWizardStep
+          initialPrefs={initialPrefs}
+          onComplete={() => { void advance(); }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <SpotlightTour
+      step={current}
+      stepIdx={stepIdx}
+      onNext={() => { void advance(); }}
+      onBack={() => setStepIdx((i) => Math.max(0, i - 1))}
+      onFinish={async () => {
+        await markTourCompleted();
+        onCloseRef.current();
+      }}
+      onSkip={async () => {
+        await dismissTour(30);
+        onCloseRef.current();
+      }}
+    />
+  );
+}
+
+interface SpotlightTourProps {
+  step: SpotlightStep;
+  stepIdx: number;
+  onNext: () => void;
+  onBack: () => void;
+  onFinish: () => void | Promise<void>;
+  onSkip: () => void | Promise<void>;
+}
+
+function SpotlightTour({ step, stepIdx, onNext, onBack, onFinish, onSkip }: SpotlightTourProps) {
+  const t = useT();
+  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const isLast = stepIdx === TOUR_STEPS.length - 1;
+  const canGoBack = stepIdx > 1; // Can't go back before the wizard.
 
   // Measure target — retry up to ~3s if not yet in DOM; skip step if not found.
   useEffect(() => {
-    if (!current) return;
     let cancelled = false;
     let attempts = 0;
 
@@ -65,7 +111,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
 
     function measure() {
       if (cancelled) return;
-      const el = findVisibleTarget(current.targetSelector);
+      const el = findVisibleTarget(step.targetSelector);
       if (el) {
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
@@ -81,11 +127,11 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
       if (attempts < 30) {
         setTimeout(measure, 100);
       } else if (!cancelled) {
-        // Target not found — skip to next step (or finish).
-        if (stepIdx >= TOUR_STEPS.length - 1) {
-          void markTourCompleted().then(() => onCloseRef.current());
+        // Target not found — advance / finish.
+        if (isLast) {
+          void onFinish();
         } else {
-          setStepIdx(i => i + 1);
+          onNext();
         }
       }
     }
@@ -93,14 +139,12 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepIdx]);
+  }, [step, isLast, onFinish, onNext]);
 
   // Re-measure on resize / scroll
   useEffect(() => {
     function remeasure() {
-      const sel = TOUR_STEPS[stepIdx]?.targetSelector;
-      if (!sel) return;
+      const sel = step.targetSelector;
       // Same visibility filter as measure() — hidden viewport-siblings would
       // otherwise drag the spotlight to the corner.
       const candidates = document.querySelectorAll<HTMLElement>(sel);
@@ -119,30 +163,28 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
       window.removeEventListener('resize', remeasure);
       window.removeEventListener('scroll', remeasure, true);
     };
-  }, [stepIdx]);
+  }, [step]);
 
   // Keyboard navigation
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
-        void skip();
+        void onSkip();
       } else if (e.key === 'ArrowRight' || e.key === 'Enter') {
         e.preventDefault();
-        void next();
-      } else if (e.key === 'ArrowLeft') {
+        onNext();
+      } else if (e.key === 'ArrowLeft' && canGoBack) {
         e.preventDefault();
-        back();
+        onBack();
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, back, skip]);
+  }, [onNext, onBack, onSkip, canGoBack]);
 
-  if (!current) return null;
-
-  const title = (t as unknown as Record<string, string>)[current.titleKey] ?? current.id;
-  const body = (t as unknown as Record<string, string>)[current.bodyKey] ?? '';
+  const title = (t as unknown as Record<string, string>)[step.titleKey] ?? step.id;
+  const body = (t as unknown as Record<string, string>)[step.bodyKey] ?? '';
 
   return (
     <>
@@ -151,15 +193,15 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
         ref={tooltipRef}
         title={title}
         body={body}
-        step={stepIdx + 1}
-        total={TOUR_STEPS.length}
-        onNext={() => void next()}
-        onBack={back}
-        onSkip={() => void skip()}
+        step={stepIdx}
+        total={TOUR_STEPS.length - 1}
+        onNext={onNext}
+        onBack={onBack}
+        onSkip={() => void onSkip()}
         isLast={isLast}
         canGoBack={canGoBack}
         targetRect={targetRect}
-        position={current.position ?? 'bottom'}
+        position={step.position ?? 'bottom'}
       />
     </>
   );
@@ -169,7 +211,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
  * Gate: reads ?tour=1 from the URL, mounts <OnboardingTour /> if present,
  * strips the param on close so the tour doesn't re-trigger on reload.
  */
-export default function OnboardingTourGate() {
+export default function OnboardingTourGate({ initialPrefs }: { initialPrefs: InitialPrefs }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -195,5 +237,5 @@ export default function OnboardingTourGate() {
   }, [router, pathname, searchParams]);
 
   if (!active || !ready) return null;
-  return <OnboardingTour onClose={handleClose} />;
+  return <OnboardingTour onClose={handleClose} initialPrefs={initialPrefs} />;
 }
