@@ -200,6 +200,18 @@ body::after {
     font-feature-settings: 'kern' 1, 'liga' 1, 'dlig' 1, 'onum' 1, 'ss01' 1;
     text-wrap: pretty;
   }
+
+  /* ── Dialog panels ─────────────────────────────────────────────────────
+     Because html { font-size: 1.375rem } to hit the brand's legibility-under-
+     pressure bar, all Tailwind rem-based widths are inflated ~1.375×. That
+     pushes max-w-sm (24rem) → 528px, max-w-md (28rem) → 616px, max-w-2xl
+     (42rem) → 924px — all wider than a phone viewport. Dialogs therefore
+     must cap width against the actual viewport, not rem math. Use these
+     classes (not max-w-*) on any fixed panel / modal / dialog. */
+  .dialog-panel      { width: 100%; max-width: min(28rem, calc(100vw - 2rem)); }
+  .dialog-panel-sm   { width: 100%; max-width: min(24rem, calc(100vw - 2rem)); }
+  .dialog-panel-lg   { width: 100%; max-width: min(32rem, calc(100vw - 2rem)); }
+  .dialog-panel-2xl  { width: 100%; max-width: min(42rem, calc(100vw - 2rem)); }
   .display-xl { font-size: clamp(1.75rem, 1.35rem + 1.2vw, 2.5rem); line-height: 1.15; }
   .display-lg { font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.875rem); line-height: 1.2; }
 

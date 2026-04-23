@@ -234,7 +234,7 @@ export function MacrosMatchModal({ recipe, open, onClose, onSaved }: Props) {
       data-testid="macros-match-modal"
     >
       <div
-        className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-lg p-5"
+        className="dialog-panel-2xl max-h-[85svh] overflow-y-auto rounded-lg p-5"
         style={{
           background: 'var(--bg-raised)',
           border: '1px solid var(--border)',

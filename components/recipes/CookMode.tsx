@@ -280,7 +280,14 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   return (
     <div
       className="fixed inset-0 z-20 flex flex-col animate-scale-in"
-      style={{ background: 'var(--bg)', color: 'var(--text-1)' }}
+      style={{
+        background: 'var(--bg)',
+        color: 'var(--text-1)',
+        paddingTop: 'env(safe-area-inset-top, 0)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0)',
+        paddingLeft: 'env(safe-area-inset-left, 0)',
+        paddingRight: 'env(safe-area-inset-right, 0)',
+      }}
       data-testid="cook-mode"
     >
       {/* Completion screen */}
@@ -301,7 +308,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </Link>
 
           {/* Content block */}
-          <div className="w-full max-w-md flex flex-col gap-10">
+          <div className="dialog-panel flex flex-col gap-10">
             {/* Completion message */}
             <div className="flex flex-col gap-3">
               <p

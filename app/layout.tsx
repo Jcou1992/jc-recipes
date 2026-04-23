@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Noto_Serif_JP, Barlow_Condensed, Cormorant_Garamond } from 'next/font/google';
 import { cookies } from 'next/headers';
 import './globals.css';
@@ -33,6 +33,19 @@ const cormorantGaramond = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: 'SEKAI — recipe tool',
   description: 'Personal recipe space — precise, proud, functional.',
+};
+
+// viewport-fit=cover opts into edge-to-edge on notched devices; combined with
+// env(safe-area-inset-*) in fixed bars this prevents the nav and bulk bars
+// from hiding under the notch / home indicator on iPhone 14 Pro Max etc.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)',  color: '#1a1a1d' },
+    { media: '(prefers-color-scheme: light)', color: '#f3ecd9' },
+  ],
 };
 
 const VALID_THEME: ReadonlyArray<string> = ['light', 'dark'];

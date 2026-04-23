@@ -11,7 +11,7 @@ export default function LoginPage() {
       style={{ background: 'var(--bg)' }}
     >
       <div
-        className="w-full max-w-sm rounded-2xl p-8 animate-scale-in"
+        className="dialog-panel-sm rounded-2xl p-8 animate-scale-in"
         style={{
           background: 'var(--bg-card)',
           boxShadow: 'var(--shadow-dialog)',

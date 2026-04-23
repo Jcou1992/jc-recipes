@@ -114,7 +114,7 @@ export default function BulkTagDialog({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto animate-scale-in"
+        className="dialog-panel relative rounded-2xl p-6 max-h-[90svh] overflow-y-auto animate-scale-in"
         style={{ background: 'var(--bg-card)', boxShadow: 'var(--shadow-dialog)' }}
         data-testid="bulk-tag-dialog"
       >

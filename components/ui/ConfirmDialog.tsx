@@ -46,7 +46,7 @@ export default function ConfirmDialog({
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative rounded-2xl p-6 w-full max-w-sm animate-scale-in"
+        className="dialog-panel-sm relative rounded-2xl p-6 animate-scale-in"
         style={{
           background: 'var(--bg-card)',
           boxShadow: 'var(--shadow-dialog)',

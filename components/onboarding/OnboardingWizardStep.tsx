@@ -136,7 +136,7 @@ export function OnboardingWizardStep({ initialPrefs, onComplete }: Props) {
       aria-modal="true"
       aria-labelledby="wizard-title"
       data-testid="onboarding-wizard"
-      className="mx-auto w-full max-w-md rounded-2xl p-6 md:p-8 shadow-2xl"
+      className="dialog-panel mx-auto rounded-2xl p-6 md:p-8 shadow-2xl max-h-[calc(100svh-2rem)] overflow-y-auto"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
     >
       <h2

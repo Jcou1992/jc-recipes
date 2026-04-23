@@ -376,6 +376,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
                       maxHeight: '85svh',
                       display: 'flex',
                       flexDirection: 'column',
+                      paddingBottom: 'env(safe-area-inset-bottom, 0)',
                     }}
                     role="dialog"
                     aria-modal="true"

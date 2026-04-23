@@ -46,9 +46,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <EmailSync email={email} theme={theme} fontSize={fontSize} language={language} />
         <nav
           className="nav-frosted sticky top-0 z-10"
-          style={{ borderBottom: '1px solid var(--border)' }}
+          style={{
+            borderBottom: '1px solid var(--border)',
+            paddingTop: 'env(safe-area-inset-top, 0)',
+          }}
         >
-          <div className="max-w-[min(100%-2rem,1920px)] mx-auto px-4 py-3 flex items-center justify-between">
+          <div
+            className="max-w-[min(100%-2rem,1920px)] mx-auto py-3 flex items-center justify-between"
+            style={{
+              paddingLeft: 'max(1rem, env(safe-area-inset-left))',
+              paddingRight: 'max(1rem, env(safe-area-inset-right))',
+            }}
+          >
             <Link href="/recipes" aria-label="SEKAI — go to recipes">
               <WordmarkStrokeIn>
                 <span
