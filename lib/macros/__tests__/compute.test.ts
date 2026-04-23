@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import type { Ingredient, MacroValues } from '@/types/recipe';
+import type { Ingredient, MacroValues, RecipeMacros } from '@/types/recipe';
 
 type RecipeRow = { id: string; servings: number; ingredients: Ingredient[] };
 let currentRecipe: RecipeRow | null = null;
@@ -74,7 +74,7 @@ type Case = {
   facts: Record<number, MacroValues>;
   autoMatches?: Record<string, number | null>;
   check: (
-    result: { kcal: number; matched_count: number; total_count: number; unresolved_ingredients: unknown[] } | null,
+    result: RecipeMacros | null,
     ctx: { updatePayload: Record<string, unknown> | null }
   ) => void;
 };
