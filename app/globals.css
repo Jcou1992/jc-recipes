@@ -609,6 +609,19 @@ body::after {
   .crossfade-number { transition: opacity 160ms var(--ease-out-quart); }
   .crossfade-number.is-changing { opacity: 0; }
 
+  /* MacrosCard footer swap: 200ms fade on partial → complete (and vice
+     versa). Keyed wrapper remounts on transition, animation plays on mount. */
+  .macros-card-footer-swap {
+    animation: macros-card-footer-fade 200ms var(--ease-out-quart) both;
+  }
+  @keyframes macros-card-footer-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .macros-card-footer-swap { animation: none; }
+  }
+
   /* ── Cook mode ────────────────────────────────────────────────────────── */
   @keyframes step-slide-in {
     from { opacity: 0; transform: translateX(18px); }

@@ -152,41 +152,48 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
         {servingsLabel} · {prefix}{Math.round(m.kcal)} kcal total
       </p>
 
-      {isPartial ? (
+      <div className="relative mt-3">
         <div
-          className="mt-3 flex flex-col gap-2"
-          data-testid="macros-partial-footer"
-          aria-live="polite"
+          key={isPartial ? 'partial' : 'complete'}
+          className="macros-card-footer-swap"
         >
-          <p
-            className="font-label text-[11px] tracking-widest uppercase"
-            style={{ color: 'var(--color-gold)' }}
-          >
-            Estimate · {m.matched_count} of {m.total_count} ingredients matched
-          </p>
-          <button
-            type="button"
-            onClick={onOpenMatchModal}
-            data-testid="macros-match-btn"
-            className="self-start font-label text-[11px] tracking-widest uppercase rounded-full px-4 min-h-[44px] transition-colors"
-            style={{
-              color: 'var(--color-terracotta)',
-              background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
-              border: '1px solid color-mix(in oklch, var(--color-terracotta) 42%, transparent)',
-            }}
-          >
-            Match {remaining} remaining →
-          </button>
+          {isPartial ? (
+            <div
+              className="flex flex-col gap-2"
+              data-testid="macros-partial-footer"
+              aria-live="polite"
+            >
+              <p
+                className="font-label text-[11px] tracking-widest uppercase"
+                style={{ color: 'var(--color-gold)' }}
+              >
+                Estimate · {m.matched_count} of {m.total_count} ingredients matched
+              </p>
+              <button
+                type="button"
+                onClick={onOpenMatchModal}
+                data-testid="macros-match-btn"
+                className="self-start font-label text-[11px] tracking-widest uppercase rounded-full px-4 min-h-[44px] transition-colors"
+                style={{
+                  color: 'var(--color-terracotta)',
+                  background: 'color-mix(in oklch, var(--color-terracotta) 12%, transparent)',
+                  border: '1px solid color-mix(in oklch, var(--color-terracotta) 42%, transparent)',
+                }}
+              >
+                Match {remaining} remaining →
+              </button>
+            </div>
+          ) : (
+            <p
+              className="font-label text-[11px] tracking-widest uppercase"
+              style={{ color: 'var(--text-3)' }}
+              data-testid="macros-provenance"
+            >
+              USDA FoodData Central
+            </p>
+          )}
         </div>
-      ) : (
-        <p
-          className="font-label mt-2 text-[11px] tracking-widest uppercase"
-          style={{ color: 'var(--text-3)' }}
-          data-testid="macros-provenance"
-        >
-          USDA FoodData Central
-        </p>
-      )}
+      </div>
     </div>
   );
 }
