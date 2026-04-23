@@ -201,10 +201,12 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       setCompletedSteps(prev => new Set([...prev, currentIndex]));
       setElapsedSeconds(Math.round((Date.now() - cookStartRef.current) / 1000));
       setFinished(true);
+      haptic([40, 40, 40]);
       return;
     }
     setCompletedSteps(prev => new Set([...prev, currentIndex]));
     setCurrentIndex(i);
+    haptic(8);
   }
 
   function startAgain() {
@@ -309,11 +311,12 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
                 {t.cookDoneBanner}
               </p>
               <h1
-                className="font-display"
+                className="recipe-title font-display relative overflow-hidden"
                 style={{ fontSize: '2.5rem', fontWeight: 500, lineHeight: 1.2, color: 'var(--text-1)' }}
                 data-testid="cook-completion-title"
               >
                 {recipe.name}
+                <span key="cook-complete-sweep" className="gold-sweep" aria-hidden="true" />
               </h1>
               <p
                 className="font-label text-sm tracking-wide"
@@ -434,7 +437,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </div>
 
           {/* Step content */}
-          <div className="flex-1 flex flex-col justify-center px-10 py-8 overflow-y-auto">
+          <div
+            key={`step-desktop-${currentIndex}`}
+            className="animate-step-slide flex-1 flex flex-col justify-center px-10 py-8 overflow-y-auto"
+          >
             <p
               className="font-body mb-8"
               style={{ fontSize: '2rem', fontWeight: 500, lineHeight: 1.5, color: 'var(--text-1)' }}
@@ -446,7 +452,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
             {currentTimer && (
               <div className="flex items-center gap-4">
                 <span
-                  className="font-label text-4xl font-bold tabular-nums"
+                  className={`font-label text-4xl font-bold tabular-nums ${currentTimer.running ? 'animate-ring-breath' : ''}`.trim()}
                   style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : 'var(--text-1)' }}
                   data-testid="cook-timer-display"
                 >
@@ -578,7 +584,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         </div>
 
         {/* Step content */}
-        <div className="relative flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto">
+        <div
+          key={`step-mobile-${currentIndex}`}
+          className="animate-step-slide relative flex-1 flex flex-col justify-center px-6 py-8 overflow-y-auto"
+        >
           {/* Swipe affordance — decorative only */}
           <div
             className="absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-20"
@@ -611,7 +620,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           {currentTimer && (
             <div className="flex items-center gap-4">
               <span
-                className={`font-label text-3xl font-bold tabular-nums ${currentTimer.remaining === 0 ? 'animate-pulse' : ''}`}
+                className={`font-label text-3xl font-bold tabular-nums ${
+                  currentTimer.remaining === 0
+                    ? 'animate-pulse'
+                    : currentTimer.running
+                      ? 'animate-ring-breath'
+                      : ''
+                }`}
                 style={{ color: currentTimer.remaining === 0 ? 'var(--color-terracotta)' : 'var(--text-1)' }}
                 data-testid="cook-timer-display-mobile"
               >
