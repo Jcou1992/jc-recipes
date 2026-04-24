@@ -135,7 +135,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             aria-label={t.decreaseServings}
             data-testid="scaler-decrease"
           >
-            −
+            -
           </button>
           <span
             className={`crossfade-number font-label text-sm tracking-wide tabular-nums ${valueChanging ? 'is-changing' : ''}`.trim()}

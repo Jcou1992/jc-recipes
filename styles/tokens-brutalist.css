@@ -710,6 +710,234 @@
   :root[data-design="brut"] .animate-fade-up {
     animation: none !important;
   }
+
+  /* ── RECIPE DETAIL — spec sheet grammar ─────────────────────────────────── */
+  /* Detail page top header (h1 + tags row above the service bar) */
+  :root[data-design="brut"] .recipe-title,
+  :root[data-design="brut"] main h1.font-display {
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    font-weight: 700;
+  }
+
+  /* Service bar — add top + bottom hairlines, zero the pill chrome. */
+  :root[data-design="brut"] [data-testid="service-bar"] {
+    border-top: 2px solid var(--rule-strong) !important;
+    border-bottom: 1px solid var(--rule) !important;
+    padding: var(--s-4) 0 !important;
+    gap: var(--s-6) !important;
+    font-family: var(--font-mono);
+  }
+
+  /* Scaler — reshape +/- into 48px square hard buttons, digit in mono t-20. */
+  :root[data-design="brut"] [data-testid="serving-scaler"] {
+    position: relative;
+    padding-top: var(--s-4);
+  }
+  :root[data-design="brut"] [data-testid="serving-scaler"]::before {
+    content: '[ SCALER ]';
+    position: absolute;
+    top: -4px;
+    left: 0;
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  :root[data-design="brut"] [data-testid="scaler-decrease"],
+  :root[data-design="brut"] [data-testid="scaler-increase"] {
+    background: var(--surface) !important;
+    color: var(--text-1) !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    font-weight: 400 !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-decrease"]:hover,
+  :root[data-design="brut"] [data-testid="scaler-increase"]:hover {
+    border-color: var(--hot) !important;
+    color: var(--hot) !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-value"] {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    color: var(--text-1) !important;
+    font-variant-numeric: tabular-nums;
+    /* Reserved ch-width — borrowed from Team A (FeatureSwap) to prevent
+       jitter when servings count changes width. */
+    min-width: 5ch;
+    display: inline-block;
+    text-align: center;
+    padding: 0 var(--s-3);
+    border: 1px solid var(--rule-strong);
+    min-height: 48px;
+    line-height: 48px;
+  }
+  /* When scaled, the digit switches to hot terracotta. Existing
+     scaler-scaled-badge is the sentinel; its presence means multiplier !== 1. */
+  :root[data-design="brut"] [data-testid="serving-scaler"]:has([data-testid="scaler-scaled-badge"])
+    [data-testid="scaler-value"] {
+    color: var(--hot) !important;
+    border-color: var(--hot) !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-scaled-badge"] {
+    background: transparent !important;
+    color: var(--hot) !important;
+    border: 1px solid var(--hot) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Unit toggle — the existing segmented control goes full brut. */
+  :root[data-design="brut"] [data-testid="unit-toggle"] {
+    border-radius: 0 !important;
+    border: 1px solid var(--rule-strong) !important;
+  }
+  :root[data-design="brut"] [data-testid="unit-toggle"] button {
+    background: transparent !important;
+    color: var(--text-3) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    min-height: 48px !important;
+    padding: 0 var(--s-4) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  :root[data-design="brut"] [data-testid="unit-toggle"] button[aria-pressed="true"] {
+    background: var(--text-1) !important;
+    color: var(--bg) !important;
+  }
+
+  /* Export buttons in the service bar — ghosty hard rectangles. */
+  :root[data-design="brut"] [data-testid="recipe-export-md"],
+  :root[data-design="brut"] [data-testid="recipe-export-pdf"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.1em;
+    min-height: 48px !important;
+    padding: 0 var(--s-3) !important;
+  }
+
+  /* Ingredient list → visually tabular via grid. Existing <ul> / <li> stays;
+     style the <li> as a grid row with code | amt | name columns. */
+  :root[data-design="brut"] [data-testid="ingredients-section"] ul {
+    border-top: 2px solid var(--rule-strong);
+    counter-reset: ing-counter;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] li {
+    display: grid !important;
+    grid-template-columns: 48px minmax(96px, auto) 1fr auto;
+    gap: var(--s-3) !important;
+    align-items: baseline !important;
+    padding: var(--s-2) 0 !important;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-12);
+    counter-increment: ing-counter;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] li::before {
+    content: 'ING-' counter(ing-counter, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.1em;
+    color: var(--text-4);
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] [data-testid^="ingredient-amount-"] {
+    font-family: var(--font-mono) !important;
+    color: var(--text-1) !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+    text-align: right !important;
+    min-width: 5ch;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] .ingredient-name {
+    color: var(--text-1) !important;
+    font-family: var(--font-mono) !important;
+  }
+
+  /* Step list in detail — render as a rule-bordered table. */
+  :root[data-design="brut"] main ol {
+    border-top: 2px solid var(--rule-strong);
+    counter-reset: stp-counter;
+  }
+  :root[data-design="brut"] main ol > li {
+    counter-increment: stp-counter;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    padding: var(--s-3) 0 var(--s-3) var(--s-16) !important;
+    font-family: var(--font-mono);
+  }
+  :root[data-design="brut"] main ol > li::before {
+    content: 'STP-' counter(stp-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    letter-spacing: 0.16em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  /* The existing gold round bubble on step number — suppress in brut (we
+     render STP-NN in left gutter instead via counter::before). */
+  :root[data-design="brut"] main ol > li > span.font-label.flex-shrink-0 {
+    display: none !important;
+  }
+  :root[data-design="brut"] main ol > li p {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-14);
+    line-height: 1.55;
+    color: var(--text-1) !important;
+  }
+
+  /* Macros card → hard rectangle + 2px top rule. */
+  :root[data-design="brut"] [data-testid^="macros-card-"] {
+    border-radius: 0 !important;
+    border: 0 !important;
+    border-top: 2px solid var(--rule-strong) !important;
+    border-bottom: 1px solid var(--rule) !important;
+    background: transparent !important;
+    font-family: var(--font-mono);
+    padding: var(--s-3) 0 !important;
+  }
+  :root[data-design="brut"] [data-testid="macros-kcal"] {
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+  }
+
+  /* Hide the dropcap + scroll parallax cover + first-save confetti under brut. */
+  :root[data-design="brut"] [data-testid="scroll-parallax-cover"],
+  :root[data-design="brut"] [data-testid="first-save-celebration"] {
+    display: none !important;
+  }
+
+  /* Mobile sticky cook footer — kill blur + round corners + frosted bg. */
+  :root[data-design="brut"] [data-testid="cook-mode-btn"] {
+    border-radius: 0 !important;
+  }
+
+  /* ── Reserved-ch utility (borrowed from Team A FeatureSwap) ─────────────── */
+  :root[data-design="brut"] .brut-reserve-ch {
+    min-width: 5ch;
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
 }
+
 
 
