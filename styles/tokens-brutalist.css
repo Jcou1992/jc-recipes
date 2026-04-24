@@ -274,3 +274,241 @@
     opacity: 0.4;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * BRUT · GLOBAL CHROME OVERRIDES
+ * Apply to every existing JSX surface without touching components. Class
+ * selectors match the tailwind + bespoke classes already rendered by
+ * sacred-feature components. Scoped under [data-design="brut"] so classic mode
+ * is untouched.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+
+  /* ── Headings + body typography under brut ──────────────────────────────── */
+  :root[data-design="brut"] h1,
+  :root[data-design="brut"] h2,
+  :root[data-design="brut"] h3,
+  :root[data-design="brut"] h4,
+  :root[data-design="brut"] h5,
+  :root[data-design="brut"] h6 {
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  :root[data-design="brut"] .font-display,
+  :root[data-design="brut"] .font-body,
+  :root[data-design="brut"] .font-label {
+    font-family: var(--font-mono);
+  }
+
+  /* Kill every rounded utility — scoped hard. Two deliberate exceptions
+     documented above (data-brut-round="bubble" and :focus-visible). */
+  :root[data-design="brut"] .rounded-full,
+  :root[data-design="brut"] .rounded-xl,
+  :root[data-design="brut"] .rounded-2xl,
+  :root[data-design="brut"] .rounded-lg,
+  :root[data-design="brut"] .rounded,
+  :root[data-design="brut"] .rounded-md,
+  :root[data-design="brut"] .rounded-sm,
+  :root[data-design="brut"] .rounded-t-2xl {
+    border-radius: 0 !important;
+  }
+
+  /* Inline style bypass for inputs that force border-radius via style={}.
+     RecipeListClient search input passes borderRadius: 9999px inline — this
+     rule wins at specificity because it's also attribute-specific. */
+  :root[data-design="brut"] input[style*="border-radius"] {
+    border-radius: 0 !important;
+  }
+
+  /* ── Shadow + blur kill — applied to every element in brut mode ─────────── */
+  :root[data-design="brut"] * {
+    box-shadow: none !important;
+  }
+  :root[data-design="brut"] [style*="backdrop-filter"],
+  :root[data-design="brut"] [style*="backdropFilter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* ── Existing btn-* classes — brut-ify into ticket buttons ──────────────── */
+  :root[data-design="brut"] .btn-primary,
+  :root[data-design="brut"] .btn-primary:link,
+  :root[data-design="brut"] .btn-primary:visited {
+    background: var(--text-1);
+    color: var(--bg);
+    border: 1px solid var(--text-1);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 48px;
+    padding: 0 var(--s-4);
+    box-shadow: none;
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .btn-primary:hover {
+    background: var(--bg);
+    color: var(--text-1);
+  }
+  :root[data-design="brut"] .btn-primary:active {
+    transform: translateY(1px);
+  }
+  :root[data-design="brut"] .btn-ghost,
+  :root[data-design="brut"] .btn-ghost:link,
+  :root[data-design="brut"] .btn-ghost:visited {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 44px;
+    padding: 0 var(--s-3);
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .btn-ghost:hover {
+    color: var(--text-1);
+    border-color: var(--rule-strong);
+  }
+  :root[data-design="brut"] .btn-danger {
+    background: transparent;
+    color: var(--late);
+    border: 1px solid var(--late);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 44px;
+  }
+  :root[data-design="brut"] .btn-danger:hover {
+    background: var(--late);
+    color: var(--bg);
+  }
+
+  /* ── Inputs — the existing .input-base class gets a hard rectangle ──────── */
+  :root[data-design="brut"] .input-base {
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 0 !important;
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: var(--t-14);
+    min-height: 48px;
+    padding: 0 var(--s-4);
+  }
+  :root[data-design="brut"] .input-base:focus {
+    outline: 2px solid var(--hot);
+    outline-offset: 0;
+    border-color: var(--hot);
+  }
+  :root[data-design="brut"] .input-base::placeholder {
+    color: var(--text-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: var(--t-11);
+  }
+
+  /* Section labels rendered with the existing .section-label utility class. */
+  :root[data-design="brut"] .section-label {
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border-top: 2px solid var(--rule-strong);
+    padding-top: var(--s-3);
+    font-weight: 500;
+  }
+
+  /* ── LOGIN — brutalist single column ────────────────────────────────────── */
+  /* The login page uses a dialog-panel-sm card. Under brut: rip the card
+     chrome, centre the column, add the 世界 watermark via ::before on <main>. */
+  :root[data-design="brut"] main {
+    position: relative;
+  }
+  :root[data-design="brut"] .dialog-panel-sm {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: var(--s-8) !important;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  /* 世界 watermark on the login viewport. We scope to .dialog-panel-sm's
+     parent <main> to keep it login-only (the settings page also uses
+     section layouts, but those aren't centred <main> landmarks with dark bg). */
+  :root[data-design="brut"] main:has(.dialog-panel-sm)::before {
+    content: '世界';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-jp);
+    font-weight: 700;
+    font-size: clamp(8rem, 22vw, 18rem);
+    color: var(--text-1);
+    opacity: 0.055;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.08em;
+    z-index: 0;
+  }
+  /* Login wordmark — the h1 already carries "SEKAI" text; restyle to brut. */
+  :root[data-design="brut"] .dialog-panel-sm header h1 {
+    font-family: var(--font-mono);
+    font-size: var(--t-64);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: var(--text-1) !important;
+    text-transform: uppercase;
+  }
+  /* Hide the classic 世界 inline-serif glyph, the ornamental hairline rule,
+     and "Recipe tool" caption — we replace with a medal rule + caption. */
+  :root[data-design="brut"] .dialog-panel-sm header > .flex > span[aria-hidden="true"],
+  :root[data-design="brut"] .dialog-panel-sm header > .h-px,
+  :root[data-design="brut"] .dialog-panel-sm header > .mt-4.mb-3 {
+    display: none !important;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header {
+    text-align: center;
+    margin-bottom: var(--s-12);
+    position: relative;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header .flex {
+    justify-content: center;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--medal);
+    margin: var(--s-3) auto 0;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header p {
+    margin-top: var(--s-3);
+    font-size: var(--t-10);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-3) !important;
+  }
+
+  /* Login-footer strip rendered via ::after on the login card itself. */
+  :root[data-design="brut"] .dialog-panel-sm::after {
+    content: 'SEKAI/AUTH/v2.03 · BUILD 20260424·A8F3';
+    display: block;
+    margin-top: var(--s-12);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-4);
+    text-align: center;
+  }
+}
+
