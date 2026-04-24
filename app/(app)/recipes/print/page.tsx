@@ -104,6 +104,28 @@ export default async function PrintPage({ searchParams }: PageProps) {
             padding-bottom: 3pt;
           }
           .print-list li { margin-bottom: 3pt !important; }
+
+          /* Brut mode: mono service-ticket print. Forward-compat defensive:
+             also suppress any canvas in the print tree (Team C borrow). */
+          :root[data-design="brut"] .print-recipe {
+            font-family: 'Berkeley Mono', 'IBM Plex Mono', ui-monospace, Menlo, monospace !important;
+          }
+          :root[data-design="brut"] .print-title {
+            text-transform: uppercase;
+            letter-spacing: 0.02em !important;
+            font-weight: 700 !important;
+          }
+          :root[data-design="brut"] .print-description {
+            font-style: normal !important;
+          }
+          :root[data-design="brut"] .print-meta {
+            letter-spacing: 0.14em !important;
+          }
+          :root[data-design="brut"] .print-h2 {
+            letter-spacing: 0.18em !important;
+            font-weight: 600 !important;
+          }
+          :root[data-design="brut"] canvas { display: none !important; }
         }
         @media screen {
           .print-rule { display: none; }
