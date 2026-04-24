@@ -100,14 +100,14 @@ void main() {
   // Gold       ≈ oklch(86.5% 0.089 89) → rgb(0.96, 0.84, 0.55)
   vec3 terracotta = vec3(0.820, 0.420, 0.220);
   vec3 gold       = vec3(0.960, 0.840, 0.550);
-  vec3 hazeColor  = mix(terracotta, gold, clamp(shimmer * 0.8 + uv.y * 0.3, 0.0, 1.0));
+  vec3 hazeColor  = mix(terracotta, gold, clamp(shimmer * 0.8 + (1.0 - uv.y) * 0.3, 0.0, 1.0));
 
   // Very low opacity haze: 1.5–3%
   float hazeAlpha = shimmer * 0.028 * u_intensity;
 
   // Vignette: suppress toward edges
   vec2 vig = uv * 2.0 - 1.0;
-  float vigFactor = clamp(1.0 - dot(vig * vec2(0.65, 0.5), vig * vec2(0.65, 0.5)), 0.0, 1.0);
+  float vigFactor = clamp(1.0 - dot(vig * vec2(0.85, 0.75), vig * vec2(0.85, 0.75)), 0.0, 1.0);
 
   gl_FragColor = vec4(hazeColor * hazeAlpha, hazeAlpha) * vigFactor;
 }

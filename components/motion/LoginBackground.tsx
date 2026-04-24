@@ -150,8 +150,8 @@ export default function LoginBackground() {
           static
           scale={1.1}
           style={{
-            top: '50%',
-            left: '30%',
+            top: '65%',
+            left: '15%',
             opacity: 0.04,
           }}
         />

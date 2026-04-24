@@ -25,22 +25,23 @@ interface DragonSilhouetteProps {
 // a single whisker stroke.
 const DRAGON_BODY_PATH =
   // Tail base — fat curved sweep from bottom-left
-  'M 20,560 ' +
+  'M 20,540 ' +
   // First coil — large arc upward and right
-  'C 60,520 120,480 180,440 ' +
-  'C 240,400 260,340 300,300 ' +
-  // Mid-body S-inflection
-  'C 340,260 420,280 480,250 ' +
-  'C 540,220 560,160 620,130 ' +
+  'C 40,510 80,470 140,430 ' +
+  'C 200,390 240,360 280,340 ' +
+  // Mid-body S-inflection — belly drops then spine rises
+  'C 320,320 380,380 440,400 ' +
+  'C 500,420 540,380 580,320 ' +
   // Upper coil — narrowing
-  'C 680,100 760,120 820,100 ' +
-  'C 880,80 900,40 960,30 ' +
+  'C 620,260 660,180 720,140 ' +
+  'C 780,100 840,90 900,70 ' +
   // Head suggestion — tapers to fine stroke
-  'C 1000,22 1040,18 1080,12';
+  'C 940,55 980,35 1040,20 ' +
+  'C 1060,14 1075,10 1080,8';
 
 // Single whisker from the head — a short diverging stroke
 const DRAGON_WHISKER_PATH =
-  'M 1080,12 C 1100,0 1120,-8 1140,-4';
+  'M 1080,8 C 1095,0 1110,-4 1125,-2';
 
 // Tail flare — a second broader flourish from the tail base
 const DRAGON_TAIL_PATH =
@@ -62,12 +63,16 @@ export default function DragonSilhouette({
           100% { transform: translate(0px, 0px) scale(1); }
         }
 
-        @keyframes dragon-prominent-pass {
-          0%   { transform: translate(0px, 0px) scale(1);      opacity: 0.07; }
-          10%  { transform: translate(-12px, 8px) scale(1.01); opacity: 0.12; }
-          50%  { transform: translate(18px, -14px) scale(1.015); opacity: 0.12; }
-          90%  { transform: translate(-8px, 6px) scale(1.005); opacity: 0.07; }
-          100% { transform: translate(0px, 0px) scale(1);      opacity: 0.07; }
+        @keyframes dragon-draw-in {
+          0%   { stroke-dashoffset: 1000; opacity: 0; }
+          5%   { opacity: 0.22; }
+          100% { stroke-dashoffset: 0; opacity: 0.22; }
+        }
+
+        @keyframes dragon-draw-hold-fade {
+          0%   { opacity: 0.22; }
+          14%  { opacity: 0.18; }
+          100% { opacity: 0; }
         }
 
         .dragon-ambient {
@@ -80,10 +85,16 @@ export default function DragonSilhouette({
         }
 
         .dragon-prominent-overlay {
-          opacity: 0;
-          animation: dragon-prominent-pass 30s ease-in-out 0.5s 1 forwards;
-          transform-origin: 600px 300px;
           pointer-events: none;
+        }
+
+        .dragon-prominent-overlay path.draw-path {
+          stroke-dasharray: 1000;
+          stroke-dashoffset: 1000;
+          opacity: 0;
+          animation:
+            dragon-draw-in 4s cubic-bezier(0.25, 1, 0.5, 1) 0.3s 1 forwards,
+            dragon-draw-hold-fade 3s ease-in-out 4.3s 1 forwards;
         }
       `}</style>
 
@@ -115,7 +126,7 @@ export default function DragonSilhouette({
           {/* Head portion fine taper — same path, thinner, overlaid */}
           <path
             d={
-              'M 820,100 C 880,80 900,40 960,30 C 1000,22 1040,18 1080,12'
+              'M 720,140 C 780,100 840,90 900,70 C 940,55 980,35 1040,20 C 1060,14 1075,10 1080,8'
             }
             strokeWidth="1.8"
             strokeOpacity="1"
@@ -127,7 +138,7 @@ export default function DragonSilhouette({
         </g>
       </svg>
 
-      {/* Prominent-mode one-shot dramatic pass overlay */}
+      {/* Prominent-mode one-shot calligraphic draw-in overlay */}
       {prominent && (
         <svg
           className="dragon-prominent-overlay"
@@ -149,14 +160,30 @@ export default function DragonSilhouette({
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d={DRAGON_BODY_PATH} strokeWidth="4" strokeOpacity="0.9" />
+            {/* Body — draws itself in via dasharray animation */}
             <path
-              d={'M 820,100 C 880,80 900,40 960,30 C 1000,22 1040,18 1080,12'}
+              className="draw-path"
+              d={DRAGON_BODY_PATH}
+              strokeWidth="4"
+              strokeOpacity="0.9"
+              pathLength="1000"
+            />
+            {/* Head taper overlay */}
+            <path
+              className="draw-path"
+              d={'M 720,140 C 780,100 840,90 900,70 C 940,55 980,35 1040,20 C 1060,14 1075,10 1080,8'}
               strokeWidth="1.8"
               strokeOpacity="1"
+              pathLength="1000"
             />
-            <path d={DRAGON_WHISKER_PATH} strokeWidth="1.2" strokeOpacity="0.8" />
-            <path d={DRAGON_TAIL_PATH} strokeWidth="3" strokeOpacity="0.7" />
+            {/* Whisker */}
+            <path
+              className="draw-path"
+              d={DRAGON_WHISKER_PATH}
+              strokeWidth="1.2"
+              strokeOpacity="0.8"
+              pathLength="1000"
+            />
           </g>
         </svg>
       )}
