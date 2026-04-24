@@ -1072,7 +1072,54 @@
     font-family: var(--font-mono) !important;
     letter-spacing: 0.12em;
   }
+
+  /* ── KILL CLASSIC DECORATIONS UNDER BRUT ────────────────────────────────── */
+  /* CSS-based suppression keeps the component files untouched (still usable
+     in classic mode) and keeps the diff minimal. Target stable elements:
+     - InkBrush: rendered inside [data-testid="empty-state"] (only canvas/svg)
+     - ScrollParallaxCover: self-identified testid
+     - FirstSaveCelebration: self-identified testid
+     - SeasonalKanji: classified by class .seasonal-kanji
+     - WordmarkStrokeIn: classified by class .wordmark-stroke-in */
+  :root[data-design="brut"] [data-testid="scroll-parallax-cover"],
+  :root[data-design="brut"] [data-testid="first-save-celebration"],
+  :root[data-design="brut"] .seasonal-kanji,
+  :root[data-design="brut"] .wordmark-stroke-in,
+  :root[data-design="brut"] .ink-brush {
+    display: none !important;
+  }
+
+  /* ── ACCESSIBILITY — touch targets + focus rings ─────────────────────────── */
+  /* All interactive elements under brut floor at 44px. Sort pills raised to 48.
+     Scaler +/-: 48 (already). Cook prev/next: 56 (already). */
+  :root[data-design="brut"] button,
+  :root[data-design="brut"] a.btn-primary,
+  :root[data-design="brut"] a.btn-ghost {
+    min-height: 44px;
+  }
+  /* Focus ring — already set globally. Re-declare for belt-and-suspenders. */
+  :root[data-design="brut"] :focus-visible {
+    outline: 2px solid var(--hot) !important;
+    outline-offset: 0 !important;
+  }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * REDUCED MOTION
+ * Kill stamp steps(16) and any residual ticks. Leaves state changes instant.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel::before {
+    animation: none !important;
+    clip-path: none !important;
+  }
+  :root[data-design="brut"] * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
 
 
 
