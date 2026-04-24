@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import LoginForm from '@/components/auth/LoginForm';
 import EmailPreviewBootstrap from '@/components/auth/EmailPreviewBootstrap';
+import LoginBackground from '@/components/motion/LoginBackground';
 
 export const metadata: Metadata = { title: 'Log in — SEKAI' };
 
@@ -8,13 +9,21 @@ export default function LoginPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--bg)' }}
+      style={{
+        background: 'var(--bg)',
+        position: 'relative',
+        overflow: 'hidden',
+        perspective: '1200px',
+      }}
     >
+      <LoginBackground />
       <div
         className="dialog-panel-sm rounded-2xl p-8 animate-scale-in"
         style={{
           background: 'var(--bg-card)',
           boxShadow: 'var(--shadow-dialog)',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         <header className="mb-10">
