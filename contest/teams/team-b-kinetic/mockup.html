@@ -1,0 +1,1809 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>SEKAI 世界 — KINETIC MOTION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Serif+JP:wght@400;500;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --terracotta:      oklch(63.2% 0.148 45);
+  --terracotta-dark: oklch(40% 0.145 44);
+  --terracotta-con:  oklch(47% 0.16 45);
+  --gold:            oklch(86.5% 0.089 89);
+  --bone:            oklch(95.3% 0.014 85);
+  --ink:             oklch(11% 0.004 285);
+
+  --bg:            oklch(11% 0.004 285);
+  --bg-card:       #131315;
+  --bg-raised:     #1C1C1F;
+  --bg-input:      #1A1A1D;
+  --border:        oklch(100% 0 0 / 0.07);
+  --border-strong: oklch(100% 0 0 / 0.13);
+  --text-1:        #EDE8DC;
+  --text-2:        #A89E92;
+  --text-3:        #8A7E72;
+  --ring:          oklch(63.2% 0.148 45 / 0.45);
+
+  --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
+  --shadow-drag:   0 24px 72px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(100% 0 0 / 0.08);
+  --shadow-snap:   0 4px 18px oklch(72% 0.17 50 / 0.55);
+
+  --r-sm: 6px;  --r-md: 10px;  --r-lg: 16px;  --r-xl: 22px;
+  --t-quick: 120ms;  --t-tap: 180ms;  --t-step: 260ms;
+  --t-settle: 420ms; --t-story: 620ms; --t-hero: 880ms;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-expo:   cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out-exp:cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-spring-kiss: cubic-bezier(0.34, 1.22, 0.64, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text-1);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 17px; line-height: 1.6;
+  min-height: 100svh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+body::after {
+  content:''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: .025; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
+.label { font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+.display { font-family: 'Noto Serif JP', 'Cormorant Garamond', serif; font-weight: 500; }
+.serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+button { cursor: pointer; border: 0; background: transparent; color: inherit; font: inherit; }
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--terracotta); outline-offset: 3px; border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ── Chrome ──────────────────────────────────────────────────── */
+.app-shell { position: relative; min-height: 100svh; }
+.nav {
+  position: sticky; top: 0; z-index: 40;
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  background: color-mix(in oklch, var(--bg) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+}
+.wordmark { display: inline-flex; align-items: baseline; gap: 8px; }
+.wordmark .roman {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; letter-spacing: 0.22em;
+  color: var(--terracotta);
+  font-size: 18px;
+}
+.wordmark .kanji {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 500; color: var(--gold);
+  font-size: 18px;
+}
+.nav-tabs { display: flex; gap: 4px; }
+.nav-tab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--text-3);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+  transition: color var(--t-tap) var(--ease-out-quart), background var(--t-tap) var(--ease-out-quart);
+}
+.nav-tab[aria-current="true"] {
+  color: var(--text-1); background: var(--bg-raised);
+  border: 1px solid var(--border);
+}
+.nav-tab:hover { color: var(--text-1); }
+.nav-end { display: flex; gap: 14px; align-items: center; }
+.chip-avatar {
+  width: 32px; height: 32px; border-radius: 999px;
+  background: linear-gradient(140deg, var(--terracotta) 30%, var(--gold));
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Noto Serif JP', serif; font-weight: 700; color: #17120A;
+  font-size: 14px;
+}
+
+/* Shared screen frame */
+.screen {
+  position: relative; z-index: 1;
+  padding: 24px 28px 80px;
+  max-width: 1440px; margin: 0 auto;
+  min-height: calc(100svh - 58px);
+}
+
+/* ── LOGIN ───────────────────────────────────────────────────── */
+#login-screen {
+  min-height: 100svh; display: grid; place-items: center;
+  position: relative; overflow: hidden;
+}
+#login-screen::before {
+  content:''; position: absolute; inset: -20%;
+  background:
+    radial-gradient(ellipse at 20% 30%, color-mix(in oklch, var(--terracotta) 22%, transparent), transparent 55%),
+    radial-gradient(ellipse at 80% 75%, color-mix(in oklch, var(--gold) 14%, transparent), transparent 60%);
+  filter: blur(60px);
+  opacity: .7;
+  animation: ambient-drift 22s ease-in-out infinite alternate;
+  z-index: 0;
+}
+@keyframes ambient-drift {
+  0% { transform: translate3d(0,0,0) rotate(0deg); }
+  100% { transform: translate3d(-40px,18px,0) rotate(3deg); }
+}
+.login-card {
+  position: relative; z-index: 1;
+  width: min(440px, 90vw);
+  padding: 42px 38px 34px;
+  background: color-mix(in oklch, var(--bg-card) 88%, transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: 0 40px 80px oklch(0 0 0 / 0.5), 0 0 0 1px oklch(100% 0 0 / 0.04);
+  backdrop-filter: blur(8px);
+}
+.login-hero {
+  text-align: center; margin-bottom: 32px;
+}
+.login-hero .wordmark-big {
+  display: inline-flex; align-items: baseline; gap: 14px;
+  margin-bottom: 8px;
+}
+.login-hero .roman-big {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; letter-spacing: 0.32em; font-size: 36px;
+  color: var(--terracotta);
+  display: inline-block;
+}
+.login-hero .kanji-big {
+  font-family: 'Noto Serif JP', serif;
+  font-weight: 500; font-size: 40px;
+  color: var(--gold);
+  display: inline-block;
+}
+.login-hero .tagline {
+  font-style: italic; color: var(--text-3); font-size: 15px;
+  margin-top: 14px;
+}
+.login-form label {
+  display: block; margin-bottom: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-3);
+  transition: letter-spacing var(--t-step) var(--ease-out-quart), color var(--t-step) var(--ease-out-quart);
+}
+.login-form .field { margin-bottom: 18px; position: relative; }
+.login-form .field:focus-within label { letter-spacing: 0.14em; color: var(--text-1); }
+.login-form input {
+  width: 100%; min-height: 50px;
+  padding: 12px 14px; background: var(--bg-input);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+  color: var(--text-1); font-size: 16px;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  transition: border-color var(--t-tap) var(--ease-out-quart),
+              box-shadow var(--t-tap) var(--ease-out-quart);
+}
+.login-form input:focus {
+  outline: none; border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 10px 20px;
+  background: var(--terracotta-con); color: var(--bone);
+  border-radius: var(--r-sm);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+  font-weight: 600;
+  transition: background var(--t-tap) var(--ease-out-quart);
+  will-change: transform;
+}
+.btn:hover { background: var(--terracotta-dark); }
+.btn-full { width: 100%; }
+.btn-ghost {
+  background: transparent; color: var(--text-2);
+  border: 1px solid var(--border-strong);
+}
+.btn-ghost:hover { color: var(--text-1); }
+.login-meta {
+  margin-top: 20px; font-size: 13px; color: var(--text-3);
+  text-align: center;
+}
+.login-meta a { color: var(--gold); text-decoration: none; border-bottom: 1px dashed color-mix(in oklch, var(--gold) 50%, transparent); }
+
+/* ── LIST ────────────────────────────────────────────────────── */
+.list-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 24px; gap: 24px;
+}
+.space-name {
+  font-family: 'Noto Serif JP', 'Cormorant Garamond', serif;
+  font-size: clamp(28px, 3.2vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.list-search {
+  position: relative;
+  margin-bottom: 20px;
+}
+.list-search input {
+  width: 100%; min-height: 48px;
+  padding: 0 48px 0 44px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-1); font-size: 16px;
+  font-family: 'Cormorant Garamond', serif;
+  transition: border-color var(--t-tap), box-shadow var(--t-tap);
+}
+.list-search input:focus {
+  outline: none; border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+.list-search svg {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); pointer-events: none;
+}
+
+.tag-rail {
+  display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+  min-height: 38px;
+  transition: background var(--t-tap) var(--ease-out-quart),
+              color var(--t-tap) var(--ease-out-quart),
+              border-color var(--t-tap) var(--ease-out-quart);
+  position: relative; overflow: hidden;
+  will-change: transform;
+}
+.chip::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: 0;
+  height: 1.5px; background: var(--gold); transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-step) var(--ease-out-expo);
+}
+.chip[aria-pressed="true"] {
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  color: var(--gold); border-color: color-mix(in oklch, var(--gold) 38%, transparent);
+}
+.chip[aria-pressed="true"]::after { transform: scaleX(1); }
+.chip:active { transform: scale(0.96); }
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 18px;
+}
+.recipe-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg-card);
+  overflow: hidden;
+  transition: border-color var(--t-tap) var(--ease-out-quart),
+              box-shadow var(--t-tap) var(--ease-out-quart);
+  will-change: transform;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+}
+.recipe-card:hover {
+  border-color: color-mix(in oklch, var(--terracotta) 35%, transparent);
+  box-shadow: 0 14px 36px oklch(0 0 0 / 0.55), 0 0 0 1px oklch(100% 0 0 / 0.06);
+}
+.recipe-card .cover {
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, var(--terracotta-dark), var(--ink));
+  position: relative;
+}
+.recipe-card .cover .glyph {
+  position: absolute; right: 16px; bottom: 10px;
+  font-family: 'Noto Serif JP', serif;
+  color: color-mix(in oklch, var(--gold) 70%, transparent);
+  font-size: 44px; font-weight: 500;
+  pointer-events: none;
+}
+.recipe-card .cover .veil {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 30%, transparent 30%, oklch(11% 0.004 285 / 0.6) 100%);
+}
+.recipe-card .body {
+  padding: 16px 16px 18px; flex: 1;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.recipe-card .title {
+  font-family: 'Noto Serif JP', 'Cormorant Garamond', serif;
+  font-size: 22px; line-height: 1.2; font-weight: 500;
+  color: var(--text-1);
+}
+.recipe-card .meta {
+  display: flex; gap: 14px; color: var(--text-3);
+  font-family: 'Barlow Condensed', sans-serif; font-size: 12px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.recipe-card .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 8px; }
+.recipe-card .tag {
+  padding: 3px 10px; border-radius: 999px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  background: color-mix(in oklch, var(--gold) 14%, transparent);
+  color: var(--gold);
+  border: 1px solid color-mix(in oklch, var(--gold) 30%, transparent);
+}
+
+/* Featured card (first in list) */
+.recipe-card.featured { grid-column: span 2; }
+.recipe-card.featured .cover { aspect-ratio: 21/9; }
+.recipe-card.featured .title { font-size: 30px; }
+@media (max-width: 680px) { .recipe-card.featured { grid-column: span 1; } .recipe-card.featured .title { font-size: 24px; } }
+
+/* ── DETAIL ──────────────────────────────────────────────────── */
+.detail-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 18px;
+  padding: 8px 12px 8px 4px; border-radius: 999px;
+  transition: color var(--t-tap) var(--ease-out-quart);
+}
+.detail-back:hover { color: var(--text-1); }
+.detail-hero {
+  position: relative;
+  aspect-ratio: 24/9;
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--terracotta-dark), var(--ink));
+  box-shadow: var(--shadow-card);
+}
+.detail-hero .veil {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, oklch(11% 0.004 285 / 0.85) 0%, transparent 60%);
+}
+.detail-hero .title-over {
+  position: absolute; left: 28px; bottom: 22px; right: 28px;
+  font-family: 'Noto Serif JP', serif;
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 500; line-height: 1.1;
+  color: var(--bone);
+}
+.detail-hero .glyph-big {
+  position: absolute; right: 28px; top: 22px;
+  font-family: 'Noto Serif JP', serif;
+  color: color-mix(in oklch, var(--gold) 70%, transparent);
+  font-size: 80px; font-weight: 500;
+  pointer-events: none;
+}
+
+.detail-layout {
+  display: grid; grid-template-columns: 1fr; gap: 28px;
+}
+@media (min-width: 920px) {
+  .detail-layout { grid-template-columns: 1.2fr 1fr; gap: 48px; }
+}
+
+/* Service bar */
+.service-bar {
+  display: flex; align-items: center; gap: 24px;
+  padding: 20px; margin: 0 0 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  flex-wrap: wrap;
+}
+.scaler {
+  display: flex; align-items: center; gap: 14px;
+  position: relative;
+}
+.scaler-dial {
+  position: relative;
+  width: 116px; height: 116px;
+  border-radius: 999px;
+  background:
+    conic-gradient(from 180deg, var(--terracotta) 0deg, color-mix(in oklch, var(--gold) 60%, transparent) 180deg, var(--terracotta) 360deg);
+  padding: 4px;
+  box-shadow: 0 10px 30px oklch(0 0 0 / 0.5), inset 0 0 0 1px oklch(100% 0 0 / 0.1);
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+}
+.scaler-dial:active { cursor: grabbing; }
+.scaler-dial .face {
+  position: absolute; inset: 4px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #1E1E21, #101012);
+  display: grid; place-items: center;
+  box-shadow: inset 0 2px 0 oklch(100% 0 0 / 0.06), inset 0 -2px 8px oklch(0 0 0 / 0.7);
+}
+.scaler-dial .face::before {
+  content: ''; position: absolute; top: 6px; left: 50%;
+  transform: translateX(-50%);
+  width: 3px; height: 14px; border-radius: 2px;
+  background: var(--gold);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--gold) 60%, transparent);
+}
+.scaler-dial .face .value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 34px;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.scaler-dial .face .unit {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+.scaler-dial .ticks {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+.scaler-dial .tick {
+  position: absolute; left: 50%; top: 2px;
+  width: 2px; height: 8px; background: oklch(100% 0 0 / 0.14);
+  transform-origin: 1px 56px;
+}
+.scaler-dial .tick.major { background: oklch(100% 0 0 / 0.28); height: 10px; }
+.scaler-buttons { display: flex; flex-direction: column; gap: 8px; }
+.scaler-btn {
+  width: 44px; height: 44px; border-radius: 999px;
+  background: var(--bg-raised); color: var(--text-1);
+  border: 1px solid var(--border);
+  font-size: 20px; font-weight: 600;
+  display: grid; place-items: center;
+  transition: background var(--t-tap), transform var(--t-tap) var(--ease-out-quart);
+}
+.scaler-btn:hover { background: #252528; }
+.scaler-btn:active { transform: scale(0.92); }
+.scaler-readout {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-3);
+}
+.scaler-reset {
+  padding: 6px 12px; border-radius: 999px;
+  background: color-mix(in oklch, var(--terracotta) 12%, transparent);
+  color: var(--terracotta);
+  border: 1px solid color-mix(in oklch, var(--terracotta) 30%, transparent);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+}
+
+.unit-toggle {
+  display: inline-flex; background: var(--bg-raised);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 3px; position: relative;
+}
+.unit-toggle button {
+  padding: 8px 14px; border-radius: 999px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-3); position: relative; z-index: 1;
+  transition: color var(--t-tap);
+}
+.unit-toggle button[aria-pressed="true"] { color: var(--text-1); }
+.unit-toggle .glider {
+  position: absolute; top: 3px; left: 3px; bottom: 3px;
+  width: calc(50% - 3px);
+  background: var(--terracotta-con);
+  border-radius: 999px;
+  transition: transform var(--t-step) var(--ease-out-expo);
+  z-index: 0;
+}
+.unit-toggle[data-active="imperial"] .glider { transform: translateX(100%); }
+
+.service-cta {
+  margin-left: auto; display: flex; gap: 8px;
+}
+
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::before {
+  content: ''; display: inline-block; width: 28px; height: 1px;
+  background: var(--text-3);
+}
+
+.ingredient-list { list-style: none; padding: 0; }
+.ingredient-row {
+  display: grid; grid-template-columns: 14px 1fr auto;
+  align-items: baseline; gap: 14px;
+  padding: 14px 6px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background var(--t-tap) var(--ease-out-quart);
+  position: relative;
+}
+.ingredient-row:hover { background: color-mix(in oklch, var(--terracotta) 4%, transparent); }
+.ingredient-row .dot {
+  width: 6px; height: 6px; border-radius: 999px;
+  background: var(--gold);
+  align-self: center;
+  transform-origin: center;
+  will-change: transform;
+}
+.ingredient-row .name {
+  color: var(--text-1);
+  font-size: 17px;
+  transition: color var(--t-step), text-decoration-color var(--t-step);
+}
+.ingredient-row .amount {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ingredient-row.checked .name {
+  color: var(--text-3);
+  text-decoration: line-through;
+  text-decoration-color: var(--terracotta);
+  text-decoration-thickness: 1.5px;
+}
+.ingredient-row.checked .dot {
+  background: var(--terracotta);
+  transform: scale(0.7);
+}
+
+.steps-list { list-style: none; padding: 0; counter-reset: step; }
+.step-row {
+  position: relative;
+  padding: 16px 0 18px 48px;
+  border-bottom: 1px solid var(--border);
+  counter-increment: step;
+}
+.step-row::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute; left: 0; top: 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 14px;
+  color: var(--terracotta);
+  letter-spacing: 0.1em;
+}
+.step-row p { color: var(--text-1); font-size: 17px; line-height: 1.55; }
+.step-timer {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 8px; padding: 4px 10px;
+  border-radius: 999px; font-size: 12px;
+  color: var(--gold);
+  font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.12em; text-transform: uppercase;
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+  border: 1px solid color-mix(in oklch, var(--gold) 28%, transparent);
+}
+
+/* ── COOK MODE ───────────────────────────────────────────────── */
+#cook-screen {
+  position: fixed; inset: 0; z-index: 80;
+  background: var(--bg);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+#cook-screen[data-open="true"] { display: flex; }
+.cook-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.cook-progress {
+  flex: 1; height: 3px; margin: 0 20px; border-radius: 2px;
+  background: var(--border); position: relative;
+  overflow: hidden;
+}
+.cook-progress .bar {
+  position: absolute; inset: 0; width: 0%;
+  background: linear-gradient(90deg, var(--terracotta), var(--gold));
+  transition: width var(--t-step) var(--ease-out-quart);
+  border-radius: 2px;
+}
+.cook-body {
+  flex: 1; overflow: hidden; position: relative;
+  display: grid; place-items: center;
+  padding: 24px;
+  touch-action: pan-y;
+}
+.cook-step {
+  position: absolute; inset: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px;
+  will-change: transform, opacity, filter;
+  max-width: 640px; margin: 0 auto;
+  text-align: center;
+}
+.cook-step .num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--terracotta);
+}
+.cook-step .body {
+  font-family: 'Noto Serif JP', 'Cormorant Garamond', serif;
+  font-size: clamp(24px, 3.6vw, 40px);
+  font-weight: 500; line-height: 1.35;
+  color: var(--text-1);
+}
+.cook-step .ingredients {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+  margin-top: 8px;
+}
+.cook-step .ing-chip {
+  padding: 8px 14px; border-radius: 999px;
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+  border: 1px solid color-mix(in oklch, var(--gold) 30%, transparent);
+  color: var(--gold);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; letter-spacing: 0.1em;
+}
+.cook-timer {
+  position: relative;
+  width: 180px; height: 180px;
+  margin-top: 16px;
+}
+.cook-timer svg { transform: rotate(-90deg); }
+.cook-timer .ring-bg { stroke: var(--border); stroke-width: 4; fill: none; }
+.cook-timer .ring-fill {
+  stroke: var(--terracotta);
+  stroke-width: 5; fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 471; /* 2πr at r=75 */
+  stroke-dashoffset: 471;
+  transition: stroke-dashoffset 1s linear;
+}
+.cook-timer .label-center {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 36px; font-weight: 600;
+  color: var(--text-1); font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.cook-bottombar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 20px 28px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  gap: 12px;
+}
+.cook-nav-btn {
+  width: 56px; height: 56px; border-radius: 999px;
+  background: var(--bg-raised); border: 1px solid var(--border);
+  color: var(--text-1);
+  display: grid; place-items: center;
+  transition: background var(--t-tap), transform var(--t-tap);
+}
+.cook-nav-btn:active { transform: scale(0.92); }
+.cook-check-btn {
+  flex: 1; max-width: 360px;
+  min-height: 56px; padding: 0 24px; border-radius: 999px;
+  background: var(--terracotta-con); color: var(--bone);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase;
+  font-weight: 600;
+  transition: background var(--t-tap), transform var(--t-tap);
+}
+.cook-check-btn:active { transform: scale(0.97); }
+
+/* ── Page transition ─────────────────────────────────────────── */
+.screen { transition: filter var(--t-step) var(--ease-out-quart); }
+body.during-handoff .screen { pointer-events: none; }
+
+/* Shared-element clones during hand-off */
+.handoff-clone {
+  position: fixed; z-index: 70;
+  pointer-events: none;
+  will-change: transform, width, height, opacity;
+}
+
+/* Cook step transition classes */
+.cook-step.entering-right { animation: cook-in-right var(--t-step) var(--ease-out-expo) both; }
+.cook-step.entering-left  { animation: cook-in-left  var(--t-step) var(--ease-out-expo) both; }
+.cook-step.leaving-left   { animation: cook-out-left  200ms var(--ease-in-expo) both; }
+.cook-step.leaving-right  { animation: cook-out-right 200ms var(--ease-in-expo) both; }
+@keyframes cook-in-right {
+  from { transform: translateX(48px); opacity: 0; filter: blur(0); }
+  to   { transform: translateX(0);    opacity: 1; filter: blur(0); }
+}
+@keyframes cook-in-left {
+  from { transform: translateX(-48px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+@keyframes cook-out-left {
+  from { transform: translateX(0); opacity: 1; filter: blur(0px); }
+  to   { transform: translateX(-48px); opacity: 0; filter: blur(3px); }
+}
+@keyframes cook-out-right {
+  from { transform: translateX(0); opacity: 1; filter: blur(0px); }
+  to   { transform: translateX(48px); opacity: 0; filter: blur(3px); }
+}
+
+/* Cascade */
+.cascade > * {
+  opacity: 0; transform: translateY(18px);
+  animation: cascade-in var(--t-step) var(--ease-out-quart) both;
+}
+.cascade > *:nth-child(1) { animation-delay: 0ms; }
+.cascade > *:nth-child(2) { animation-delay: 38ms; }
+.cascade > *:nth-child(3) { animation-delay: 76ms; }
+.cascade > *:nth-child(4) { animation-delay: 114ms; }
+.cascade > *:nth-child(5) { animation-delay: 152ms; }
+.cascade > *:nth-child(6) { animation-delay: 190ms; }
+.cascade > *:nth-child(7) { animation-delay: 228ms; }
+.cascade > *:nth-child(8) { animation-delay: 266ms; }
+.cascade > *:nth-child(n+9) { animation-delay: 304ms; }
+@keyframes cascade-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Plate (card cascade) */
+.plate-cascade > * {
+  opacity: 0; transform: translateY(24px) scale(0.98);
+  animation: plate-in var(--t-step) var(--ease-out-expo) both;
+}
+.plate-cascade > *:nth-child(1) { animation-delay: 0ms; }
+.plate-cascade > *:nth-child(2) { animation-delay: 60ms; }
+.plate-cascade > *:nth-child(3) { animation-delay: 120ms; }
+.plate-cascade > *:nth-child(4) { animation-delay: 180ms; }
+.plate-cascade > *:nth-child(5) { animation-delay: 240ms; }
+.plate-cascade > *:nth-child(6) { animation-delay: 300ms; }
+.plate-cascade > *:nth-child(n+7) { animation-delay: 360ms; }
+@keyframes plate-in {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Wordmark stroke */
+.stroke-reveal {
+  animation: stroke-wipe var(--t-hero) var(--ease-out-expo) both;
+  clip-path: inset(0 100% 0 0);
+}
+.stroke-reveal.done { clip-path: inset(0 0 0 0); }
+@keyframes stroke-wipe {
+  from { clip-path: inset(0 100% 0 0); opacity: 0.4; }
+  to   { clip-path: inset(0 0 0 0);    opacity: 1; }
+}
+
+/* Toast */
+#toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 40px);
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  color: var(--text-1);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; letter-spacing: 0.12em;
+  opacity: 0;
+  transition: transform var(--t-step) var(--ease-out-expo), opacity var(--t-step) var(--ease-out-expo);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+}
+#toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+/* Reduced motion: flatten everything */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  body::after { display: none; }
+}
+
+/* Screen visibility toggle */
+.screen[hidden] { display: none; }
+
+/* Utility */
+.row { display: flex; align-items: center; gap: 12px; }
+.spacer { flex: 1; }
+
+/* Hint overlay — small pill bottom-left of demo */
+#hint {
+  position: fixed; left: 20px; bottom: 20px; z-index: 90;
+  padding: 10px 14px;
+  background: color-mix(in oklch, var(--bg-card) 92%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.12em;
+  color: var(--text-2);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+  max-width: 300px;
+  line-height: 1.5;
+}
+#hint b { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ═══════════════════════ NAV ═══════════════════════ -->
+  <nav class="nav" id="mainNav" hidden>
+    <span class="wordmark" id="navWordmark">
+      <span class="roman">SEKAI</span>
+      <span class="kanji">世界</span>
+    </span>
+    <div class="nav-tabs">
+      <button class="nav-tab" data-screen="list" aria-current="true">Recipes</button>
+      <button class="nav-tab" data-screen="detail">Detail</button>
+      <button class="nav-tab" id="openCookBtn">Cook</button>
+    </div>
+    <div class="nav-end">
+      <span class="label" style="color: var(--text-3); font-size: 12px;" id="greetLabel">Bonsoir, Chef</span>
+      <span class="chip-avatar">JC</span>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════ LOGIN ═══════════════════════ -->
+  <section class="screen" id="login-screen">
+    <div class="login-card" id="loginCard">
+      <div class="login-hero">
+        <div class="wordmark-big">
+          <span class="roman-big stroke-reveal" id="wm-roman">SEKAI</span>
+          <span class="kanji-big stroke-reveal" id="wm-kanji" style="animation-delay: 120ms;">世界</span>
+        </div>
+        <p class="tagline" id="taglineEl"><em>The house kitchen, organised.</em></p>
+      </div>
+      <form class="login-form" id="loginForm" autocomplete="off">
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" value="jc@sakai.app" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" value="••••••••" autocomplete="off" />
+        </div>
+        <button type="button" class="btn btn-full" id="loginBtn">Enter the pass</button>
+        <p class="login-meta">By invitation only · <a href="#" id="enterAsDemo">continue as demo@</a></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ LIST ═══════════════════════ -->
+  <section class="screen" id="list-screen" hidden>
+    <div class="list-header">
+      <div>
+        <span class="label" style="color: var(--text-3); font-size: 12px;">My kitchen</span>
+        <h1 class="space-name">Chef JC's pass</h1>
+      </div>
+      <button class="btn">New recipe</button>
+    </div>
+
+    <div class="list-search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="search" placeholder="Search recipes — or press /" id="searchInput" />
+    </div>
+
+    <div class="tag-rail" id="tagRail">
+      <button class="chip" aria-pressed="false">All</button>
+      <button class="chip" aria-pressed="true">Sunday</button>
+      <button class="chip" aria-pressed="false">Hot line</button>
+      <button class="chip" aria-pressed="false">Pasta</button>
+      <button class="chip" aria-pressed="false">Bakery</button>
+      <button class="chip" aria-pressed="false">Knife-work</button>
+      <button class="chip" aria-pressed="false">Slow</button>
+      <button class="chip" aria-pressed="false">30-min</button>
+    </div>
+
+    <div class="recipes-grid plate-cascade" id="recipesGrid">
+      <!-- injected by JS -->
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ DETAIL ═══════════════════════ -->
+  <section class="screen" id="detail-screen" hidden>
+    <button class="detail-back" data-screen="list">← Back to pass</button>
+    <div class="detail-hero" id="detailHero" data-handoff="hero">
+      <div class="veil"></div>
+      <span class="glyph-big" id="detailGlyph">鮨</span>
+      <h1 class="title-over" id="detailTitle" data-handoff="title">Smoked tomato ragù</h1>
+    </div>
+
+    <div class="service-bar cascade">
+      <div class="scaler" id="scaler">
+        <div class="scaler-dial" id="scalerDial" role="slider" tabindex="0" aria-label="Servings">
+          <div class="ticks" id="dialTicks"></div>
+          <div class="face">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+              <span class="value" id="scalerValue">4</span>
+              <span class="unit">Servings</span>
+            </div>
+          </div>
+        </div>
+        <div class="scaler-buttons">
+          <button class="scaler-btn" id="scalerMinus" aria-label="Decrease servings">−</button>
+          <button class="scaler-btn" id="scalerPlus" aria-label="Increase servings">+</button>
+        </div>
+        <span class="scaler-readout" id="scalerMultiplier">Native</span>
+      </div>
+
+      <div class="unit-toggle" id="unitToggle" data-active="metric">
+        <span class="glider"></span>
+        <button aria-pressed="true" data-unit="metric">Metric</button>
+        <button aria-pressed="false" data-unit="imperial">Imperial</button>
+      </div>
+
+      <div class="service-cta">
+        <button class="btn btn-ghost">Print</button>
+        <button class="btn" id="detailCookBtn">Cook mode</button>
+      </div>
+    </div>
+
+    <div class="detail-layout">
+      <div>
+        <h2 class="section-label">Ingredients</h2>
+        <ul class="ingredient-list cascade" id="ingredientList">
+          <!-- injected -->
+        </ul>
+      </div>
+      <div>
+        <h2 class="section-label">Method</h2>
+        <ol class="steps-list" id="stepsList">
+          <!-- injected -->
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ COOK MODE ═══════════════════════ -->
+  <section id="cook-screen" role="dialog" aria-label="Cook mode">
+    <div class="cook-topbar">
+      <button class="cook-nav-btn" id="cookClose" aria-label="Exit cook mode">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="cook-progress"><div class="bar" id="cookBar"></div></div>
+      <span class="label tabular" style="color: var(--text-3); font-size: 13px; min-width: 56px; text-align: right;" id="cookCount">1 / 5</span>
+    </div>
+    <div class="cook-body" id="cookBody">
+      <!-- current step injected here -->
+    </div>
+    <div class="cook-bottombar">
+      <button class="cook-nav-btn" id="cookPrev" aria-label="Previous step">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <button class="cook-check-btn" id="cookAdvance">Next step</button>
+      <button class="cook-nav-btn" id="cookNext" aria-label="Next step">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+  <div id="hint"></div>
+
+</div>
+
+<script>
+/* ═════════════════════════════════════════════════════════════
+   KINETIC-MOTION · self-contained spring engine + orchestrator
+   ═════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────
+   1. SPRING ENGINE — critically-damped harmonic
+   ──────────────────────────────────────────────── */
+const SPRING = {
+  snap:    { stiffness: 520, damping: 36, mass: 1.0 },
+  stiff:   { stiffness: 380, damping: 30, mass: 1.0 },
+  gentle:  { stiffness: 220, damping: 28, mass: 1.1 },
+  wobbly:  { stiffness: 180, damping: 14, mass: 1.0 },
+  cushion: { stiffness: 140, damping: 24, mass: 1.3 },
+};
+
+function animateSpring(from, to, config, onFrame, onRest, initialVelocity = 0) {
+  const { stiffness, damping, mass } = config;
+  let x = from;
+  let v = initialVelocity;
+  const dt = 1 / 60;
+  const restDelta = 0.5;
+  const restVelocity = 0.05;
+  let stopped = false;
+  let frameId;
+  function step() {
+    if (stopped) return;
+    const Fspring = -stiffness * (x - to);
+    const Fdamp = -damping * v;
+    const a = (Fspring + Fdamp) / mass;
+    v += a * dt;
+    x += v * dt;
+    onFrame(x);
+    if (Math.abs(to - x) < restDelta && Math.abs(v) < restVelocity) {
+      onFrame(to);
+      onRest && onRest();
+      return;
+    }
+    frameId = requestAnimationFrame(step);
+  }
+  frameId = requestAnimationFrame(step);
+  return () => { stopped = true; cancelAnimationFrame(frameId); };
+}
+
+/* ────────────────────────────────────────────────
+   2. HAPTIC + AUDIO
+   ──────────────────────────────────────────────── */
+let audioCtx;
+function ensureAudio() {
+  if (audioCtx) return audioCtx;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch { audioCtx = null; }
+  return audioCtx;
+}
+function tone(freq, dur, wave = 'sine', gain = 0.18) {
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  if (ctx.state === 'suspended') ctx.resume();
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.type = wave;
+  osc.frequency.value = freq;
+  osc.connect(g);
+  g.connect(ctx.destination);
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(gain, now + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur / 1000);
+  osc.start(now);
+  osc.stop(now + dur / 1000 + 0.02);
+}
+const SFX = {
+  tock:    () => tone(60,  14, 'sine', 0.16),
+  start:   () => tone(554, 80, 'sine', 0.18),
+  advance: () => tone(784, 60, 'sine', 0.16),
+  back:    () => tone(587, 60, 'sine', 0.14),
+  complete:() => { tone(554, 180, 'triangle', 0.16); setTimeout(() => tone(784, 220, 'triangle', 0.16), 90); },
+  confirm: () => { tone(554, 140, 'sine', 0.14); tone(784, 160, 'sine', 0.14); },
+  fail:    () => tone(220, 140, 'sawtooth', 0.12),
+};
+function haptic(pattern) {
+  if (navigator.vibrate) navigator.vibrate(pattern);
+}
+const HAPTIC = {
+  tick:   () => haptic(5),
+  nudge:  () => haptic(10),
+  snap:   () => haptic(12),
+  confirm:() => haptic([8, 20, 8]),
+  fail:   () => haptic([30, 40, 30]),
+  hero:   () => haptic([6, 14, 6, 14, 6]),
+};
+
+/* ────────────────────────────────────────────────
+   3. TOAST
+   ──────────────────────────────────────────────── */
+let toastTO;
+function toast(msg, ms = 1800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTO);
+  toastTO = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* ────────────────────────────────────────────────
+   4. DATA
+   ──────────────────────────────────────────────── */
+const RECIPES = [
+  {
+    id: 'r-ragu', glyph: '蕃', name: 'Smoked tomato ragù',
+    tags: ['Sunday', 'Slow', 'Pasta'],
+    prep: 25, cook: 180, servings: 4,
+    ingredients: [
+      { n: 'Roma tomatoes',    a: 1.6, u: 'kg' },
+      { n: 'Spanish onion',    a: 2,   u: '' },
+      { n: 'Garlic cloves',    a: 6,   u: '' },
+      { n: 'Guanciale',        a: 140, u: 'g' },
+      { n: 'Hot-smoked paprika',a: 2,   u: 'tsp' },
+      { n: 'Picholine olives', a: 80,  u: 'g' },
+      { n: 'Basil',            a: 1,   u: 'bunch' },
+      { n: 'Flake salt',       a: 1,   u: 'to taste' },
+    ],
+    steps: [
+      { body: 'Score and char the tomatoes over open flame until blistered on all sides.', timer: null, items: ['Roma tomatoes'] },
+      { body: 'Render the guanciale in a cold pan, rising slowly to medium — do not colour.', timer: 480, items: ['Guanciale'] },
+      { body: 'Add onion + crushed garlic. Sweat until glassy, never brown.', timer: 600, items: ['Onion', 'Garlic'] },
+      { body: 'Crush the tomatoes by hand straight into the pan. Paprika. Simmer low and slow.', timer: 3600, items: ['Tomatoes', 'Paprika'] },
+      { body: 'Finish with torn basil and olives. Rest 8 minutes before plating.', timer: 480, items: ['Basil', 'Olives'] },
+    ],
+  },
+  {
+    id: 'r-onigiri', glyph: '飯', name: 'Yaki onigiri, two sauces',
+    tags: ['30-min', 'Rice'],
+    prep: 10, cook: 18, servings: 6,
+    ingredients: [
+      { n: 'Koshihikari rice', a: 400, u: 'g' },
+      { n: 'Rice vinegar',     a: 1,   u: 'tbsp' },
+      { n: 'Soy sauce',        a: 3,   u: 'tbsp' },
+      { n: 'Mirin',            a: 2,   u: 'tbsp' },
+      { n: 'Shio kombu',       a: 2,   u: 'tbsp' },
+    ],
+    steps: [
+      { body: 'Rinse rice until the water runs clear, then cook with a touch of kombu.', timer: 1500, items: ['Rice'] },
+      { body: 'Shape into triangles with wet, salted hands.', timer: null, items: [] },
+      { body: 'Grill on a dry plancha until the faces are lacquered and crisp.', timer: 240, items: [] },
+    ],
+  },
+  {
+    id: 'r-tartare', glyph: '魚', name: 'Yellowtail tartare',
+    tags: ['Hot line', 'Knife-work'],
+    prep: 20, cook: 0, servings: 2,
+    ingredients: [], steps: []
+  },
+  {
+    id: 'r-focaccia', glyph: '麦', name: 'Friday focaccia',
+    tags: ['Bakery', 'Slow'],
+    prep: 20, cook: 25, servings: 8,
+    ingredients: [], steps: []
+  },
+  {
+    id: 'r-dashi', glyph: '海', name: 'House dashi',
+    tags: ['Sunday'],
+    prep: 8, cook: 35, servings: 12,
+    ingredients: [], steps: []
+  },
+  {
+    id: 'r-brodo', glyph: '湯', name: 'Brodo di pollo',
+    tags: ['Sunday', 'Slow'],
+    prep: 15, cook: 240, servings: 10,
+    ingredients: [], steps: []
+  },
+  {
+    id: 'r-smash', glyph: '肉', name: 'Classic smash burger',
+    tags: ['30-min', 'Hot line'],
+    prep: 10, cook: 5, servings: 2,
+    ingredients: [], steps: []
+  },
+];
+
+/* ────────────────────────────────────────────────
+   5. RENDER — LIST
+   ──────────────────────────────────────────────── */
+function renderList() {
+  const grid = document.getElementById('recipesGrid');
+  grid.innerHTML = '';
+  RECIPES.forEach((r, i) => {
+    const card = document.createElement('article');
+    card.className = 'recipe-card' + (i === 0 ? ' featured' : '');
+    card.dataset.id = r.id;
+    card.innerHTML = `
+      <div class="cover" data-handoff="hero-${r.id}">
+        <div class="veil"></div>
+        <span class="glyph">${r.glyph}</span>
+      </div>
+      <div class="body">
+        <h2 class="title" data-handoff="title-${r.id}">${r.name}</h2>
+        <div class="meta">
+          <span>${r.prep + r.cook} min total</span>
+          <span>·</span>
+          <span>Serves ${r.servings}</span>
+        </div>
+        <div class="tags">
+          ${r.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', (e) => handoffToDetail(r, card));
+    grid.appendChild(card);
+  });
+  // re-trigger plate cascade by re-adding class
+  grid.classList.remove('plate-cascade');
+  void grid.offsetWidth;
+  grid.classList.add('plate-cascade');
+}
+
+/* ────────────────────────────────────────────────
+   6. RENDER — DETAIL
+   ──────────────────────────────────────────────── */
+let currentRecipe = RECIPES[0];
+let currentServings = currentRecipe.servings;
+let currentUnit = 'metric';
+
+function formatAmount(n) {
+  if (n < 1) return n.toFixed(2).replace(/0$/, '');
+  if (n < 10) return n.toFixed(1).replace(/\.0$/, '');
+  return Math.round(n);
+}
+
+function convertUnit(amount, unit) {
+  if (currentUnit === 'imperial') {
+    if (unit === 'kg') return { a: amount * 2.20462, u: 'lb' };
+    if (unit === 'g')  return { a: amount / 28.3495, u: 'oz' };
+    if (unit === 'ml') return { a: amount / 29.5735, u: 'fl oz' };
+  }
+  return { a: amount, u: unit };
+}
+
+function renderDetail() {
+  const r = currentRecipe;
+  document.getElementById('detailTitle').textContent = r.name;
+  document.getElementById('detailGlyph').textContent = r.glyph;
+  document.getElementById('detailHero').dataset.handoff = `hero-${r.id}`;
+  const list = document.getElementById('ingredientList');
+  const steps = document.getElementById('stepsList');
+  const multiplier = currentServings / r.servings;
+  list.innerHTML = '';
+  steps.innerHTML = '';
+
+  (r.ingredients || []).forEach((ing, i) => {
+    const li = document.createElement('li');
+    li.className = 'ingredient-row';
+    const scaled = ing.a * multiplier;
+    const { a, u } = convertUnit(scaled, ing.u);
+    li.innerHTML = `
+      <span class="dot"></span>
+      <span class="name">${ing.n}</span>
+      <span class="amount">${formatAmount(a)}${u ? ' ' + u : ''}</span>
+    `;
+    li.addEventListener('click', () => {
+      li.classList.toggle('checked');
+      HAPTIC.nudge();
+      animateSpring(1.35, 1, SPRING.stiff, (x) => {
+        li.querySelector('.dot').style.transform = `scale(${x})`;
+      });
+    });
+    list.appendChild(li);
+  });
+
+  (r.steps || []).forEach((s) => {
+    const li = document.createElement('li');
+    li.className = 'step-row';
+    li.innerHTML = `
+      <p>${s.body}</p>
+      ${s.timer ? `<span class="step-timer">⏱ ${Math.round(s.timer/60)} min</span>` : ''}
+    `;
+    steps.appendChild(li);
+  });
+
+  // Re-trigger cascades
+  [list, document.querySelector('.service-bar')].forEach(el => {
+    if (!el) return;
+    el.classList.remove('cascade'); void el.offsetWidth; el.classList.add('cascade');
+  });
+
+  updateScalerReadout();
+  renderDialTicks();
+  updateDialVisuals();
+}
+
+function updateScalerReadout() {
+  const native = currentRecipe.servings;
+  const m = currentServings / native;
+  document.getElementById('scalerValue').textContent = currentServings;
+  const readout = document.getElementById('scalerMultiplier');
+  if (m === 1) {
+    readout.textContent = 'Native';
+    readout.style.color = 'var(--text-3)';
+  } else {
+    readout.textContent = `×${Math.round(m * 10) / 10}`;
+    readout.style.color = 'var(--terracotta)';
+  }
+}
+
+function renderDialTicks() {
+  const container = document.getElementById('dialTicks');
+  container.innerHTML = '';
+  const total = 20;
+  for (let i = 0; i < total; i++) {
+    const deg = (360 / total) * i;
+    const el = document.createElement('span');
+    el.className = 'tick' + (i % 5 === 0 ? ' major' : '');
+    el.style.transform = `rotate(${deg}deg)`;
+    container.appendChild(el);
+  }
+}
+
+function updateDialVisuals() {
+  const dial = document.getElementById('scalerDial');
+  // Rotate the dial to visualize the current servings position
+  const deg = (currentServings - 1) * 18; // 20° per integer × reduced to 18° so 1..20 maps to 0..342
+  dial.style.transform = `rotate(${deg}deg)`;
+  dial.style.transition = `transform var(--t-step) var(--ease-out-expo)`;
+  // Counter-rotate the face so the number stays upright
+  const face = dial.querySelector('.face');
+  face.style.transform = `rotate(${-deg}deg)`;
+  face.style.transition = `transform var(--t-step) var(--ease-out-expo)`;
+}
+
+function setServings(next, { preserveVelocity = false } = {}) {
+  next = Math.max(1, Math.min(20, Math.round(next)));
+  if (next === currentServings) return;
+  currentServings = next;
+  // Detent
+  SFX.tock();
+  HAPTIC.tick();
+  // Animate scaler value pop
+  const val = document.getElementById('scalerValue');
+  val.style.animation = 'none'; void val.offsetWidth;
+  animateSpring(0.92, 1, SPRING.stiff, x => { val.style.transform = `scale(${x})`; });
+  updateScalerReadout();
+  updateDialVisuals();
+  // Pulse ingredient dots
+  const dots = document.querySelectorAll('#ingredientList .dot');
+  const amounts = document.querySelectorAll('#ingredientList .amount');
+  dots.forEach((dot, i) => {
+    setTimeout(() => {
+      animateSpring(1.45, 1, SPRING.stiff, x => { dot.style.transform = `scale(${x})`; });
+    }, i * 20);
+  });
+  // Recompute amounts (in place, no rerender)
+  const r = currentRecipe;
+  const multiplier = currentServings / r.servings;
+  (r.ingredients || []).forEach((ing, i) => {
+    const scaled = ing.a * multiplier;
+    const { a, u } = convertUnit(scaled, ing.u);
+    if (amounts[i]) amounts[i].textContent = `${formatAmount(a)}${u ? ' ' + u : ''}`;
+  });
+}
+
+/* ────────────────────────────────────────────────
+   7. SCALER DIAL — drag with inertia
+   ──────────────────────────────────────────────── */
+function initScaler() {
+  const dial = document.getElementById('scalerDial');
+  let dragging = false;
+  let startAngle = 0;
+  let startServings = currentServings;
+  let lastAngle = 0;
+  let lastTime = 0;
+  let angularVelocity = 0;
+
+  function angleFromEvent(e) {
+    const rect = dial.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const x = (e.clientX ?? (e.touches && e.touches[0].clientX)) - cx;
+    const y = (e.clientY ?? (e.touches && e.touches[0].clientY)) - cy;
+    return Math.atan2(y, x) * 180 / Math.PI;
+  }
+
+  function onDown(e) {
+    dragging = true;
+    startAngle = angleFromEvent(e);
+    startServings = currentServings;
+    lastAngle = startAngle;
+    lastTime = performance.now();
+    angularVelocity = 0;
+    dial.setPointerCapture?.(e.pointerId ?? 1);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const ang = angleFromEvent(e);
+    let delta = ang - startAngle;
+    // Normalize -180..180
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+    const servingsDelta = Math.round(delta / 18);
+    const next = Math.max(1, Math.min(20, startServings + servingsDelta));
+    if (next !== currentServings) setServings(next);
+    // Velocity sampling
+    const now = performance.now();
+    const dt = now - lastTime;
+    if (dt > 0) angularVelocity = (ang - lastAngle) / dt; // deg/ms
+    lastAngle = ang;
+    lastTime = now;
+  }
+
+  function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    // Inertia: decay angularVelocity, translate into servings nudges
+    if (Math.abs(angularVelocity) > 0.4) {
+      const direction = Math.sign(angularVelocity);
+      const magnitude = Math.min(4, Math.floor(Math.abs(angularVelocity) * 2));
+      for (let i = 1; i <= magnitude; i++) {
+        setTimeout(() => setServings(currentServings + direction), i * 90);
+      }
+    }
+  }
+
+  dial.addEventListener('pointerdown', onDown);
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+
+  // Keyboard
+  dial.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { setServings(currentServings + 1); e.preventDefault(); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { setServings(currentServings - 1); e.preventDefault(); }
+  });
+
+  document.getElementById('scalerPlus').addEventListener('click', () => setServings(currentServings + 1));
+  document.getElementById('scalerMinus').addEventListener('click', () => setServings(currentServings - 1));
+}
+
+/* ────────────────────────────────────────────────
+   8. UNIT TOGGLE
+   ──────────────────────────────────────────────── */
+function initUnitToggle() {
+  const t = document.getElementById('unitToggle');
+  t.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const unit = btn.dataset.unit;
+    if (unit === currentUnit) return;
+    currentUnit = unit;
+    t.dataset.active = unit;
+    t.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.unit === unit));
+    SFX.tock();
+    HAPTIC.tick();
+    // Rerender amounts
+    const r = currentRecipe;
+    const multiplier = currentServings / r.servings;
+    const amounts = document.querySelectorAll('#ingredientList .amount');
+    (r.ingredients || []).forEach((ing, i) => {
+      const scaled = ing.a * multiplier;
+      const { a, u } = convertUnit(scaled, ing.u);
+      if (amounts[i]) {
+        amounts[i].style.opacity = '0';
+        setTimeout(() => {
+          amounts[i].textContent = `${formatAmount(a)}${u ? ' ' + u : ''}`;
+          amounts[i].style.opacity = '1';
+          amounts[i].style.transition = 'opacity 160ms var(--ease-out-quart)';
+        }, 80);
+      }
+    });
+  });
+}
+
+/* ────────────────────────────────────────────────
+   9. SHARED-ELEMENT HAND-OFF (list → detail)
+   ──────────────────────────────────────────────── */
+function handoffToDetail(recipe, fromCard) {
+  currentRecipe = recipe;
+  currentServings = recipe.servings;
+  currentUnit = 'metric';
+  const unitToggleEl = document.getElementById('unitToggle');
+  unitToggleEl.dataset.active = 'metric';
+  unitToggleEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.unit === 'metric'));
+
+  const cover = fromCard.querySelector('.cover');
+  const title = fromCard.querySelector('.title');
+
+  // Create clones before hiding source
+  const coverClone = cover.cloneNode(true);
+  const titleClone = title.cloneNode(true);
+  const coverRect = cover.getBoundingClientRect();
+  const titleRect = title.getBoundingClientRect();
+
+  coverClone.className = 'handoff-clone';
+  Object.assign(coverClone.style, {
+    left: coverRect.left + 'px', top: coverRect.top + 'px',
+    width: coverRect.width + 'px', height: coverRect.height + 'px',
+    borderRadius: '16px',
+    transition: 'all var(--t-hero) var(--ease-in-out-exp)',
+    overflow: 'hidden',
+  });
+
+  titleClone.className = 'handoff-clone';
+  Object.assign(titleClone.style, {
+    left: titleRect.left + 'px', top: titleRect.top + 'px',
+    color: 'var(--bone)',
+    fontFamily: "'Noto Serif JP', serif",
+    fontWeight: '500',
+    transition: 'all var(--t-hero) var(--ease-in-out-exp)',
+    padding: '0',
+    margin: '0',
+  });
+
+  document.body.appendChild(coverClone);
+  document.body.appendChild(titleClone);
+
+  // Switch screens (but keep target hidden until after hand-off starts)
+  document.body.classList.add('during-handoff');
+  showScreen('detail', { skipCascadeTrigger: true });
+
+  // Force layout, then measure target positions
+  requestAnimationFrame(() => {
+    const heroTarget = document.getElementById('detailHero');
+    const titleTarget = document.getElementById('detailTitle');
+    const heroRect = heroTarget.getBoundingClientRect();
+    const titleTargetRect = titleTarget.getBoundingClientRect();
+
+    // Hide targets until hand-off completes
+    heroTarget.style.opacity = '0';
+    titleTarget.style.opacity = '0';
+
+    // Start the hand-off on next frame
+    requestAnimationFrame(() => {
+      Object.assign(coverClone.style, {
+        left: heroRect.left + 'px', top: heroRect.top + 'px',
+        width: heroRect.width + 'px', height: heroRect.height + 'px',
+        borderRadius: '22px',
+      });
+      Object.assign(titleClone.style, {
+        left: titleTargetRect.left + 'px', top: titleTargetRect.top + 'px',
+        fontSize: getComputedStyle(titleTarget).fontSize,
+      });
+    });
+
+    setTimeout(() => {
+      heroTarget.style.opacity = '1';
+      titleTarget.style.opacity = '1';
+      coverClone.remove(); titleClone.remove();
+      document.body.classList.remove('during-handoff');
+      // Trigger the ingredient cascade
+      const list = document.getElementById('ingredientList');
+      list.classList.remove('cascade'); void list.offsetWidth; list.classList.add('cascade');
+      SFX.start();
+      HAPTIC.nudge();
+    }, 880);
+  });
+}
+
+/* ────────────────────────────────────────────────
+   10. SCREEN ROUTER
+   ──────────────────────────────────────────────── */
+function showScreen(name, opts = {}) {
+  document.getElementById('login-screen').hidden = name !== 'login';
+  document.getElementById('list-screen').hidden = name !== 'list';
+  document.getElementById('detail-screen').hidden = name !== 'detail';
+  document.getElementById('mainNav').hidden = name === 'login';
+  document.querySelectorAll('.nav-tab[data-screen]').forEach(tab => {
+    tab.setAttribute('aria-current', tab.dataset.screen === name ? 'true' : 'false');
+  });
+  if (name === 'list') renderList();
+  if (name === 'detail' && !opts.skipCascadeTrigger) renderDetail();
+  else if (name === 'detail') renderDetail();
+  updateHint(name);
+}
+
+/* ────────────────────────────────────────────────
+   11. COOK MODE
+   ──────────────────────────────────────────────── */
+let cookIndex = 0;
+let cookOpen = false;
+let cookTimerInterval = null;
+
+function openCook() {
+  cookIndex = 0;
+  const scr = document.getElementById('cook-screen');
+  scr.dataset.open = 'true';
+  cookOpen = true;
+  renderCookStep('right');
+  updateHint('cook');
+}
+
+function closeCook() {
+  const scr = document.getElementById('cook-screen');
+  scr.dataset.open = 'false';
+  cookOpen = false;
+  if (cookTimerInterval) { clearInterval(cookTimerInterval); cookTimerInterval = null; }
+  updateHint(document.getElementById('detail-screen').hidden ? 'list' : 'detail');
+}
+
+function renderCookStep(direction) {
+  const body = document.getElementById('cookBody');
+  const steps = currentRecipe.steps || [];
+  const total = steps.length;
+  const step = steps[cookIndex];
+  if (!step) return;
+
+  // Animate out existing
+  const prev = body.querySelector('.cook-step');
+  if (prev) {
+    prev.classList.add(direction === 'right' ? 'leaving-left' : 'leaving-right');
+    setTimeout(() => prev.remove(), 260);
+  }
+
+  // Build new
+  const el = document.createElement('div');
+  el.className = 'cook-step ' + (direction === 'right' ? 'entering-right' : 'entering-left');
+  el.innerHTML = `
+    <span class="num">Step ${cookIndex + 1} of ${total}</span>
+    <p class="body">${step.body}</p>
+    ${step.items.length ? `<div class="ingredients">${step.items.map(i => `<span class="ing-chip">${i}</span>`).join('')}</div>` : ''}
+    ${step.timer ? `
+      <div class="cook-timer">
+        <svg width="180" height="180" viewBox="0 0 180 180">
+          <circle class="ring-bg" cx="90" cy="90" r="75" />
+          <circle class="ring-fill" cx="90" cy="90" r="75" />
+        </svg>
+        <div class="label-center tabular" id="timerDisplay">${Math.floor(step.timer/60).toString().padStart(2,'0')}:${(step.timer%60).toString().padStart(2,'0')}</div>
+      </div>
+    ` : ''}
+  `;
+  body.appendChild(el);
+
+  // Progress bar
+  document.getElementById('cookBar').style.width = `${((cookIndex+1)/total)*100}%`;
+  document.getElementById('cookCount').textContent = `${cookIndex + 1} / ${total}`;
+  document.getElementById('cookAdvance').textContent = cookIndex === total - 1 ? 'Finish' : 'Mark done & next';
+
+  // Timer progress
+  if (cookTimerInterval) { clearInterval(cookTimerInterval); cookTimerInterval = null; }
+  if (step.timer) {
+    const startTime = Date.now();
+    const total = step.timer;
+    const ring = el.querySelector('.ring-fill');
+    const disp = el.querySelector('#timerDisplay');
+    if (ring && disp) {
+      ring.style.transition = 'none';
+      ring.style.strokeDashoffset = '471';
+      cookTimerInterval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const remaining = Math.max(0, total - elapsed);
+        const frac = remaining / total;
+        ring.style.transition = 'stroke-dashoffset 200ms linear';
+        ring.style.strokeDashoffset = (471 * (1 - (1 - frac))) + '';
+        ring.style.strokeDashoffset = (471 * (1 - frac)) + '';
+        disp.textContent = `${Math.floor(remaining/60).toString().padStart(2,'0')}:${Math.floor(remaining%60).toString().padStart(2,'0')}`;
+        if (remaining <= 0) { clearInterval(cookTimerInterval); SFX.complete(); HAPTIC.confirm(); }
+      }, 200);
+    }
+  }
+}
+
+function cookAdvance(direction = 'right') {
+  const total = (currentRecipe.steps || []).length;
+  if (direction === 'right') {
+    if (cookIndex < total - 1) {
+      cookIndex++;
+      SFX.advance(); HAPTIC.snap();
+      renderCookStep('right');
+    } else {
+      // Finish
+      SFX.complete(); HAPTIC.confirm();
+      toast('Service complete');
+      closeCook();
+    }
+  } else {
+    if (cookIndex > 0) {
+      cookIndex--;
+      SFX.back(); HAPTIC.snap();
+      renderCookStep('left');
+    }
+  }
+}
+
+/* ────────────────────────────────────────────────
+   12. COOK MODE SWIPE
+   ──────────────────────────────────────────────── */
+function initCookSwipe() {
+  const body = document.getElementById('cookBody');
+  let startX = 0, startT = 0, currentX = 0, dragging = false;
+  body.addEventListener('pointerdown', (e) => {
+    startX = e.clientX; startT = performance.now(); currentX = e.clientX; dragging = true;
+  });
+  body.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    currentX = e.clientX;
+  });
+  body.addEventListener('pointerup', () => {
+    if (!dragging) return;
+    dragging = false;
+    const dx = currentX - startX;
+    const dt = performance.now() - startT;
+    const vx = Math.abs(dx) / dt;
+    if (Math.abs(dx) > 72 || vx > 0.35) {
+      cookAdvance(dx < 0 ? 'right' : 'left');
+    }
+  });
+  body.addEventListener('pointercancel', () => { dragging = false; });
+}
+
+/* ────────────────────────────────────────────────
+   13. HINT OVERLAY
+   ──────────────────────────────────────────────── */
+function updateHint(name) {
+  const hint = document.getElementById('hint');
+  const messages = {
+    login:  'Click <b>Enter the pass</b>. Watch the wordmark stroke in, the card spring, the ambient drift.',
+    list:   'Hover a card. <b>Click the first (Smoked tomato ragù)</b> to see the hand-off transition.',
+    detail: '<b>Drag the dial</b>, or use <b>+/−</b>. Dotted lines pulse, amounts recompute. Then click <b>Cook mode</b>.',
+    cook:   '<b>Swipe</b> or tap <b>Next</b>. Each step is a cut — outgoing blurs, incoming lands. Haptics + tones paired.',
+  };
+  hint.innerHTML = messages[name] || '';
+}
+
+/* ────────────────────────────────────────────────
+   14. BOOT
+   ──────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderDialTicks();
+
+  // Login
+  document.getElementById('loginBtn').addEventListener('click', () => {
+    ensureAudio();
+    SFX.confirm();
+    HAPTIC.hero();
+    const card = document.getElementById('loginCard');
+    // Card lift then fade
+    card.style.transition = 'transform 420ms var(--ease-in-out-exp), opacity 380ms var(--ease-out-expo), filter 380ms ease';
+    card.style.transform = 'translateY(-24px) scale(0.96)';
+    card.style.opacity = '0';
+    card.style.filter = 'blur(6px)';
+    setTimeout(() => {
+      showScreen('list');
+      toast('Welcome back, Chef.');
+    }, 380);
+  });
+  document.getElementById('enterAsDemo').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('email').value = 'demo@sakai.app';
+  });
+
+  // Nav tabs
+  document.querySelectorAll('.nav-tab[data-screen]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const name = tab.dataset.screen;
+      if (name === 'detail') { currentRecipe = RECIPES[0]; currentServings = currentRecipe.servings; }
+      showScreen(name);
+    });
+  });
+  document.getElementById('openCookBtn').addEventListener('click', openCook);
+  document.getElementById('detailCookBtn').addEventListener('click', openCook);
+  document.getElementById('cookClose').addEventListener('click', closeCook);
+  document.getElementById('cookPrev').addEventListener('click', () => cookAdvance('left'));
+  document.getElementById('cookNext').addEventListener('click', () => cookAdvance('right'));
+  document.getElementById('cookAdvance').addEventListener('click', () => cookAdvance('right'));
+
+  // Tag rail
+  document.querySelectorAll('#tagRail .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const now = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', now ? 'false' : 'true');
+      SFX.tock(); HAPTIC.tick();
+      animateSpring(0.92, 1, SPRING.stiff, x => { chip.style.transform = `scale(${x})`; });
+    });
+  });
+
+  // Back from detail
+  document.querySelector('.detail-back').addEventListener('click', () => showScreen('list'));
+
+  // Scaler + unit
+  initScaler();
+  initUnitToggle();
+  initCookSwipe();
+
+  // Keyboard — / to focus search
+  window.addEventListener('keydown', (e) => {
+    if (cookOpen) {
+      if (e.key === 'ArrowRight') cookAdvance('right');
+      if (e.key === 'ArrowLeft')  cookAdvance('left');
+      if (e.key === 'Escape')     closeCook();
+      return;
+    }
+    if (e.key === '/' && !document.getElementById('list-screen').hidden) {
+      const s = document.getElementById('searchInput');
+      if (s) { s.focus(); s.select(); e.preventDefault(); }
+    }
+  });
+
+  // Primary path: land on login for the first beat
+  showScreen('login');
+
+  // Preamble: play wordmark reveal + hint
+  setTimeout(() => {
+    document.querySelectorAll('.stroke-reveal').forEach(el => el.classList.add('done'));
+  }, 50);
+});
+</script>
+</body>
+</html>

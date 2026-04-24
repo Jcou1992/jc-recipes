@@ -1,0 +1,265 @@
+/* ============================================================
+   SEKAI · tokens-editorial.css
+   Additive overlay to globals.css. All tokens extend, none
+   replace. Gated by html.ed so legacy UI continues to render
+   if the class is removed.
+
+   Phase-1 deliverable. Loaded AFTER globals.css:
+     app/layout.tsx
+       import './globals.css'
+       import './tokens-editorial.css'
+   ============================================================ */
+
+html.ed {
+  /* ─ Paper & ink — light theme ─────────────────────────────── */
+  --paper-newsprint: oklch(93.5% 0.018 82);
+  --paper-cream:     oklch(96.5% 0.024 85);
+  --paper-deckle:    oklch(89.0% 0.020 82);
+  --ink-body:        oklch(14% 0.008 60);
+  --ink-rule:        oklch(38% 0.010 60);
+  --ink-caption:     oklch(42% 0.012 60);
+
+  /* ─ Night press — dark theme ──────────────────────────────── */
+  --night-paper:   oklch(12% 0.008 50);
+  --night-raised:  oklch(15% 0.009 50);
+  --night-body:    oklch(89% 0.014 80);
+  --night-rule:    oklch(55% 0.010 60);
+  --night-caption: oklch(68% 0.012 70);
+
+  /* ─ Rules ─────────────────────────────────────────────────── */
+  --rule-hair: 0.75px;
+  --rule-fine: 1px;
+
+  /* ─ Editorial rhythm — 6px baseline ──────────────────────── */
+  --r-1: 6px; --r-2: 12px; --r-3: 18px; --r-4: 24px;
+  --r-5: 36px; --r-6: 48px; --r-7: 72px; --r-8: 108px; --r-9: 144px;
+
+  /* ─ Motion — press cadence ────────────────────────────────── */
+  --ease-press: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --ease-set:   cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-page:  cubic-bezier(0.16, 1, 0.3, 1);
+  --t-whisper:  120ms;
+  --t-set:      240ms;
+  --t-turn:     420ms;
+  --t-folio:    620ms;
+
+  /* ─ Type scale (px @ base=22px = 1rem) ───────────────────── */
+  --type-kicker:   11px;
+  --type-caption:  13px;
+  --type-meta:     15px;
+  --type-body-sm:  18px;
+  --type-body:     22px;
+  --type-lede:     26px;
+  --type-dek:      32px;
+  --type-head-sm:  44px;
+  --type-head:     72px;
+  --type-head-lg: 128px;
+  --type-folio:   160px;
+
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.45;
+  --lh-body:   1.65;
+  --lh-loose:  1.85;
+
+  --track-tight:   -0.02em;
+  --track-caption:  0.02em;
+  --track-kicker:   0.18em;
+  --track-folio:   -0.04em;
+}
+
+/* ─ Semantic remap under .ed ─────────────────────────────────── */
+html.ed, html.ed[data-theme="dark"] {
+  --bg:          var(--night-paper);
+  --bg-card:     var(--night-paper);       /* no card fill */
+  --bg-raised:   var(--night-raised);
+  --bg-input:    transparent;              /* inputs are rule-bottom only */
+  --text-1:      var(--night-body);
+  --text-2:      var(--night-caption);
+  --text-3:      var(--night-rule);
+  --border:      var(--night-rule);
+  --border-input: var(--night-rule);
+  --shadow-card: none;                     /* rules replace shadows */
+}
+html.ed[data-theme="light"] {
+  --bg:          var(--paper-cream);
+  --bg-card:     var(--paper-cream);
+  --bg-raised:   var(--paper-newsprint);
+  --bg-input:    transparent;
+  --text-1:      var(--ink-body);
+  --text-2:      var(--ink-caption);
+  --text-3:      var(--ink-rule);
+  --border:      var(--ink-rule);
+  --border-input: var(--ink-rule);
+  --shadow-card: none;
+}
+
+/* ─ Editorial utilities ─────────────────────────────────────── */
+html.ed .tabular { font-variant-numeric: lining-nums tabular-nums; }
+html.ed .oldstyle { font-variant-numeric: oldstyle-nums proportional-nums; }
+
+html.ed .kicker {
+  font-family: var(--font-barlow, 'Barlow Condensed', sans-serif);
+  font-size: var(--type-kicker);
+  letter-spacing: var(--track-kicker);
+  text-transform: uppercase;
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+html.ed .rule-line        { height: var(--rule-fine); background: var(--border); }
+html.ed .rule-line.hair   { height: var(--rule-hair); }
+
+/* ─ Editorial button — flat with ink-fill sweep ─────────────── */
+html.ed .btn-primary,
+html.ed .btn-ghost,
+html.ed .btn-danger {
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  transition: color var(--t-whisper) var(--ease-press);
+}
+html.ed .btn-primary::before,
+html.ed .btn-ghost::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: currentColor;
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0.08;
+  transition: transform var(--t-set) var(--ease-press);
+  z-index: 0;
+  pointer-events: none;
+}
+html.ed .btn-primary:hover::before,
+html.ed .btn-ghost:hover::before { transform: scaleX(1); }
+html.ed .btn-primary:active,
+html.ed .btn-ghost:active { transform: none; box-shadow: inset 0 0 0 2px var(--color-terracotta); }
+
+/* ─ Editorial input — bottom-only rule ─────────────────────── */
+html.ed .input-base {
+  border-radius: 0;
+  border: none;
+  border-bottom: var(--rule-fine) solid var(--border-input);
+  padding: 10px 0;
+  background: transparent;
+}
+html.ed .input-base:focus {
+  border-bottom-color: var(--color-terracotta);
+  box-shadow: none;
+}
+html.ed .input-base:focus-visible {
+  outline: none;
+  border-bottom-width: 1.5px;
+}
+
+/* ─ Section label override ─────────────────────────────────── */
+html.ed .section-label {
+  letter-spacing: var(--track-kicker);
+  padding-bottom: 6px;
+  border-bottom: var(--rule-fine) solid var(--border);
+  margin-bottom: var(--r-3);
+  display: block;
+}
+
+/* ─ Drop cap utility — used by DropCap.tsx ─────────────────── */
+html.ed .dropcap {
+  float: left;
+  font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+  font-size: 4.5rem;
+  line-height: 0.9;
+  font-weight: 500;
+  color: var(--color-terracotta);
+  padding: 6px 10px 0 0;
+  font-variant-numeric: oldstyle-nums;
+}
+
+/* ─ Margin folio — used by MarginFolio.tsx ─────────────────── */
+html.ed .folio {
+  font-family: var(--font-cormorant, 'Cormorant Garamond', serif);
+  font-size: var(--type-folio);
+  font-weight: 300;
+  letter-spacing: var(--track-folio);
+  color: var(--text-2);
+  font-variant-numeric: oldstyle-nums;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+/* ─ Clip-wipe "set" — used by EditorialGrid page mounts ────── */
+@keyframes clip-set {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+html.ed .set-in { animation: clip-set var(--t-set) var(--ease-set) both; }
+
+/* ─ Turn transition — used by CookMode step change ─────────── */
+@keyframes page-turn-in {
+  from { opacity: 0; clip-path: inset(0 100% 0 0); }
+  to   { opacity: 1; clip-path: inset(0 0 0 0); }
+}
+html.ed .turn-in { animation: page-turn-in var(--t-turn) var(--ease-page) both; }
+
+/* ─ Feature swap — qty / scaler / macro crossfade ──────────── */
+html.ed .feature-swap {
+  display: inline-block;
+  transition: opacity var(--t-whisper) var(--ease-press);
+}
+html.ed .feature-swap.swapping { opacity: 0; }
+
+/* Gold underline sweep for the changed ingredient row */
+@keyframes gold-sweep-ed {
+  from { transform: scaleX(0); opacity: 0.9; }
+  to   { transform: scaleX(1); opacity: 0; }
+}
+html.ed .row-gold-sweep {
+  position: relative;
+}
+html.ed .row-gold-sweep::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+  transform-origin: left;
+  animation: gold-sweep-ed 520ms var(--ease-set) forwards;
+  pointer-events: none;
+}
+
+/* ─ Recipe card → TOC row ──────────────────────────────────── */
+html.ed .recipe-card {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  html.ed .recipe-card:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+    border-color: transparent;
+  }
+}
+
+/* ─ Reduced motion — degrade set/turn to opacity ───────────── */
+@media (prefers-reduced-motion: reduce) {
+  html.ed .set-in,
+  html.ed .turn-in {
+    animation: none !important;
+    opacity: 1;
+    clip-path: none;
+  }
+  html.ed .row-gold-sweep::after { display: none; }
+}
+
+/* ─ Print — brand fix: Cormorant, not Georgia ──────────────── */
+@media print {
+  html.ed body {
+    font-family: var(--font-cormorant, 'Cormorant Garamond', Georgia, serif) !important;
+  }
+}

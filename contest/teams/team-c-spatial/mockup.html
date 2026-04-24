@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>SEKAI 世界 — Spatial-3D proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+JP:wght@400;500;700&family=Barlow+Condensed:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- three.js pinned to r162 (ESM CDN) — ~160KB gzip, tree-shaking in real build drops it to ~70KB -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.162.0/build/three.module.js"
+  }
+}
+</script>
+
+<style>
+/* ── Brand tokens (copied verbatim from globals.css, dark default) ────────── */
+:root {
+  --color-terracotta:          oklch(63.2% 0.148 45);
+  --color-terracotta-dark:     oklch(40% 0.145 44);
+  --color-terracotta-contrast: oklch(47% 0.16 45);
+  --color-gold:                oklch(86.5% 0.089 89);
+  --color-bone:                oklch(95.3% 0.014 85);
+  --color-ink:                 oklch(11% 0.004 285);
+  --bg:            oklch(11% 0.004 285);
+  --bg-card:       #131315;
+  --bg-raised:     #1C1C1F;
+  --bg-input:      #1A1A1D;
+  --border:        oklch(100% 0 0 / 0.07);
+  --border-input:  oklch(100% 0 0 / 0.13);
+  --text-1:        #EDE8DC;
+  --text-2:        #A89E92;
+  --text-3:        #8A7E72;
+  --ring:          oklch(63.2% 0.148 45 / 0.45);
+  --shadow-card:   0 0 0 1px oklch(100% 0 0 / 0.04), 0 2px 12px oklch(0 0 0 / 0.45);
+  --shadow-dialog: 0 0 0 1px oklch(100% 0 0 / 0.06), 0 24px 64px oklch(0 0 0 / 0.7);
+
+  /* SPATIAL-3D additions ─────────────────────────────────────────────────── */
+  --hdr-gold-leaf:   oklch(92% 0.12 90);
+  --hdr-pass-lamp:   oklch(82% 0.14 75);
+  --hdr-terracotta-hot: oklch(68% 0.19 44);
+
+  --mat-clay-2d:
+      radial-gradient(120% 80% at 50% 0%,
+        oklch(58% 0.13 40) 0%, oklch(42% 0.11 38) 60%, oklch(28% 0.07 34) 100%);
+  --mat-cedar-2d:
+      repeating-linear-gradient(92deg,
+        oklch(48% 0.08 70) 0px, oklch(44% 0.07 68) 1px,
+        oklch(48% 0.08 70) 3px, oklch(52% 0.09 72) 4px);
+  --mat-gold-2d:
+      linear-gradient(105deg,
+        oklch(78% 0.10 88) 0%, oklch(94% 0.14 92) 45%,
+        oklch(78% 0.10 88) 70%, oklch(96% 0.12 92) 100%);
+  --mat-iron-2d:
+      radial-gradient(140% 100% at 30% 30%,
+        oklch(28% 0.01 240) 0%, oklch(18% 0.005 240) 100%);
+  --mat-porcelain-2d:
+      linear-gradient(165deg, oklch(98% 0.005 85) 0%, oklch(94% 0.005 85) 100%);
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-camera-settle: 820ms;
+  --motion-pass-relight:  400ms;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;overflow-x:clip;max-width:100vw;background:var(--bg);color:var(--text-1);
+  font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
+@media (min-width: 900px){ html,body{font-size:19px;} }
+body{min-height:100svh}
+h1,h2,h3{text-wrap:balance;margin:0;font-weight:500}
+p{text-wrap:pretty;margin:0}
+
+.font-display{font-family:'Noto Serif JP',Georgia,serif;font-feature-settings:'palt' 1}
+.font-label  {font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:500}
+.tabular-nums{font-variant-numeric:tabular-nums}
+
+/* Ambient grain (from globals.css) */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.025;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* ── Nav (proposal-only chrome so you can jump between surfaces) ──────── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;backdrop-filter:blur(16px) saturate(1.4);
+  background:color-mix(in oklch, var(--bg) 80%, transparent);border-bottom:1px solid var(--border)}
+.nav-brand{font-family:'Noto Serif JP',serif;font-size:16px;letter-spacing:.18em}
+.nav-brand .kanji{color:var(--color-gold);margin-left:6px}
+.nav-links{display:flex;gap:4px}
+.nav-btn{background:transparent;border:1px solid transparent;color:var(--text-2);font-family:'Barlow Condensed',sans-serif;
+  text-transform:uppercase;letter-spacing:.12em;font-size:11px;padding:8px 10px;cursor:pointer;border-radius:4px;min-height:32px}
+.nav-btn:hover{color:var(--text-1);border-color:var(--border)}
+.nav-btn[aria-current="true"]{color:var(--color-gold);border-color:color-mix(in oklch, var(--color-gold) 30%, transparent)}
+
+/* ── Screen routing ───────────────────────────────────────────────────── */
+.screen{display:none;min-height:100svh;padding:72px 0 40px}
+.screen.is-active{display:block;animation:fade-in .3s var(--ease-out-quint)}
+@keyframes fade-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LOGIN — the passage
+   ──────────────────────────────────────────────────────────────────────── */
+#screen-login{position:relative;overflow:hidden;padding-top:0;display:none;min-height:100svh}
+#screen-login.is-active{display:flex;flex-direction:column;align-items:center;justify-content:center}
+#login-canvas{position:absolute;inset:0;z-index:0;width:100%;height:100%}
+.login-fallback{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(50% 40% at 50% 45%, color-mix(in oklch, var(--hdr-terracotta-hot) 30%, transparent) 0%, transparent 70%),
+    radial-gradient(80% 80% at 50% 110%, color-mix(in oklch, var(--hdr-pass-lamp) 20%, transparent) 0%, transparent 60%),
+    var(--bg);
+  opacity:1;transition:opacity 620ms var(--ease-out-quint);
+}
+.login-fallback.hidden{opacity:0}
+.login-stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:28px;padding:24px}
+
+.wordmark-2d{font-family:'Noto Serif JP',serif;font-size:clamp(48px,9vw,120px);font-weight:500;line-height:1;
+  letter-spacing:.02em;display:flex;align-items:baseline;gap:12px;color:var(--color-bone)}
+.wordmark-2d .roman{background:var(--mat-gold-2d);-webkit-background-clip:text;background-clip:text;color:transparent;
+  font-family:'Cormorant Garamond',serif;font-weight:500;font-style:italic}
+.wordmark-2d .kanji{background:var(--mat-gold-2d);-webkit-background-clip:text;background-clip:text;color:transparent;
+  font-size:.85em}
+
+.login-panel{background:var(--mat-porcelain-2d);color:var(--color-ink);padding:28px 32px;border-radius:10px;
+  width:min(360px, calc(100vw - 48px));box-shadow:var(--shadow-dialog);
+  border:1px solid oklch(11% 0.004 285 / 0.08);
+  transform:translateY(8px);opacity:0;animation:panel-in .6s 1s var(--ease-out-quint) forwards}
+@keyframes panel-in{to{transform:translateY(0);opacity:1}}
+.login-panel .hint{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:oklch(40% 0.03 45);margin-bottom:14px}
+.login-panel input{width:100%;font-family:'Cormorant Garamond',serif;font-size:16px;padding:12px 14px;border-radius:6px;
+  background:#fff;border:1px solid oklch(11% 0.004 285 / 0.12);color:var(--color-ink);margin-bottom:10px;min-height:44px}
+.login-panel input:focus{outline:2px solid var(--color-terracotta);outline-offset:2px}
+.login-panel button{width:100%;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;
+  font-weight:600;font-size:14px;min-height:44px;background:var(--color-terracotta-contrast);color:var(--color-bone);
+  border:none;border-radius:6px;cursor:pointer;transition:background .15s}
+.login-panel button:hover{background:var(--color-terracotta-dark)}
+.login-caption{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--text-3);margin-top:4px;text-align:center}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LIST — material-sample recipe cards
+   ──────────────────────────────────────────────────────────────────────── */
+#screen-list .list-wrap{max-width:1180px;margin:0 auto;padding:0 20px;position:relative}
+.list-head{display:flex;align-items:start;justify-content:space-between;gap:16px;margin-bottom:28px}
+.space-name{font-family:'Noto Serif JP',serif;font-size:clamp(26px,3.6vw,40px);font-weight:500;letter-spacing:-.01em;color:var(--text-1)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;background:var(--color-terracotta-contrast);
+  color:var(--color-bone);border:none;border-radius:6px;padding:10px 20px;font-family:'Barlow Condensed',sans-serif;
+  font-size:14px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;min-height:44px;
+  transition:background .15s,box-shadow .15s}
+.btn-primary:hover{background:var(--color-terracotta-dark);box-shadow:0 2px 12px color-mix(in oklch, var(--color-terracotta) 35%, transparent)}
+
+.search-row{display:flex;gap:10px;margin-bottom:16px}
+.search-input{flex:1;position:relative}
+.search-input input{width:100%;background:var(--bg-input);border:1px solid var(--border-input);border-radius:9999px;
+  color:var(--text-1);font-family:'Cormorant Garamond',serif;font-size:16px;padding:10px 14px 10px 40px;min-height:44px;
+  transition:border-color .15s}
+.search-input input:focus{outline:none;border-color:var(--color-terracotta);box-shadow:0 0 0 3px var(--ring)}
+.search-input svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-3)}
+
+.sort-pills{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.sort-pills button{background:transparent;border:1px solid var(--border);color:var(--text-2);border-radius:9999px;
+  padding:8px 14px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;min-height:44px;transition:all .15s}
+.sort-pills button[aria-pressed="true"]{color:var(--color-gold);border-color:color-mix(in oklch, var(--color-gold) 40%, transparent);
+  background:color-mix(in oklch, var(--color-gold) 10%, transparent)}
+
+.tag-rail{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.tag{background:color-mix(in oklch, var(--color-gold) 18%, transparent);
+  border:1px solid color-mix(in oklch, var(--color-gold) 40%, transparent);
+  color:var(--color-gold);font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;padding:6px 12px;border-radius:9999px;cursor:pointer;transition:transform .18s;min-height:32px;display:inline-flex;align-items:center}
+.tag:active{transform:scale(.96)}
+.tag[aria-pressed="true"]{background:var(--color-gold);color:var(--color-ink)}
+
+.recipe-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px;position:relative}
+
+.recipe-card{
+  position:relative;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:20px 20px 18px;
+  min-height:152px;
+  display:flex;flex-direction:column;justify-content:flex-end;gap:8px;
+  cursor:pointer;
+  transition:transform .22s var(--ease-out-quint), border-color .15s, box-shadow .18s;
+  overflow:hidden;
+  isolation:isolate;
+}
+.recipe-card::before{
+  /* material sample well — top-right 88×88 corner where the 3D sample will sit */
+  content:'';position:absolute;top:14px;right:14px;width:88px;height:88px;border-radius:10px;
+  background:var(--bg-raised);
+  border:1px solid var(--border);
+  z-index:1;
+  /* the 2D poster fallback — replaced by canvas when we upgrade */
+  background-image:var(--card-mat, var(--mat-clay-2d));background-size:cover;background-position:center;
+  transition:transform .28s var(--ease-out-quint), box-shadow .18s;
+  box-shadow:inset 0 0 0 1px oklch(100% 0 0 / 0.05), inset 0 -8px 20px oklch(0 0 0 / 0.25);
+}
+@media (hover:hover) and (pointer:fine){
+  .recipe-card:hover{transform:translateY(-3px);border-color:color-mix(in oklch, var(--color-terracotta) 30%, transparent);
+    box-shadow:0 0 0 1px rgba(255,255,255,0.06), 0 12px 32px rgba(0,0,0,0.55)}
+  .recipe-card:hover::before{transform:translateY(-2px) rotate(-1deg);box-shadow:inset 0 0 0 1px oklch(100% 0 0 / 0.1), 0 6px 14px oklch(0 0 0 / 0.45)}
+}
+.recipe-card .r-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text-1);line-height:1.15;max-width:calc(100% - 108px)}
+.recipe-card .r-desc{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--text-3);max-width:calc(100% - 108px);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.recipe-card .r-meta{display:flex;gap:10px;align-items:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-top:4px}
+.recipe-card .r-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3)}
+.recipe-card .r-mat-label{position:absolute;top:108px;right:14px;width:88px;text-align:center;
+  font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);z-index:2}
+
+.recipe-card[data-featured]{grid-column:1/-1}
+@media (min-width:700px){.recipe-card[data-featured]{grid-column:span 2}}
+.recipe-card[data-featured]{min-height:220px}
+.recipe-card[data-featured]::before{width:140px;height:140px;top:24px;right:24px}
+.recipe-card[data-featured] .r-mat-label{top:170px;right:24px;width:140px}
+.recipe-card[data-featured] .r-title{font-size:32px;max-width:calc(100% - 180px)}
+.recipe-card[data-featured] .r-desc{font-size:16px;max-width:calc(100% - 180px)}
+
+/* Canvas pool for cards — pinned to list screen */
+#card-pool-canvas{position:fixed;inset:0;pointer-events:none;z-index:-1}
+
+/* ────────────────────────────────────────────────────────────────────────
+   DETAIL — parallax cover + porcelain scaler
+   ──────────────────────────────────────────────────────────────────────── */
+#screen-detail .detail-wrap{max-width:760px;margin:0 auto;padding:0 20px}
+.detail-cover{position:relative;height:clamp(200px,40vh,360px);border-radius:16px;overflow:hidden;margin-bottom:28px;
+  background:var(--mat-clay-2d);box-shadow:var(--shadow-card)}
+.detail-cover .vignette{position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 65%, transparent 0%, oklch(0 0 0 / 0.5) 100%);pointer-events:none}
+.detail-cover .title-on-cover{position:absolute;left:28px;right:28px;bottom:24px;font-family:'Noto Serif JP',serif;
+  font-size:clamp(28px,5vw,56px);color:var(--color-bone);line-height:1.05;font-weight:500;
+  text-shadow:0 2px 24px oklch(0 0 0 / 0.5)}
+.detail-meta{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:28px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-2)}
+.detail-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--text-3)}
+
+.scaler-wrap{background:var(--bg-raised);border-radius:14px;border:1px solid var(--border);padding:24px;margin-bottom:28px;position:relative;overflow:hidden}
+.scaler-wrap .cedar-plank{position:absolute;inset:0;background:var(--mat-cedar-2d);opacity:.18;pointer-events:none}
+.scaler-row{display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;z-index:1}
+.scaler-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3)}
+.scaler-value{font-family:'Noto Serif JP',serif;font-size:42px;font-weight:500;color:var(--text-1);min-width:80px;text-align:center;
+  background:var(--mat-porcelain-2d);color:var(--color-ink);padding:4px 20px;border-radius:10px;
+  box-shadow:0 2px 14px oklch(0 0 0 / 0.5), inset 0 0 0 1px oklch(100% 0 0 / 0.08)}
+.scaler-btn{width:52px;height:52px;border-radius:50%;background:var(--bg-input);border:1px solid var(--border-input);
+  color:var(--text-1);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .12s, background .15s}
+.scaler-btn:active{transform:scale(.94);background:var(--color-terracotta-dark);color:var(--color-bone)}
+
+.section-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--text-3);margin-bottom:12px;margin-top:24px}
+
+.ingredient-row{display:grid;grid-template-columns:76px 1fr;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ingredient-row:last-child{border-bottom:none}
+.ingredient-row .amt{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--color-gold);font-variant-numeric:tabular-nums;text-align:right}
+.ingredient-row .name{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text-1)}
+
+.step-row{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.step-row .n{font-family:'Noto Serif JP',serif;font-size:22px;color:var(--color-terracotta);font-variant-numeric:tabular-nums}
+.step-row p{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--text-1);line-height:1.55}
+
+.detail-actions{display:flex;gap:12px;margin:32px 0 40px;flex-wrap:wrap}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;background:transparent;
+  color:var(--text-2);border:1px solid var(--border-input);border-radius:6px;padding:10px 16px;
+  font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+  cursor:pointer;min-height:44px;transition:all .15s}
+.btn-ghost:hover{color:var(--text-1);border-color:var(--text-3);background:var(--bg-raised)}
+
+/* ────────────────────────────────────────────────────────────────────────
+   COOK — pass-line lighting rig
+   ──────────────────────────────────────────────────────────────────────── */
+#screen-cook{padding:72px 20px 60px;max-width:960px;margin:0 auto;position:relative}
+.cook-title{font-family:'Noto Serif JP',serif;font-size:clamp(24px,3.2vw,32px);color:var(--text-1);margin-bottom:8px}
+.cook-sub{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:28px}
+
+.pass-stage{position:relative;height:clamp(200px,32vh,280px);border-radius:12px;overflow:hidden;margin-bottom:32px;
+  background:linear-gradient(180deg, oklch(14% 0.005 40) 0%, oklch(10% 0.005 40) 100%)}
+.pass-stage .plank{position:absolute;left:0;right:0;bottom:0;height:40%;background:var(--mat-cedar-2d);opacity:.45;
+  mask-image:linear-gradient(180deg, black 0%, black 60%, transparent 100%)}
+.plates{position:absolute;inset:0;display:flex;align-items:flex-end;gap:30px;padding:0 60px 28px;overflow-x:auto;scrollbar-width:none}
+.plates::-webkit-scrollbar{display:none}
+.plate{flex:0 0 auto;width:92px;height:92px;border-radius:50%;background:var(--mat-porcelain-2d);
+  position:relative;transition:transform var(--motion-pass-relight) var(--ease-out-quint), filter var(--motion-pass-relight) var(--ease-out-quint), box-shadow var(--motion-pass-relight) var(--ease-out-quint);
+  cursor:pointer;border:1px solid oklch(100% 0 0 / 0.06);
+  filter:brightness(.35) saturate(.7);transform:translateY(10px) scale(.82);
+  box-shadow:0 2px 8px oklch(0 0 0 / 0.5)}
+.plate.prev{filter:brightness(.25) saturate(.5) sepia(.4)}
+.plate.next{filter:brightness(.45) saturate(.7)}
+.plate.active{filter:brightness(1.1) saturate(1.1);transform:translateY(-6px) scale(1.08);
+  box-shadow:0 20px 50px color-mix(in oklch, var(--hdr-pass-lamp) 55%, transparent),
+             0 0 60px color-mix(in oklch, var(--hdr-pass-lamp) 30%, transparent),
+             inset 0 0 0 1px oklch(100% 0 0 / 0.2)}
+.plate .n{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Serif JP',serif;font-size:32px;color:var(--color-ink);font-weight:500}
+.plate .tag{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);font-family:'Barlow Condensed',sans-serif;
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);white-space:nowrap}
+
+/* Tungsten key-light — travels above the active plate */
+.pass-stage .key-lamp{
+  position:absolute;top:-40px;width:180px;height:180px;pointer-events:none;
+  background:radial-gradient(circle, color-mix(in oklch, var(--hdr-pass-lamp) 55%, transparent) 0%, transparent 65%);
+  transition:left var(--motion-pass-relight) var(--ease-out-expo);
+  mix-blend-mode:screen;
+  filter:blur(8px);
+}
+
+.cook-current{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:32px;margin-bottom:24px;box-shadow:var(--shadow-card)}
+.cook-current .step-no{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--color-terracotta);margin-bottom:14px}
+.cook-current .step-text{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,30px);font-weight:400;color:var(--text-1);line-height:1.35}
+
+.cook-controls{display:flex;gap:12px;justify-content:space-between;align-items:center;padding-top:12px}
+.cook-controls .counter{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3)}
+
+/* Reduced-motion kills 3D pass-line travel */
+@media (prefers-reduced-motion: reduce){
+  .plate,.pass-stage .key-lamp{transition:none !important}
+  .recipe-card::before{transition:none !important;transform:none !important}
+  #login-canvas{display:none}
+  .login-fallback{opacity:1 !important}
+}
+
+/* Focus */
+:focus-visible{outline:2px solid var(--color-terracotta);outline-offset:2px;border-radius:3px}
+
+.flag{position:fixed;bottom:12px;left:12px;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--text-3);background:var(--bg-raised);border:1px solid var(--border);border-radius:4px;
+  padding:5px 10px;z-index:200;user-select:none}
+.flag b{color:var(--color-gold);font-weight:500;margin-left:6px}
+</style>
+</head>
+<body>
+
+<!-- ── PROPOSAL NAV ──────────────────────────────────────────────────────── -->
+<nav class="nav" aria-label="Proposal navigation">
+  <div class="nav-brand">SEKAI<span class="kanji">世界</span></div>
+  <div class="nav-links">
+    <button class="nav-btn" data-goto="login">Login</button>
+    <button class="nav-btn" data-goto="list" aria-current="true">Recipes</button>
+    <button class="nav-btn" data-goto="detail">Detail</button>
+    <button class="nav-btn" data-goto="cook">Cook</button>
+  </div>
+</nav>
+
+<!-- ── LOGIN ─────────────────────────────────────────────────────────────── -->
+<section id="screen-login" class="screen" aria-labelledby="login-h">
+  <div class="login-fallback" id="login-fallback"></div>
+  <canvas id="login-canvas" aria-hidden="true"></canvas>
+  <div class="login-stage">
+    <h1 class="wordmark-2d" id="login-h">
+      <span class="roman">SEKAI</span><span class="kanji">世界</span>
+    </h1>
+    <form class="login-panel" onsubmit="event.preventDefault();">
+      <div class="hint">Invited only — no public signup</div>
+      <input type="email" placeholder="you@sakai.app" autocomplete="email" required />
+      <input type="password" placeholder="Password" autocomplete="current-password" required />
+      <button type="submit">Enter the kitchen</button>
+    </form>
+    <div class="login-caption">Tonight's service — terracotta, gold, steam</div>
+  </div>
+</section>
+
+<!-- ── LIST ──────────────────────────────────────────────────────────────── -->
+<section id="screen-list" class="screen is-active" aria-labelledby="list-h">
+  <div class="list-wrap">
+    <div class="list-head">
+      <h1 id="list-h" class="space-name">JC's kitchen</h1>
+      <button class="btn-primary">+ New recipe</button>
+    </div>
+
+    <div class="search-row">
+      <div class="search-input">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="search" placeholder="Search recipes — press /" aria-label="Search recipes" />
+      </div>
+    </div>
+
+    <div class="sort-pills" role="radiogroup" aria-label="Sort">
+      <button aria-pressed="true">Newest</button>
+      <button>A–Z</button>
+      <button>Fastest</button>
+      <button>Most ingredients</button>
+    </div>
+
+    <div class="tag-rail" role="toolbar" aria-label="Filter by tag">
+      <button class="tag" aria-pressed="true">Pasta</button>
+      <button class="tag">Weeknight</button>
+      <button class="tag">Slow</button>
+      <button class="tag">Japanese</button>
+      <button class="tag">Grill</button>
+      <button class="tag">Dessert</button>
+      <button class="tag">Bread</button>
+      <button class="tag">Salad</button>
+    </div>
+
+    <div class="recipe-grid" id="recipe-grid">
+      <!-- Populated by JS so we can assign the right material -->
+    </div>
+  </div>
+  <canvas id="card-pool-canvas" aria-hidden="true"></canvas>
+</section>
+
+<!-- ── DETAIL ────────────────────────────────────────────────────────────── -->
+<section id="screen-detail" class="screen" aria-labelledby="detail-h">
+  <div class="detail-wrap">
+    <div class="detail-cover" id="detail-cover">
+      <div class="vignette"></div>
+      <h1 id="detail-h" class="title-on-cover">Classic Smash Burger</h1>
+    </div>
+
+    <div class="detail-meta">
+      <span>15 min prep</span><span class="dot"></span>
+      <span>12 min cook</span><span class="dot"></span>
+      <span>4 servings</span><span class="dot"></span>
+      <span>Meat · Quick · Grill</span>
+    </div>
+
+    <div class="scaler-wrap">
+      <div class="cedar-plank"></div>
+      <div class="scaler-row">
+        <div class="scaler-label">Servings</div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <button class="scaler-btn" aria-label="Decrease servings" onclick="adjustServings(-1)">−</button>
+          <div class="scaler-value tabular-nums" id="servings-value">4</div>
+          <button class="scaler-btn" aria-label="Increase servings" onclick="adjustServings(1)">+</button>
+        </div>
+        <div class="scaler-label" style="opacity:.7">Scale × <span id="scale-factor">1.0</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">Ingredients</div>
+    <div id="ingredients-list">
+      <div class="ingredient-row"><span class="amt" data-base="454">454 g</span><span class="name">Ground chuck, 80/20</span></div>
+      <div class="ingredient-row"><span class="amt" data-base="4">4</span><span class="name">Potato buns, split</span></div>
+      <div class="ingredient-row"><span class="amt" data-base="2">2 tbsp</span><span class="name">Unsalted butter, melted</span></div>
+      <div class="ingredient-row"><span class="amt" data-base="8">8</span><span class="name">American cheese slices</span></div>
+      <div class="ingredient-row"><span class="amt" data-base="1">1 tsp</span><span class="name">Flaky sea salt</span></div>
+    </div>
+
+    <div class="section-label">Steps</div>
+    <div>
+      <div class="step-row"><span class="n">1</span><p>Heat a cast-iron griddle over high until smoking. Divide beef into 4 loose balls — do not compact.</p></div>
+      <div class="step-row"><span class="n">2</span><p>Butter buns and toast cut-side down until deeply golden, 40 seconds. Set aside.</p></div>
+      <div class="step-row"><span class="n">3</span><p>Place a beef ball on the hot griddle. Smash hard with a stiff spatula for exactly 10 seconds. Salt the top.</p></div>
+      <div class="step-row"><span class="n">4</span><p>Cook 90 seconds until the edges lace and brown. Flip, top with two cheese slices, 20 seconds.</p></div>
+      <div class="step-row"><span class="n">5</span><p>Stack on the toasted bun. Serve without delay.</p></div>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn-primary" onclick="go('cook')">▶ Cook mode</button>
+      <button class="btn-ghost">Export .md</button>
+      <button class="btn-ghost">Print</button>
+      <button class="btn-ghost">Edit</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── COOK ──────────────────────────────────────────────────────────────── -->
+<section id="screen-cook" class="screen" aria-labelledby="cook-h">
+  <div class="cook-title" id="cook-h">Classic Smash Burger</div>
+  <div class="cook-sub">Pass-line · swipe · voice · tap to advance</div>
+
+  <div class="pass-stage" aria-hidden="true">
+    <div class="plank"></div>
+    <div class="key-lamp" id="key-lamp" style="left:0"></div>
+    <div class="plates" id="plates"></div>
+  </div>
+
+  <div class="cook-current">
+    <div class="step-no" id="step-no">Step 1 of 5</div>
+    <p class="step-text" id="step-text">Heat a cast-iron griddle over high until smoking. Divide beef into 4 loose balls — do not compact.</p>
+  </div>
+
+  <div class="cook-controls">
+    <button class="btn-ghost" onclick="cookStep(-1)">← Previous</button>
+    <div class="counter" id="counter">1 / 5</div>
+    <button class="btn-primary" onclick="cookStep(1)">Next →</button>
+  </div>
+</section>
+
+<!-- Tier flag -->
+<div class="flag">Render tier<b id="tier-flag">detecting…</b></div>
+
+<!-- ──────────────────────────────────────────────────────────────────────────
+     App logic + WebGL scenes
+     ────────────────────────────────────────────────────────────────────── -->
+<script type="module">
+import * as THREE from 'three';
+
+// ── Router ─────────────────────────────────────────────────────────────────
+const screens = document.querySelectorAll('.screen');
+const navBtns = document.querySelectorAll('.nav-btn');
+function go(name){
+  screens.forEach(s => s.classList.toggle('is-active', s.id === `screen-${name}`));
+  navBtns.forEach(b => b.setAttribute('aria-current', b.dataset.goto === name ? 'true' : 'false'));
+  if(name === 'login') initLogin();
+  if(name === 'list')  resumeCardPool();
+  if(name !== 'list')  pauseCardPool();
+  if(name === 'cook')  resetCookState();
+}
+window.go = go;
+navBtns.forEach(b => b.addEventListener('click', () => go(b.dataset.goto)));
+
+// ── GPU tier detection ─────────────────────────────────────────────────────
+function detectTier(){
+  try{
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if(!gl) return 0;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduced) return 0;
+    const mem = navigator.deviceMemory ?? 8;
+    const cores = navigator.hardwareConcurrency ?? 4;
+    if(mem <= 2 || cores <= 2) return 1;
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    const renderer = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '';
+    if(/SwiftShader|Software/i.test(renderer)) return 0;
+    return 2;
+  }catch(e){ return 0 }
+}
+const TIER = detectTier();
+document.getElementById('tier-flag').textContent = ['poster','baked','live','webgpu'][TIER];
+
+// ── LOGIN — volumetric terracotta light + steam plume ──────────────────────
+let loginScene, loginCam, loginRenderer, loginRaf, loginInit = false;
+function initLogin(){
+  if(loginInit || TIER < 2) {
+    // fallback: already CSS-rendered
+    return;
+  }
+  loginInit = true;
+  const canvas = document.getElementById('login-canvas');
+  loginRenderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true, powerPreference:'low-power' });
+  loginRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  loginRenderer.setSize(window.innerWidth, window.innerHeight, false);
+  loginScene = new THREE.Scene();
+  loginCam = new THREE.PerspectiveCamera(35, window.innerWidth/window.innerHeight, 0.1, 100);
+  loginCam.position.set(0,0,8);
+
+  // Volumetric terracotta light — fragment shader on a fullscreen quad
+  const geom = new THREE.PlaneGeometry(2,2);
+  const steamMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime:     { value: 0 },
+      uRes:      { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      uMouse:    { value: new THREE.Vector2(0.5, 0.5) },
+    },
+    vertexShader: `void main(){ gl_Position = vec4(position,1.0); }`,
+    fragmentShader: `
+      precision highp float;
+      uniform float uTime;
+      uniform vec2 uRes;
+      uniform vec2 uMouse;
+
+      // Curl noise — cheap 2D
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p){
+        vec2 i = floor(p); vec2 f = fract(p);
+        vec2 u = f*f*(3.0-2.0*f);
+        return mix(mix(hash(i), hash(i+vec2(1,0)), u.x),
+                   mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), u.x), u.y);
+      }
+      float fbm(vec2 p){
+        float v=0.0, a=0.5;
+        for(int i=0;i<5;i++){ v += a*noise(p); p*=2.02; a*=0.5; }
+        return v;
+      }
+
+      void main(){
+        vec2 uv = gl_FragCoord.xy / uRes.xy;
+        vec2 p = uv * 2.0 - 1.0;
+        p.x *= uRes.x / uRes.y;
+
+        float t = uTime * 0.08;
+
+        // Terracotta volumetric light — radial soft with noise breakup
+        vec2 lightPos = vec2(0.0, -0.15);
+        float d = length(p - lightPos);
+        float falloff = 1.0 / (1.0 + d*d*2.2);
+        float nmask = fbm(p*1.6 + vec2(0.0, t*2.0));
+        float light = falloff * (0.85 + 0.3*nmask);
+
+        vec3 terracotta = vec3(0.83, 0.44, 0.25);   // #D4703F
+        vec3 gold       = vec3(0.93, 0.82, 0.55);
+        vec3 ink        = vec3(0.04, 0.04, 0.05);
+
+        vec3 col = ink;
+        col = mix(col, terracotta, light*0.8);
+        col = mix(col, gold, pow(light, 3.5) * 0.5);
+
+        // Steam plume — vertical curl-noise mask, bottom-right
+        vec2 sp = (p - vec2(0.8, -0.9)) * vec2(1.0, 0.7);
+        float steamMask = smoothstep(0.7, 0.0, length(sp));
+        float steam = fbm(sp*2.5 + vec2(0.0, -t*6.0)) * smoothstep(0.0, 1.0, -sp.y);
+        steam *= steamMask;
+        col += vec3(0.95, 0.88, 0.75) * steam * 0.18;
+
+        // Vignette
+        float vig = 1.0 - length(p) * 0.35;
+        col *= clamp(vig, 0.4, 1.0);
+
+        // Grain
+        float g = hash(gl_FragCoord.xy + uTime) * 0.03 - 0.015;
+        col += g;
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+  const plane = new THREE.Mesh(geom, steamMat);
+  loginScene.add(plane);
+
+  const clock = new THREE.Clock();
+  function loop(){
+    loginRaf = requestAnimationFrame(loop);
+    steamMat.uniforms.uTime.value = clock.getElapsedTime();
+    loginRenderer.render(loginScene, loginCam);
+  }
+  loop();
+
+  // Fade out the CSS fallback once canvas has a frame
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.getElementById('login-fallback').classList.add('hidden');
+  }));
+
+  window.addEventListener('resize', () => {
+    loginRenderer.setSize(window.innerWidth, window.innerHeight, false);
+    steamMat.uniforms.uRes.value.set(window.innerWidth, window.innerHeight);
+  }, { passive:true });
+
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden && loginRaf) { cancelAnimationFrame(loginRaf); loginRaf = null; }
+    else if(!loginRaf) loop();
+  });
+}
+
+// ── LIST — material-sampled recipe cards ───────────────────────────────────
+const RECIPES = [
+  { name: 'Classic Smash Burger', desc: 'Lacy-edged, American cheese, potato bun. 12 min on iron.', mat:'iron',      tags:['Meat','Quick'], time:'12 min', featured:true },
+  { name: 'Miso Butter Cacio e Pepe', desc: 'Tonkatsu-soy reduction, aged pecorino, coarse pepper, cold butter.', mat:'clay', tags:['Pasta','Japanese'], time:'18 min' },
+  { name: 'Charred Broccolini, Lemon',  desc: 'High heat, anchovy crumb, preserved lemon, sesame.', mat:'cedar', tags:['Vegetable','Side'], time:'14 min' },
+  { name: 'Shio Koji Chicken Thighs',   desc: 'Brined 24h in shio koji, basted with brown butter.', mat:'clay',  tags:['Chicken','Slow'], time:'32 min' },
+  { name: 'Brown Butter Madeleines',    desc: 'Overnight batter, hot oven, gold-leaf dusted edges.', mat:'porcelain', tags:['Dessert','Bake'], time:'24 min' },
+  { name: 'Sourdough — City Loaf',      desc: '85% hydration, 12h cold retard, dark bake.', mat:'clay',        tags:['Bread','Slow'], time:'18 h' },
+  { name: 'Dashi, Winter Root',         desc: 'Kombu + katsuobushi 60°C slow draw, daikon, burdock.', mat:'cedar',    tags:['Japanese','Soup'], time:'40 min' },
+  { name: 'Fig, Stracciatella, Honey',  desc: 'No cooking. Ripe fig halved, torn cheese, olive oil.', mat:'porcelain', tags:['Salad','No-cook'], time:'3 min' },
+];
+
+const MAT_GRADIENTS = {
+  clay:      'var(--mat-clay-2d)',
+  cedar:     'var(--mat-cedar-2d)',
+  iron:      'var(--mat-iron-2d)',
+  porcelain: 'var(--mat-porcelain-2d)',
+  gold:      'var(--mat-gold-2d)',
+};
+
+const MAT_LABELS = {
+  clay: 'Clay', cedar: 'Cedar', iron: 'Iron', porcelain: 'Porcelain', gold: 'Gold'
+};
+
+const grid = document.getElementById('recipe-grid');
+RECIPES.forEach((r, i) => {
+  const card = document.createElement('article');
+  card.className = 'recipe-card';
+  card.style.setProperty('--card-mat', MAT_GRADIENTS[r.mat]);
+  if(r.featured) card.dataset.featured = 'true';
+  card.innerHTML = `
+    <h2 class="r-title">${r.name}</h2>
+    <p class="r-desc">${r.desc}</p>
+    <div class="r-meta">
+      <span>${r.time}</span><span class="dot"></span><span>${r.tags.join(' · ')}</span>
+    </div>
+    <div class="r-mat-label">${MAT_LABELS[r.mat]}</div>
+  `;
+  card.setAttribute('data-index', i);
+  card.addEventListener('click', () => go('detail'));
+  grid.appendChild(card);
+});
+
+// ── Card pool — live material sample on hovered card (Tier 2+) ─────────────
+let pool = { renderer:null, scene:null, cam:null, raf:null, current:null, active:false };
+function initCardPool(){
+  if(pool.renderer) return;
+  if(TIER < 2) return;
+  const canvas = document.getElementById('card-pool-canvas');
+  pool.renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true, powerPreference:'low-power' });
+  pool.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  pool.renderer.setSize(window.innerWidth, window.innerHeight, false);
+  pool.scene = new THREE.Scene();
+  pool.cam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  pool.cam.position.set(0, 0, 3.4);
+  // lighting rig — pass-line
+  const key = new THREE.DirectionalLight(0xffd9a0, 1.6); key.position.set(2, 3, 3); pool.scene.add(key);
+  const fill = new THREE.DirectionalLight(0x88aaff, 0.25); fill.position.set(-3, -1, 2); pool.scene.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(-1.5, 1, -2); pool.scene.add(rim);
+  pool.scene.add(new THREE.AmbientLight(0xffffff, 0.12));
+
+  // One instanced mesh pool, switched per hover
+  const geoms = {
+    clay:      new THREE.IcosahedronGeometry(0.95, 2),
+    cedar:     new THREE.BoxGeometry(1.5, 0.4, 1.1),
+    iron:      new THREE.CylinderGeometry(0.95, 1.0, 0.22, 32, 1, false),
+    porcelain: new THREE.SphereGeometry(0.92, 48, 32, 0, Math.PI*2, 0, Math.PI*0.55),
+    gold:      new THREE.TorusKnotGeometry(0.55, 0.17, 80, 12),
+  };
+  const mats = {
+    clay:      new THREE.MeshStandardMaterial({ color:0xB27048, roughness:0.82, metalness:0.0, flatShading:true }),
+    cedar:     new THREE.MeshStandardMaterial({ color:0x7A5836, roughness:0.55, metalness:0.0 }),
+    iron:      new THREE.MeshStandardMaterial({ color:0x1F1F22, roughness:0.45, metalness:0.9 }),
+    porcelain: new THREE.MeshPhysicalMaterial({ color:0xF4F1E8, roughness:0.08, metalness:0.0, clearcoat:0.8, clearcoatRoughness:0.1 }),
+    gold:      new THREE.MeshStandardMaterial({ color:0xE8C668, roughness:0.22, metalness:1.0 }),
+  };
+  pool.meshes = {};
+  Object.keys(geoms).forEach(k => {
+    const m = new THREE.Mesh(geoms[k], mats[k]);
+    m.visible = false;
+    pool.scene.add(m);
+    pool.meshes[k] = m;
+  });
+
+  window.addEventListener('resize', () => pool.renderer.setSize(window.innerWidth, window.innerHeight, false), { passive:true });
+}
+
+let poolMouseX = 0, poolMouseY = 0;
+function poolLoop(){
+  if(!pool.active) return;
+  pool.raf = requestAnimationFrame(poolLoop);
+  if(pool.current){
+    const m = pool.meshes[pool.current.mat];
+    if(m){
+      m.rotation.y += 0.006;
+      m.rotation.x = poolMouseY * 0.12;
+    }
+  }
+  // Render only inside the card's corner rect
+  if(pool.current){
+    const r = pool.current.rect;
+    const dpr = pool.renderer.getPixelRatio();
+    pool.renderer.setScissorTest(true);
+    pool.renderer.setScissor(r.x * dpr, (window.innerHeight - r.y - r.h) * dpr, r.w * dpr, r.h * dpr);
+    pool.renderer.setViewport(r.x * dpr, (window.innerHeight - r.y - r.h) * dpr, r.w * dpr, r.h * dpr);
+    pool.renderer.render(pool.scene, pool.cam);
+    pool.renderer.setScissorTest(false);
+  }
+}
+
+function resumeCardPool(){
+  if(TIER < 2) return;
+  initCardPool();
+  pool.active = true;
+  if(!pool.raf) poolLoop();
+}
+function pauseCardPool(){
+  pool.active = false;
+  if(pool.raf) cancelAnimationFrame(pool.raf);
+  pool.raf = null;
+  if(pool.renderer) pool.renderer.clear();
+  pool.current = null;
+}
+
+grid.addEventListener('mousemove', e => {
+  if(!pool.active) return;
+  const card = e.target.closest('.recipe-card');
+  if(!card){ pool.current = null; if(pool.renderer) pool.renderer.clear(); return; }
+  const i = parseInt(card.dataset.index, 10);
+  const r = RECIPES[i];
+  if(!pool.meshes || !pool.meshes[r.mat]){ pool.current = null; return; }
+  // hide previous
+  Object.values(pool.meshes).forEach(m => m.visible = false);
+  pool.meshes[r.mat].visible = true;
+  // corner rect (matches ::before styling)
+  const cardRect = card.getBoundingClientRect();
+  const isFeatured = card.hasAttribute('data-featured');
+  const size = isFeatured ? 140 : 88;
+  const inset = isFeatured ? 24 : 14;
+  const rect = { x: cardRect.right - inset - size, y: cardRect.top + inset, w: size, h: size };
+  pool.current = { mat: r.mat, rect };
+  poolMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  poolMouseY = (e.clientY / window.innerHeight) * 2 - 1;
+});
+grid.addEventListener('mouseleave', () => { pool.current = null; if(pool.renderer) pool.renderer.clear(); });
+
+// ── DETAIL — scaler ────────────────────────────────────────────────────────
+let servings = 4;
+function adjustServings(d){
+  servings = Math.max(1, Math.min(24, servings + d));
+  const factor = servings / 4;
+  document.getElementById('servings-value').textContent = servings;
+  document.getElementById('scale-factor').textContent = factor.toFixed(1);
+  document.querySelectorAll('#ingredients-list .amt').forEach(el => {
+    const base = parseFloat(el.getAttribute('data-base'));
+    const scaled = base * factor;
+    const unit = el.textContent.replace(/^[\d.,\s]+/, '').trim();
+    el.textContent = (scaled % 1 === 0 ? scaled.toFixed(0) : scaled.toFixed(1)) + (unit ? ' ' + unit : '');
+  });
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+window.adjustServings = adjustServings;
+
+// Tiny parallax on detail cover
+document.getElementById('detail-cover').addEventListener('mousemove', e => {
+  const r = e.currentTarget.getBoundingClientRect();
+  const x = ((e.clientX - r.left) / r.width - 0.5) * 12;
+  const y = ((e.clientY - r.top) / r.height - 0.5) * 8;
+  e.currentTarget.style.backgroundPosition = `${50 + x}% ${50 + y}%`;
+});
+
+// ── COOK — pass-line lighting ──────────────────────────────────────────────
+const STEPS = [
+  { tag:'Heat',  text:'Heat a cast-iron griddle over high until smoking. Divide beef into 4 loose balls — do not compact.' },
+  { tag:'Toast', text:'Butter buns and toast cut-side down until deeply golden, 40 seconds. Set aside.' },
+  { tag:'Smash', text:'Place a beef ball on the hot griddle. Smash hard with a stiff spatula for exactly 10 seconds. Salt the top.' },
+  { tag:'Cheese',text:'Cook 90 seconds until the edges lace and brown. Flip, top with two cheese slices, 20 seconds.' },
+  { tag:'Plate', text:'Stack on the toasted bun. Serve without delay.' },
+];
+let currentStep = 0;
+
+function renderPlates(){
+  const plates = document.getElementById('plates');
+  plates.innerHTML = '';
+  STEPS.forEach((s,i) => {
+    const plate = document.createElement('button');
+    plate.className = 'plate';
+    plate.innerHTML = `<span class="n">${i+1}</span><span class="tag">${s.tag}</span>`;
+    plate.addEventListener('click', () => setStep(i));
+    plates.appendChild(plate);
+  });
+  updatePlates();
+}
+function updatePlates(){
+  const plates = document.querySelectorAll('#plates .plate');
+  plates.forEach((p, i) => {
+    p.classList.remove('active','prev','next');
+    if(i === currentStep) p.classList.add('active');
+    else if(i < currentStep) p.classList.add('prev');
+    else p.classList.add('next');
+  });
+  // Move key lamp to active plate
+  const active = plates[currentStep];
+  if(active){
+    const stage = document.querySelector('.pass-stage').getBoundingClientRect();
+    const r = active.getBoundingClientRect();
+    const lamp = document.getElementById('key-lamp');
+    const x = r.left + r.width/2 - stage.left - 90;  // lamp is 180px wide
+    lamp.style.left = Math.max(-40, Math.min(stage.width - 140, x)) + 'px';
+  }
+  // Scroll active plate into view horizontally
+  if(active) active.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+
+  // Content
+  document.getElementById('step-no').textContent = `Step ${currentStep+1} of ${STEPS.length}`;
+  document.getElementById('step-text').textContent = STEPS[currentStep].text;
+  document.getElementById('counter').textContent = `${currentStep+1} / ${STEPS.length}`;
+  // Soft tick sound
+  if(window.AudioContext || window.webkitAudioContext){
+    try {
+      const ac = cookAC || (cookAC = new (window.AudioContext||window.webkitAudioContext)());
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.value = 220; o.type='sine';
+      g.gain.setValueAtTime(0.12, ac.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.12);
+      o.start(); o.stop(ac.currentTime + 0.14);
+    } catch(e){}
+  }
+  if(navigator.vibrate) navigator.vibrate(10);
+}
+let cookAC = null;
+function setStep(i){ currentStep = Math.max(0, Math.min(STEPS.length-1, i)); updatePlates(); }
+function cookStep(d){ setStep(currentStep + d); }
+window.cookStep = cookStep;
+function resetCookState(){ currentStep = 0; renderPlates(); }
+
+// Keyboard nav inside cook
+document.addEventListener('keydown', e => {
+  const cookVisible = document.getElementById('screen-cook').classList.contains('is-active');
+  if(!cookVisible) return;
+  if(e.key === 'ArrowRight') cookStep(1);
+  if(e.key === 'ArrowLeft')  cookStep(-1);
+});
+
+// Swipe (mobile)
+let touchStartX = null;
+document.getElementById('screen-cook').addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+}, { passive:true });
+document.getElementById('screen-cook').addEventListener('touchend', e => {
+  if(touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx) > 60) cookStep(dx < 0 ? 1 : -1);
+  touchStartX = null;
+}, { passive:true });
+
+// Initial render
+renderPlates();
+
+// Resume/pause based on which screen starts active (list)
+resumeCardPool();
+</script>
+</body>
+</html>
