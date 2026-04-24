@@ -53,33 +53,55 @@ export default function KonamiEasterEgg() {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  if (!show) return null;
   return (
-    <div
-      aria-hidden="true"
-      className="animate-fade-up"
-      style={{
-        position: 'fixed',
-        left: '50%',
-        bottom: '8%',
-        transform: 'translateX(-50%)',
-        fontFamily: 'var(--font-noto, serif)',
-        color: 'var(--color-gold)',
-        fontSize: '0.875rem',
-        letterSpacing: '0.24em',
-        textTransform: 'uppercase',
-        pointerEvents: 'none',
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: '0.25rem',
-      }}
-    >
-      <span>Sakai · Est. 2019</span>
-      <span style={{ opacity: 0.75, fontSize: '0.75rem' }}>
-        {modeAfter === 'ryu' ? '龍 mode on' : '龍 mode off'}
-      </span>
-    </div>
+    <>
+      {/* Visible flash (decorative) */}
+      {show && (
+        <div
+          aria-hidden="true"
+          className="animate-fade-up"
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: '8%',
+            transform: 'translateX(-50%)',
+            fontFamily: 'var(--font-noto, serif)',
+            color: 'var(--color-gold)',
+            fontSize: '0.875rem',
+            letterSpacing: '0.24em',
+            textTransform: 'uppercase',
+            pointerEvents: 'none',
+            zIndex: 9999,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.25rem',
+          }}
+        >
+          <span>Sakai · Est. 2019</span>
+          <span style={{ opacity: 0.75, fontSize: '0.75rem' }}>
+            {modeAfter === 'ryu' ? '龍 mode on' : '龍 mode off'}
+          </span>
+        </div>
+      )}
+      {/* Screen-reader announcement of the mode change. Separate from the
+          visible flash so assistive tech gets the state change even though
+          the flash itself is aria-hidden. */}
+      <div
+        role="status"
+        aria-live="polite"
+        className="sr-only"
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {show ? (modeAfter === 'ryu' ? 'Dragon mode activated' : 'Dragon mode deactivated') : ''}
+      </div>
+    </>
   );
 }
