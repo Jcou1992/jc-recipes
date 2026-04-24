@@ -4,6 +4,7 @@ import type { KeyboardEvent, MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
 import { useT } from '@/components/ui/LanguageContext';
 import ViewTransitionLink from '@/components/motion/ViewTransitionLink';
+import { fmtRec } from '@/lib/brut/ref-codes';
 
 interface Props {
   recipe: Recipe;
@@ -24,6 +25,9 @@ export default function RecipeCard({
 }: Props) {
   const t = useT();
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
+  // Brut ticket nameplate code — rendered via CSS ::before in brut mode, no
+  // visual effect in classic (the attribute is present but not read).
+  const brutCode = `${fmtRec(recipe.id)} · FIG.03`;
 
   const metaRow = (
     <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
@@ -136,6 +140,7 @@ export default function RecipeCard({
         aria-label={selected ? t.deselectRecipeAriaLabel(recipe.name) : t.selectRecipeAriaLabel(recipe.name)}
         data-testid={`recipe-card-${recipe.id}`}
         data-selected={selected ? 'true' : 'false'}
+        data-code={brutCode}
       >
         {inner}
       </button>
@@ -154,6 +159,7 @@ export default function RecipeCard({
         viewTransitionName: `recipe-card-${recipe.id}`,
       } as React.CSSProperties}
       data-testid={`recipe-card-${recipe.id}`}
+      data-code={brutCode}
     >
       {inner}
     </ViewTransitionLink>
