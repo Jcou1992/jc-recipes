@@ -937,7 +937,143 @@
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
+
+  /* ── COOK MODE — KDS line printer ───────────────────────────────────────── */
+  /* The cook-mode surface is identified by [data-testid="cook-mode"]. Kill
+     all gradients, strip the step-slide animation, re-style step number
+     and timer with mono tabular. */
+  :root[data-design="brut"] [data-testid="cook-mode"] {
+    background: var(--bg) !important;
+    color: var(--text-1) !important;
+    font-family: var(--font-mono);
+  }
+  /* Kill the step-slide keyframe motion in brut — mechanical clicks only. */
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-step-slide {
+    animation: none !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-scale-in,
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-pulse,
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-ring-breath {
+    animation: none !important;
+  }
+
+  /* Progress bar — thinner + hot color flat. */
+  :root[data-design="brut"] [data-testid="cook-mode"] .h-1\\.5 {
+    background: var(--surface) !important;
+  }
+
+  /* Step text → mono, centred for the KDS-as-line-printer feel. */
+  :root[data-design="brut"] [data-testid="cook-step-text"],
+  :root[data-design="brut"] [data-testid="cook-step-text-mobile"] {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    line-height: 1.55 !important;
+    color: var(--text-1) !important;
+  }
+
+  /* Step of N — the "STEP 3/7" display becomes the verb header.  */
+  :root[data-design="brut"] [data-testid="cook-mode"] header span,
+  :root[data-design="brut"] [data-testid="cook-mode"] .font-label.tracking-wide {
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.16em;
+  }
+
+  /* Timer display — giant mono tabular, hot when running, late overdue. */
+  :root[data-design="brut"] [data-testid="cook-timer-display"],
+  :root[data-design="brut"] [data-testid="cook-timer-display-mobile"] {
+    font-family: var(--font-mono) !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    font-weight: 600 !important;
+    font-size: clamp(3rem, 14vw, 5.5rem) !important;
+    line-height: 1 !important;
+  }
+
+  /* Prev/Next nav — 56px tall, hard rectangle. */
+  :root[data-design="brut"] [data-testid="cook-prev-btn"],
+  :root[data-design="brut"] [data-testid="cook-next-btn"],
+  :root[data-design="brut"] [data-testid="cook-prev-btn-mobile"],
+  :root[data-design="brut"] [data-testid="cook-next-btn-mobile"] {
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    min-height: 56px !important;
+  }
+
+  /* Exit and timer-pill buttons. */
+  :root[data-design="brut"] [data-testid="cook-exit-btn"],
+  :root[data-design="brut"] [data-testid="cook-exit-btn-mobile"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.16em;
+  }
+  :root[data-design="brut"] [data-testid^="timer-pill-"],
+  :root[data-design="brut"] [data-testid^="cook-timer-reset-"] {
+    border-radius: 0 !important;
+    background: var(--hot) !important;
+    color: var(--bg) !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.1em;
+    backdrop-filter: none !important;
+  }
+
+  /* Ingredient rows in cook mode → brut-check grammar. */
+  :root[data-design="brut"] [data-testid^="cook-ingredient-"],
+  :root[data-design="brut"] [data-testid="cook-ingredient-sheet"] li {
+    font-family: var(--font-mono);
+    font-size: var(--t-12);
+  }
+  :root[data-design="brut"] [data-testid="cook-ingredient-sheet-toggle"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.2em;
+  }
+
+  /* Completion screen — SERVICE COMPLETE stamp in gold via ::after on the
+     completion wrapper. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] {
+    background: var(--bg) !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel {
+    position: relative;
+  }
+  /* Hide the classic sweep span + keep the title but restyle to mono. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .gold-sweep {
+    display: none !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-completion-title"] {
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 700 !important;
+  }
+  /* The SERVICE COMPLETE stamp — print via steps(16) clip-path. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel::before {
+    content: 'SERVICE COMPLETE';
+    display: block;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--medal);
+    margin-bottom: var(--s-8);
+    animation: brut-stamp-print 800ms steps(16) forwards;
+    clip-path: inset(0 100% 0 0);
+  }
+  @keyframes brut-stamp-print {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+
+  /* Completion screen primary + secondary + tertiary buttons — hard rects. */
+  :root[data-design="brut"] [data-testid="cook-completion-return"],
+  :root[data-design="brut"] [data-testid="cook-completion-print"],
+  :root[data-design="brut"] [data-testid="cook-completion-restart"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.12em;
+  }
 }
+
 
 
 
