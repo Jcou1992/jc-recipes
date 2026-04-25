@@ -1150,6 +1150,12 @@
     color: var(--text-1) !important;
     font-family: var(--font-mono);
   }
+  /* Hide classic-mode local "EXIT · STEP n/N" header strip in brut.
+     The Wayfinder above carries the same telemetry. CSS-based suppression
+     so the JSX stays byte-identical to baseline in classic. */
+  :root[data-design="brut"] [data-cook-local-header] {
+    display: none !important;
+  }
   /* Kill the step-slide keyframe motion in brut — mechanical clicks only. */
   :root[data-design="brut"] [data-testid="cook-mode"] .animate-step-slide {
     animation: none !important;
