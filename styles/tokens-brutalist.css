@@ -919,13 +919,27 @@
   :root[data-design="brut"] .recipe-title,
   :root[data-design="brut"] main h1.font-display {
     font-family: var(--font-mono) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.01em;
+    /* Cycle 2 P0 #2: preserve user-typed casing, kill the all-caps bold
+       look that made recipe names visually indistinguishable from the
+       system-minted ref-codes (`BULKDEL-W2-1776892154725-A`).  The chef
+       typed `Tonkatsu sauce`, the system should render `Tonkatsu sauce`.
+       Tighter clamp keeps the title from dominating empty pages. */
+    text-transform: none !important;
+    letter-spacing: 0 !important;
     font-weight: 700;
-    font-size: clamp(var(--t-20), 5vw, var(--t-40)) !important;
+    font-size: clamp(1.5rem, 4vw, 2.25rem) !important;
     overflow-wrap: anywhere;
     word-break: normal;
     hyphens: manual;
+  }
+  /* Below-title ref-code chip — the *machine-grammar* identity sits on a
+     11px mono chip just under the human name, not in the page title slot. */
+  :root[data-design="brut"] .brut-detail-ref {
+    display: inline-block;
+    margin: var(--s-1) 0 var(--s-2);
+    font-size: var(--t-10);
+    letter-spacing: 0.08em;
+    color: var(--text-3);
   }
 
   /* U1 follow-up: on mobile under brut, the detail header row (title column +

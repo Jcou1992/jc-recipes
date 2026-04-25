@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
@@ -7,6 +8,9 @@ import DeleteRecipeButton from '@/components/recipes/DeleteRecipeButton';
 import RecipeDetailClient from '@/components/recipes/RecipeDetailClient';
 import ScrollParallaxCover from '@/components/motion/ScrollParallaxCover';
 import FirstSaveCelebration from '@/components/motion/FirstSaveCelebration';
+import { RefCode } from '@/components/ui/brut/RefCode';
+import { DESIGN_MODE_COOKIE } from '@/lib/brut/design-mode-cookie';
+import { fmtRec } from '@/lib/brut/ref-codes';
 import type { Recipe } from '@/types/recipe';
 
 interface PageProps {
@@ -33,6 +37,13 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   if (error || !recipe) notFound();
 
   const t = await getServerT();
+  // Cycle 2 P0 #2: under brut, render the machine-grammar ref-code as a
+  // small chip BELOW the human name — not in the title slot, where it was
+  // visually indistinguishable from the recipe name itself. Server-side
+  // cookie read keeps this zero-flash; classic mode renders nothing extra.
+  const cookieStore = await cookies();
+  const isBrut = cookieStore.get(DESIGN_MODE_COOKIE)?.value === 'brut';
+  const refCodeId = isBrut ? fmtRec(recipe.id).replace(/^REC-/, '') : '';
 
   return (
     <div
@@ -52,6 +63,9 @@ export default async function RecipeDetailPage({ params }: PageProps) {
             >
               {recipe.name}
             </h1>
+            {isBrut && (
+              <RefCode ns="REC" id={refCodeId} className="brut-detail-ref" />
+            )}
             <FirstSaveCelebration recipeId={id} />
           </div>
           <div className="flex gap-2 flex-shrink-0 mt-1">
