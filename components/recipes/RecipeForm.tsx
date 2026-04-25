@@ -117,9 +117,20 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  // Cycle 2 P2: track which required fields the user has interacted with
+  // so we can show the inline `REQUIRED` hint after first blur (not on
+  // first focus, which would feel hostile to the empty form).
+  const [touched, setTouched] = useState<{ name?: boolean; ingredients?: boolean }>({});
 
   const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
   const activeSteps = stepEntries.filter(e => !e.deletedAt);
+
+  // Disabled-until-valid for the submit button. Mirrors `validate()` but
+  // computed cheaply on every render so the button reflects state live.
+  const hasName = name.trim().length > 0;
+  const hasIngredient = activeIngredients.some(e => e.field.name.trim().length > 0);
+  const hasStep = activeSteps.some(e => e.field.content.trim().length > 0);
+  const isValid = hasName && hasIngredient && hasStep;
 
   useEffect(() => {
     const dirty =
@@ -242,6 +253,9 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // First-attempt submit: mark all required fields touched so the inline
+    // hints surface even if the user never blurred them.
+    setTouched({ name: true, ingredients: true });
     if (!validate()) return;
 
     setLoading(true);
@@ -316,6 +330,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
             setName(e.target.value);
             if (fieldErrors.name) setFieldErrors(prev => ({ ...prev, name: undefined }));
           }}
+          onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
           placeholder={t.namePlaceholder}
           className="input-base"
           style={fieldErrors.name ? inputErrorStyle : undefined}
@@ -324,6 +339,14 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
         />
         {fieldErrors.name && (
           <span id="name-error" className="field-error">{fieldErrors.name}</span>
+        )}
+        {!fieldErrors.name && touched.name && !hasName && (
+          <span
+            className="font-label text-xs tracking-widest uppercase mt-1 inline-block"
+            style={{ color: 'var(--text-3)' }}
+          >
+            [ ] REQUIRED
+          </span>
         )}
       </div>
 
@@ -625,7 +648,12 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
 
       {/* Actions */}
       <div className="flex items-center gap-3 pt-2">
-        <button type="submit" disabled={loading} className="btn-primary">
+        <button
+          type="submit"
+          disabled={loading || !isValid}
+          aria-disabled={loading || !isValid}
+          className="btn-primary"
+        >
           {loading ? t.savingBtn : submitLabel}
         </button>
         <button
