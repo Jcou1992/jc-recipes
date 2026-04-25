@@ -95,6 +95,22 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
   redirect(`/recipes/${id}`);
 }
 
+/**
+ * Stamp `cooked_at = NOW()` and increment `cooked_count` for a recipe owned
+ * by the authenticated user. Drives brut heat-decay rendering (R6).
+ *
+ * Atomic via the `record_cooked(uuid)` Postgres function (see migration
+ * 20260425004000). Silent on RLS misses: 0 rows updated, no throw.
+ * No `revalidatePath` — heat decay reads via re-mount or client refresh.
+ */
+export async function recordCooked(recipeId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) redirect('/login');
+
+  await supabase.rpc('record_cooked', { recipe_id: recipeId });
+}
+
 export async function deleteRecipe(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
