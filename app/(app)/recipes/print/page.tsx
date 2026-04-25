@@ -1,9 +1,13 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { DESIGN_MODE_COOKIE } from '@/lib/brut/design-mode-cookie';
 import type { Recipe } from '@/types/recipe';
 import PrintAutoTrigger from './PrintAutoTrigger';
 
-export const metadata: Metadata = { title: 'Print - jc-recipes' };
+// Cycle 2 P3: standardise the em-dash format used elsewhere (recipe detail,
+// settings, root layout). Was `'Print - jc-recipes'`.
+export const metadata: Metadata = { title: 'Print — SEKAI' };
 
 interface PageProps {
   searchParams: Promise<{ ids?: string; servings?: string }>;
@@ -26,10 +30,35 @@ export default async function PrintPage({ searchParams }: PageProps) {
   })();
 
   if (idList.length === 0) {
+    // Cycle 2 P3: branded empty state. Brut renders a ticket card; classic
+    // keeps the body face but with the SEKAI chrome consistent with the
+    // rest of the app instead of an unbranded one-line message.
+    const cookieStore = await cookies();
+    const isBrut = cookieStore.get(DESIGN_MODE_COOKIE)?.value === 'brut';
+    if (isBrut) {
+      return (
+        <div className="max-w-3xl mx-auto px-6 py-8">
+          <div className="brut-ticket" data-code="PRINT · EMPTY">
+            <p
+              className="font-label text-xs tracking-widest uppercase"
+              style={{ color: 'var(--text-3)' }}
+            >
+              No recipes selected for print.
+            </p>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="max-w-3xl mx-auto px-6 py-8">
+        <p
+          className="font-display text-2xl mb-2"
+          style={{ color: 'var(--text-1)' }}
+        >
+          Nothing to print.
+        </p>
         <p className="font-body text-base" style={{ color: 'var(--text-2)' }}>
-          No recipes selected.
+          No recipes were selected. Open a recipe and use Print / PDF.
         </p>
       </div>
     );

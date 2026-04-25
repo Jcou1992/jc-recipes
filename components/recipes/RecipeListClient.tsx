@@ -11,11 +11,8 @@ import TagRail from './TagRail';
 import { Ticket } from '@/components/ui/brut/Ticket';
 import { useT } from '@/components/ui/LanguageContext';
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut';
+import { normalise } from '@/lib/utils/normalise';
 import type { Recipe } from '@/types/recipe';
-
-function normalise(s: string) {
-  return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
 
 type SortKey = 'newest' | 'az' | 'fastest' | 'most-ingredients';
 

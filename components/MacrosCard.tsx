@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { triggerCompute } from '@/app/actions/macros';
 import { formatServings } from '@/lib/utils/format-servings';
@@ -11,6 +11,14 @@ interface Props {
   onOpenMatchModal: () => void;
 }
 
+function useIsBrut(): boolean {
+  const [isBrut, setIsBrut] = useState(false);
+  useEffect(() => {
+    setIsBrut(document.documentElement.getAttribute('data-design') === 'brut');
+  }, []);
+  return isBrut;
+}
+
 const panelStyle: React.CSSProperties = {
   border: '1px solid var(--border)',
   background: 'var(--bg-raised)',
@@ -19,9 +27,18 @@ const panelStyle: React.CSSProperties = {
 export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const isBrut = useIsBrut();
 
   // State 1: not yet computed
   if (recipe.macros === null) {
+    // Cycle 2 P3: brut copy uses ticket grammar so the "macros not yet
+    // computed" line reads like everything else under brut, and the
+    // primary verb shifts from "compute" (engineer-speak) to "estimate"
+    // (chef-speak). Classic copy unchanged — we promised "no rebuild."
+    const emptyLabel = isBrut ? '[ MACROS · UNKNOWN ]' : 'Macros not yet computed';
+    const computeLabel = isBrut
+      ? (isPending ? '⋯ ESTIMATING' : '→ ESTIMATE')
+      : (isPending ? 'Computing…' : 'Compute macros →');
     return (
       <div
         className="rounded-lg p-4 mb-6 flex items-center justify-between flex-wrap gap-3"
@@ -29,7 +46,7 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
         data-testid="macros-card-empty"
       >
         <p className="font-label text-xs tracking-widest uppercase" style={{ color: 'var(--text-3)' }}>
-          Macros not yet computed
+          {emptyLabel}
         </p>
         <button
           type="button"
@@ -43,7 +60,7 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
           className="btn-ghost font-label text-xs tracking-widest uppercase"
           data-testid="macros-compute-btn"
         >
-          {isPending ? 'Computing…' : 'Compute macros →'}
+          {computeLabel}
         </button>
       </div>
     );
