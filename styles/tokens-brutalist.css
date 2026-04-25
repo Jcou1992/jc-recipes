@@ -321,6 +321,22 @@
   :root[data-design="brut"] .brut-kicker-keys {
     color: var(--text-3);
   }
+  /* Cycle 2: optional EXIT link in the kicker row. Used by brut cook mode
+     to restore the affordance suppressed by the cook local-header CSS kill. */
+  :root[data-design="brut"] .brut-kicker-exit {
+    color: var(--brut-hot, var(--color-terracotta));
+    text-decoration: none;
+    margin-right: var(--s-2);
+    padding: 0 var(--s-2);
+    border-right: 1px solid var(--rule);
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+  }
+  :root[data-design="brut"] .brut-kicker-exit:hover,
+  :root[data-design="brut"] .brut-kicker-exit:focus-visible {
+    color: var(--text-1);
+  }
   :root[data-design="brut"] .brut-show-kicker {
     appearance: none;
     background: transparent;

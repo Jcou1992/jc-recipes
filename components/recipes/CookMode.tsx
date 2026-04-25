@@ -323,7 +323,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         hot: true,
         // Cook mode has its own keyboard map (space/arrows). The list-page
         // kicker (`/`, `F`, `ESC`) does not apply here — suppress the row.
-        hideKicker: true,
+        kicker: null as ReadonlyArray<string> | null,
       }
     : null;
 
