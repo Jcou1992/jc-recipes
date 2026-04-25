@@ -25,3 +25,8 @@ supabase/.branches/
 # superpowers brainstorming mockups
 .superpowers/
 
+# cloudflare / opennext build output
+.open-next/
+.wrangler/
+cloudflare-env.d.ts
+
