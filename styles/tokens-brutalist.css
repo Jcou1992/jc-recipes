@@ -1128,12 +1128,6 @@
     letter-spacing: 0.02em;
   }
 
-  /* Hide the dropcap + scroll parallax cover + first-save confetti under brut. */
-  :root[data-design="brut"] [data-testid="scroll-parallax-cover"],
-  :root[data-design="brut"] [data-testid="first-save-celebration"] {
-    display: none !important;
-  }
-
   /* Mobile sticky cook footer — kill blur + round corners + frosted bg. */
   :root[data-design="brut"] [data-testid="cook-mode-btn"] {
     border-radius: 0 !important;
@@ -1284,17 +1278,24 @@
 
   /* ── KILL CLASSIC DECORATIONS UNDER BRUT ────────────────────────────────── */
   /* CSS-based suppression keeps the component files untouched (still usable
-     in classic mode) and keeps the diff minimal. Target stable elements:
-     - InkBrush: rendered inside [data-testid="empty-state"] (only canvas/svg)
-     - ScrollParallaxCover: self-identified testid
-     - FirstSaveCelebration: self-identified testid
-     - SeasonalKanji: classified by class .seasonal-kanji
-     - WordmarkStrokeIn: classified by class .wordmark-stroke-in */
-  :root[data-design="brut"] [data-testid="scroll-parallax-cover"],
-  :root[data-design="brut"] [data-testid="first-save-celebration"],
-  :root[data-design="brut"] .seasonal-kanji,
-  :root[data-design="brut"] .wordmark-stroke-in,
-  :root[data-design="brut"] .ink-brush {
+     in classic mode) and keeps the diff minimal. Target the actual rendered
+     class names + testids:
+     - ScrollParallaxCover: <div className="scroll-parallax">
+     - FirstSaveCelebration: <span className="first-save-underline">
+     - WordmarkStrokeIn: data-testid="sekai-wordmark" + .animate-stroke-in
+     - InkBrush: <span className="animate-ink-brush"> (and the empty-state
+       fallback rule above also catches the SVG nested inside). */
+
+  /* Neutralize parallax motion (keep wrapper for layout stability). */
+  :root[data-design="brut"] .scroll-parallax {
+    animation: none !important;
+    transform: none !important;
+  }
+  /* Hide first-save underline + animated wordmark + ink-brush. */
+  :root[data-design="brut"] .first-save-underline,
+  :root[data-design="brut"] [data-testid="sekai-wordmark"],
+  :root[data-design="brut"] .animate-ink-brush,
+  :root[data-design="brut"] .animate-stroke-in {
     display: none !important;
   }
 
