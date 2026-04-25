@@ -1,22 +1,14 @@
 #!/usr/bin/env bash
-# Test optimization gate — pre-commit hook.
+# Pre-commit hook: test-gate + hot-token lint.
 # See CONTRIBUTING_TESTS.md for the policy and override procedure.
 set -euo pipefail
 
-# Only run on staged add/modify of test files.
-CHANGED=$(git diff --cached --name-only --diff-filter=AM \
-  | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' \
-  || true)
-
-if [ -z "$CHANGED" ]; then
-  exit 0
-fi
-
 # Pre-commit fires BEFORE git writes the new -m message to COMMIT_EDITMSG,
 # so we cannot read the current commit message from disk here (the file
-# contains the previous commit's text). To override the gate on this commit:
+# contains the previous commit's text). To override:
 #
 #     GATE_COMMIT_MSG="... [test-gate-override: reason]" git commit -m "..."
+#     GATE_COMMIT_MSG="... [lint:hot-override:  reason]" git commit -m "..."
 #
 # The env var is respected directly; we never clobber it with stale file data.
 if [ -z "${GATE_COMMIT_MSG:-}" ]; then
@@ -27,6 +19,29 @@ if [ -z "${GATE_COMMIT_MSG:-}" ]; then
   if [ -n "$COMMIT_MSG_FILE" ] && [ -f "$COMMIT_MSG_FILE" ]; then
     export GATE_COMMIT_MSG="$(cat "$COMMIT_MSG_FILE")"
   fi
+fi
+
+# ── R5: hot-token lint ────────────────────────────────────────────────────────
+# Fast static scan. Always runs (sub-100ms), even when only non-route files
+# change — catches the case where a brand-new offending route is added.
+# Skips itself if no .tsx/.css files are staged (tiny optimization).
+HOT_CHANGED=$(git diff --cached --name-only --diff-filter=AM \
+  | grep -E '\.(tsx|ts|css)$' \
+  || true)
+
+if [ -n "$HOT_CHANGED" ]; then
+  echo "[hot-lint] scanning routes for --hot density..."
+  node scripts/hot-token-lint.mjs
+fi
+
+# ── Test optimization gate ────────────────────────────────────────────────────
+# Only run on staged add/modify of test files.
+CHANGED=$(git diff --cached --name-only --diff-filter=AM \
+  | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' \
+  || true)
+
+if [ -z "$CHANGED" ]; then
+  exit 0
 fi
 
 echo "[test-gate] changed test files:"

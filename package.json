@@ -13,6 +13,7 @@
     "test:e2e:mobile": "playwright test --project='Mobile Safari' --project='Mobile Chrome' --project='Auth (Mobile Safari)'",
     "test:gate": "node scripts/test-gate.mjs",
     "test:gate:bootstrap": "node scripts/test-gate.mjs --bootstrap",
+    "lint:hot": "node scripts/hot-token-lint.mjs",
     "seed:users": "node scripts/seed-users.mjs",
     "prepare": "git config core.hooksPath .githooks"
   },
