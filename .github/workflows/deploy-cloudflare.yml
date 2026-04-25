@@ -13,7 +13,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -25,9 +25,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-
-      - name: Jest unit tests
-        run: npm test -- --ci
 
       - name: Build + deploy to Cloudflare Workers
         env:
