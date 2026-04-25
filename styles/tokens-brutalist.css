@@ -712,13 +712,23 @@
   }
 
   /* ── RECIPE DETAIL — spec sheet grammar ─────────────────────────────────── */
-  /* Detail page top header (h1 + tags row above the service bar) */
+  /* Detail page top header (h1 + tags row above the service bar)
+     R1: long slugs (e.g. BulkDel-style names) were breaking character-by-
+     character on 390px mobile under brut. overflow-wrap:anywhere with
+     word-break:normal lets the engine wrap at long unbreakable runs only
+     when the line truly cannot fit, while keeping normal word boundaries
+     intact. clamp() steps the size down on narrow viewports so the title
+     fits in <= 4 lines. Scoped to brut only — classic stays untouched. */
   :root[data-design="brut"] .recipe-title,
   :root[data-design="brut"] main h1.font-display {
     font-family: var(--font-mono) !important;
     text-transform: uppercase;
     letter-spacing: 0.01em;
     font-weight: 700;
+    font-size: clamp(var(--t-20), 5vw, var(--t-40)) !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: manual;
   }
 
   /* Service bar — add top + bottom hairlines, zero the pill chrome. */
