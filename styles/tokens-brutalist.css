@@ -159,6 +159,76 @@
     color: var(--hot);
   }
 
+  /* ── Empty-state ticket [ MISE · EMPTY ] (R3) ────────────────────────────── */
+  :root[data-design="brut"] .brut-empty-ticket {
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+  :root[data-design="brut"] .brut-empty-body {
+    display: grid;
+    gap: var(--s-3);
+    padding: var(--s-2) 0;
+    font-family: var(--font-mono);
+    text-align: left;
+  }
+  :root[data-design="brut"] .brut-empty-rule {
+    color: var(--text-3);
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    user-select: none;
+  }
+  :root[data-design="brut"] .brut-empty-headline {
+    color: var(--text-1);
+    font-size: var(--t-14);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] .brut-empty-meta {
+    color: var(--text-3);
+    font-size: var(--t-11);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] .brut-empty-cta {
+    color: var(--text-2);
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  :root[data-design="brut"] .brut-empty-hint {
+    color: var(--text-3);
+  }
+  :root[data-design="brut"] .brut-empty-key {
+    display: inline-block;
+    padding: 0 var(--s-2);
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    line-height: 1.4;
+    margin: 0 0.125rem;
+  }
+  :root[data-design="brut"] .brut-empty-action {
+    color: var(--hot, var(--text-1));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  :root[data-design="brut"] .brut-empty-action:hover,
+  :root[data-design="brut"] .brut-empty-action:focus-visible {
+    color: var(--text-1);
+  }
+
   /* ── Wayfinder — the 32px sticky header ──────────────────────────────────── */
   :root[data-design="brut"] .brut-wayfinder {
     position: sticky;
