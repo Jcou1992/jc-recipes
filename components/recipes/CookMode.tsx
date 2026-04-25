@@ -6,6 +6,7 @@ import { useT } from '@/components/ui/LanguageContext';
 import { haptic } from '@/lib/motion/haptic';
 import { Wayfinder } from '@/components/ui/brut/Wayfinder';
 import { fmtRec } from '@/lib/brut/ref-codes';
+import { recordCooked } from '@/app/actions/recipes';
 import type { Recipe, Step } from '@/types/recipe';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -228,6 +229,11 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       setElapsedSeconds(Math.round((Date.now() - cookStartRef.current) / 1000));
       setFinished(true);
       haptic([40, 40, 40]);
+      // Fire-and-forget: stamp `cooked_at = NOW()` and bump `cooked_count`
+      // for brut heat-decay rendering (R6.B). Never awaited — completion
+      // UI must paint instantly even if the network is slow or offline.
+      // RLS misses + network errors are swallowed by the catch.
+      recordCooked(recipe.id).catch((e) => console.warn('recordCooked failed', e));
       return;
     }
     setCompletedSteps(prev => new Set([...prev, currentIndex]));

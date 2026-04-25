@@ -4,6 +4,18 @@
  * Imported from app/globals.css AFTER the existing @theme block.
  * ───────────────────────────────────────────────────────────────────────── */
 
+/* ── Custom-property registration for --card-heat (R6.B) ─────────────────────
+ * Registered as <percentage> so color-mix() can interpolate it directly. The
+ * registration is global (outside the brut-only @layer) because @property
+ * cannot be nested inside @layer. The actual `.brut-card-heat-row` rule that
+ * reads it is scoped under :root[data-design="brut"] further down, so classic
+ * mode is unaffected. */
+@property --card-heat {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
 @layer tokens {
 
   :root[data-design="brut"] {
@@ -712,6 +724,21 @@
   :root[data-design="brut"] .recipe-card .rounded-full::before {
     content: '#';
     display: inline;
+  }
+
+  /* ── Heat-decay row (R6.B) ───────────────────────────────────────────────── */
+  /* The card heat row fades from --bone-100 (just-cooked, --card-heat = 100%)
+     to --bone-300 (>= 72 h, --card-heat = 0%) via color-mix. Dormant rows opt
+     out of the ramp by setting `color: var(--bone-400)` inline on the element
+     itself; that inline style wins over this rule's specificity. The 24 px
+     fixed height is set inline on the element to keep layout stable across
+     fresh / decayed / dormant / NEW states (no jump). */
+  :root[data-design="brut"] .brut-card-heat-row {
+    color: color-mix(in oklch, var(--bone-100) var(--card-heat), var(--bone-300));
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.12em;
+    transition: color var(--m-tick) var(--ease-linear);
   }
 
   /* Search input — hard rectangle, already overridden by .input-base block,
