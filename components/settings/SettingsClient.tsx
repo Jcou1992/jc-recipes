@@ -85,14 +85,17 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
         >
           {t.settingsSpaceNameLabel}
         </label>
-        <div className="flex gap-2">
+        {/* Cycle 2 P0 #3: stack input + button vertically on <sm so a long
+            space name like "Test Space 1777082963237" doesn't get visually
+            clipped by the inline SAVE button on a 360px viewport. */}
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             id="space-name-input"
             type="text"
             value={spaceName}
             onChange={e => setSpaceName(e.target.value.slice(0, 30))}
             placeholder={spaceNameFallback}
-            className="input-base flex-1"
+            className="input-base flex-1 w-full"
             maxLength={30}
             aria-label={t.settingsSpaceNameLabel}
             data-testid="settings-space-name-input"
@@ -101,7 +104,7 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
             type="button"
             onClick={saveSpaceName}
             disabled={saving}
-            className="btn-primary"
+            className="btn-primary self-start sm:self-auto"
             data-testid="settings-save-space-name"
           >
             {saving ? t.savingBtn : t.settingsSaveBtn}

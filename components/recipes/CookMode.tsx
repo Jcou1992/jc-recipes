@@ -314,6 +314,10 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   // its own ✕ exit) we suppress the bar so its z-50 sticky doesn't overlay
   // the completion chrome. Pre-formatted so the JSX stays terse and we never
   // call this work in classic mode.
+  // Cycle 2 P1: the local EXIT button is CSS-hidden under brut (cook
+  // local-header kill rule). Surface a tappable EXIT inside the kicker so
+  // chefs with wet hands have a discoverable bail-out — the wayfinder crumb
+  // alone wasn't read as a link in usability tests.
   const wayfinderProps = isBrut && !finished
     ? {
         crumb: `SEKAI · ${fmtRec(recipe.id)} · COOK`,
@@ -321,9 +325,11 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         statusRight: `T+${formatSeconds(liveElapsed)}`,
         userLabel: '',
         hot: true,
-        // Cook mode has its own keyboard map (space/arrows). The list-page
-        // kicker (`/`, `F`, `ESC`) does not apply here — suppress the row.
-        kicker: null as ReadonlyArray<string> | null,
+        // Single-key kicker — cook navigates by space/arrows, but the user
+        // still needs a visible way out. The exitHref prop renders a
+        // tappable [ESC] ← EXIT link as the first item in the kicker row.
+        kicker: ['ESC:EXIT'] as ReadonlyArray<string>,
+        exitHref: `/recipes/${recipe.id}`,
       }
     : null;
 
