@@ -279,3 +279,54 @@ These are the moments the polish was for. Run them before declaring "ready for s
 - `/recipes/new` does not yet have a staged `SEKAI · NEW · 2/4` wayfinder progression (ui-ux flagged this; separate plan).
 - Parallel ingredient timers (DOSSIER friction #3) remain unsolved (separate plan).
 - Inline form validation on blur (DOSSIER baseline gap) deferred (separate plan).
+
+## 9. Cycle 2-4 polish
+
+After the contest reveal landed, the design ran three /critique cycles to push the worse-of-modes Nielsen score from 25/32 toward the ceiling. The shipped set:
+
+### 9.1 Route-aware wayfinder kicker (cycle 2)
+
+The kicker advertised the list-page payload (`/`, `F`, `Esc`) on every route — including pages where those keys did nothing. Now `components/ui/brut/RouteAwareWayfinder.tsx` resolves a per-route payload:
+
+- `/` and `/recipes` → `/:SEARCH F:FILTER ESC:CLEAR N:NEW ?:HELP`
+- `/recipes/[id]` → `E:EDIT K:COOK P:PRINT ?:HELP`
+- `/recipes/new` and `*/edit` → `ESC:CANCEL ?:HELP`
+- `/settings` → `ESC:BACK ?:HELP`
+- `/login`, `/recipes/print`, `/cook` → wayfinder hidden entirely
+
+**Try it:** open each route in brut, watch the kicker line below SEKAI · TIME track the page.
+
+### 9.2 Detail E / K / P shortcuts bound (cycle 4)
+
+The detail kicker advertised `E:EDIT`, `K:COOK`, `P:PRINT` from cycle 2 — but the keys had no binding. Cycle 4 adds the binding inside `RecipeDetailClient.tsx` (gated on input/textarea focus + the matchOpen modal). On any recipe detail page:
+
+- `E` → `/recipes/{id}/edit`
+- `K` → `/recipes/{id}/cook?servings=…&units=…`
+- `P` → `/recipes/print?ids={id}`
+
+Skips when an input owns focus, when modifier keys are held, and when the macros-match modal is open.
+
+### 9.3 Wayfinder bar fully suppressed on auth + paper (cycle 4)
+
+Previously the kicker was nulled on `/login` and `/recipes/print` but the 32 px telemetry strip still mounted. `HIDDEN_PATTERNS` in `RouteAwareWayfinder.tsx` now drops the bar entirely on those routes plus `/cook`. The login splash and print preview render bare.
+
+### 9.4 Settings toggle chevron affordance (cycle 4)
+
+`ThemeToggle`, `FontSizeToggle`, `LanguageToggle` rendered just `DRK` / `MD` / `ES` with no visual hint that clicking cycled the value. Cycle 4 adds a trailing `›` chevron that nudges 2 px right + brightens on hover (`.cycle-toggle-chevron` in `app/globals.css`). Reduced-motion-safe.
+
+### 9.5 Floating [?] help button (cycle 4)
+
+Brut already had `?:HELP` in every kicker; classic had no visible surface for the dialog at all. `GlobalShortcuts.tsx` now mounts a 36 px `[?]` button in the bottom-right safe area that opens the same `KeyboardShortcutsDialog`. Hidden on `/login`, `/recipes/print`, and `/cook`.
+
+### 9.6 Other cycle 2-3 polish (selected)
+
+- Recipe ref-code demoted from H1 to a small chip below the recipe name (cycle 2)
+- Mobile settings: SAVE button no longer overlaps the SPACE NAME input on 360 px (cycle 2)
+- Cook mode brut: visible `[ESC] ← EXIT` link in the wayfinder (cycle 2)
+- Branded 404 page (cycle 2)
+- `/recipes` loading skeleton (cycle 2)
+- Avatar tone moved off the destructive red CTA palette (cycle 2)
+- MACROS empty-state copy `[ MACROS · UNKNOWN ] → ESTIMATE` (cycle 2)
+- Markdown export filename NFD-normalised + diacritic-stripped (cycle 2)
+- Print page `metadata.title = 'Print — SEKAI'` (cycle 2)
+- Form submit button disabled-until-valid + inline `[ ] REQUIRED` after blur (cycle 2)

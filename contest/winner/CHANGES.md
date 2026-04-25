@@ -239,3 +239,42 @@ git reset --hard 94aad56
 ```
 
 For runtime-only disable without code revert: **Settings → DESIGN → CLASSIC** (cookie flip, instant).
+
+## Cycle 2-4 polish (post-reveal)
+
+After the contest reveal merged, three /critique cycles applied targeted fixes to lift the worse-of-modes Nielsen 10 score from a measured 25/32 → ~30/32 honest. No new product features, no rewrites — only refinement on the existing brut + classic surfaces.
+
+### Cycle 2 — broad pass (P0+P1+P2+P3, 5 commits)
+
+- **P0 #1 — Route-aware kicker.** New `components/ui/brut/RouteAwareWayfinder.tsx` resolves a per-route payload. Login + print map to `null` (kicker hidden); detail gets `E:EDIT K:COOK P:PRINT`; new + edit get `ESC:CANCEL`; settings gets `ESC:BACK`; list keeps the full `/ F ESC N ?` set. `?:HELP` now in every visible kicker — the help dialog is no longer undiscoverable. (`feat(brut): route-aware wayfinder kicker`)
+- **P0 #2 — Demote ref-code, restore recipe name as title.** Detail page renders the user-typed name as `<h1>` with original casing; ref-code `<RefCode ns="REC" …>` chip in subdued mono sits below. (`fix(brut): demote ref-code to chip`)
+- **P0 #3 — Mobile settings stack.** SAVE button no longer overlaps the SPACE NAME input on 360 px. (`fix(brut): mobile settings stack + cook EXIT affordance`)
+- **P0/P1 — Cook EXIT visibility.** `Wayfinder` now accepts an `exitHref` prop; cook mode brut renders `[ESC] ← EXIT` as the first item in the kicker. (same commit)
+- **P1 — iOS scaler glyph audit.** Verified U+002D / U+002B literals; no U+2212 in numeric inputs.
+- **P2 — Form validation, branded 404, loading skeleton, avatar tone.** Submit disabled-until-valid; inline `[ ] REQUIRED` after blur; `app/not-found.tsx` reads design-mode cookie and renders mode-aware chrome; `app/(app)/recipes/loading.tsx` cookie-gated; AvatarMenu re-toned to bone/card surface. (`feat: form validation + branded 404 + iOS scaler verify`, `fix(ui): recipes loading skeleton + avatar tone`)
+- **P3 — Macros copy, markdown filename, print metadata.** `[ MACROS · UNKNOWN ] → ESTIMATE`; `lib/utils/normalise.ts` NFD-strip; `metadata.title = 'Print — SEKAI'`; print empty-state branded ticket. (`fix(ui): brut copy + i18n filename + print empty + metadata polish`)
+
+### Cycle 3 — verification (no commits)
+
+`contest/reviews/critique-cycle-3-verification.md` re-scored the post-fix state. Worse-of-modes lands at 30/32 honest, gated by three remaining gaps:
+
+- Heuristic #4 — settings toggle labels visually opaque
+- Heuristic #6 — classic mode has no visible kicker / shortcut surface
+- Heuristic #7 — detail kicker advertises `E K P` but those keys aren't bound
+
+### Cycle 4 — close the three gaps (4 commits)
+
+- **`feat(brut): bind detail E/K/P shortcuts + suppress wayfinder on auth/print`** — `RecipeDetailClient.tsx` adds a keydown listener for `E` / `K` / `P` (gated on input focus, modifier keys, and the macros-match modal). `RouteAwareWayfinder.tsx` `HIDDEN_PATTERNS` extended from `/cook` to include `/login` and `/recipes/print` — bar fully drops on those routes (closes the cycle-3 P3 #8 caveat).
+- **`fix(ui): visual cycle affordance on settings toggles`** — adds a trailing `›` chevron (CSS-only, `app/globals.css` `.cycle-toggle` + `.cycle-toggle-chevron`) to `ThemeToggle` / `FontSizeToggle` / `LanguageToggle`. Subtle hover translate + brightness, reduced-motion-safe.
+- **`feat(ui): keyboard shortcut help icon visible in both modes`** — `GlobalShortcuts.tsx` mounts a 36 px `[?]` button in the bottom-right safe area, opens the existing `KeyboardShortcutsDialog`. Hidden on `/login`, `/recipes/print`, `/cook`.
+- **`docs(brut): polish cycle changelog`** — this section.
+
+### Quality gates after cycle 4
+
+| Gate | Status |
+|---|---|
+| `npm run build` | clean, 9 routes, no new client-bundle bloat (detail page +0.0 kB; root layout untouched) |
+| `npm test` | unchanged from cycle 3 |
+| `npm run lint:hot` | unchanged (no new `--hot` use sites) |
+
+Cycle 4 ships only behavior + style — no tests added, no tests broken.
