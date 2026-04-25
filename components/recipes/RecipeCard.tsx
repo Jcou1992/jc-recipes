@@ -27,9 +27,6 @@ export default function RecipeCard({
 }: Props) {
   const t = useT();
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
-  // Brut ticket nameplate code — rendered via CSS ::before in brut mode, no
-  // visual effect in classic (the attribute is present but not read).
-  const brutCode = `${fmtRec(recipe.id)} · FIG.03`;
 
   // Brut detection — same client-only pattern as Wayfinder/CookMode. SSR
   // returns false (heat row hidden by default); the effect flips to true
@@ -39,6 +36,11 @@ export default function RecipeCard({
   useEffect(() => {
     setIsBrut(document.documentElement.getAttribute('data-design') === 'brut');
   }, []);
+
+  // Brut ticket nameplate code — rendered via CSS ::before in brut mode.
+  // Skip the formatter call entirely in classic so SSR/first-paint emits
+  // no `data-code` attribute and we don't waste CPU per card per list render.
+  const brutCode = isBrut ? `${fmtRec(recipe.id)} · FIG.03` : undefined;
 
   // Compute heat-decay descriptor once per render. Pure function, cheap.
   const cookedAge = fmtCookedAge(recipe.cooked_at);
