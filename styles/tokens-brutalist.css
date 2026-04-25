@@ -278,6 +278,64 @@
     :root[data-design="brut"] .brut-way-mode { display: none; }
   }
 
+  /* ── Wayfinder kicker — 24px keyboard-shortcut hint row (R7) ───────────── */
+  :root[data-design="brut"] .brut-kicker {
+    position: sticky;
+    top: 32px;                   /* sit flush under the wayfinder */
+    z-index: 49;                 /* below wayfinder so it occludes on overlap */
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    height: 24px;
+    padding: 0 var(--s-4);
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :root[data-design="brut"] .brut-kicker--collapsed {
+    justify-content: flex-end;
+  }
+  :root[data-design="brut"] .brut-kicker-label {
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .brut-kicker-keys {
+    color: var(--text-3);
+  }
+  :root[data-design="brut"] .brut-show-kicker {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--text-3);
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  :root[data-design="brut"] .brut-show-kicker:hover,
+  :root[data-design="brut"] .brut-show-kicker:focus-visible {
+    color: var(--text-1);
+  }
+
+  @media print {
+    .brut-kicker { display: none !important; }
+  }
+  @media (max-width: 479px) {
+    :root[data-design="brut"] .brut-kicker {
+      gap: var(--s-2);
+      padding: 0 var(--s-3);
+    }
+  }
+
   /* ── TabularNumeral — mono + tabular, no transition ──────────────────────── */
   :root[data-design="brut"] .brut-tab-num {
     font-family: var(--font-mono);

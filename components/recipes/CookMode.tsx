@@ -315,6 +315,9 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         statusRight: `T+${formatSeconds(liveElapsed)}`,
         userLabel: '',
         hot: true,
+        // Cook mode has its own keyboard map (space/arrows). The list-page
+        // kicker (`/`, `F`, `ESC`) does not apply here — suppress the row.
+        hideKicker: true,
       }
     : null;
 
