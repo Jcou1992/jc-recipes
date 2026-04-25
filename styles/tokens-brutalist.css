@@ -912,6 +912,24 @@
     hyphens: manual;
   }
 
+  /* U1 follow-up: on mobile under brut, the detail header row (title column +
+     EDIT/DELETE buttons column) gets too narrow to fit long titles without
+     wrapping in 3-char chunks. Stack the row vertically on <= 640px so the
+     title reclaims the full width; keep the button cluster aligned right
+     below. Targeted via :has() against the recipe-title descendant — there's
+     no stable data-attr on the outer wrapper and this codebase runs
+     evergreen browsers (modern Safari/Chrome/Firefox all support :has()). */
+  @media (max-width: 640px) {
+    :root[data-design="brut"] .flex.items-start.justify-between:has(> .min-w-0 > .recipe-title) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    :root[data-design="brut"] .flex.items-start.justify-between:has(> .min-w-0 > .recipe-title) > .flex.gap-2 {
+      margin-top: var(--s-3);
+      align-self: flex-end;
+    }
+  }
+
   /* Service bar — add top + bottom hairlines, zero the pill chrome. */
   :root[data-design="brut"] [data-testid="service-bar"] {
     border-top: 2px solid var(--rule-strong) !important;
