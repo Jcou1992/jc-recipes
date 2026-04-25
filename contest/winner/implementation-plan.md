@@ -108,7 +108,7 @@ checkpoint commit: "brut: snapshot RecipeListClient before ticket rewrite"
 
 Then:
 - Remove `rounded-full` from the search input (brand rule: zero radius). Replace pill with a hard rectangle + visible 1px `--rule-strong` border.
-- Sort pills → `SortPills.tsx` becomes a horizontal rule of text labels with a `box-shadow: inset 0 -2px 0 var(--hot)` underline on the active one (see mockup).
+- Sort pills → `SortPills.tsx` becomes a horizontal rule of text labels with a `box-shadow: inset 0 -2px 0 var(--brut-hot)` underline on the active one (see mockup).
 - Tag rail → `TagRail.tsx` renders `#TAGNAME` labels in mono, zero radius.
 - Grid: `display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--s-3);`. Cards span 4/6/12. Featured card spans 8.
 - Kill `InkBrush` from the empty state; replace with a 6-line ASCII ticket: `[ MISE · EMPTY ]` / `────────────` / `NO RECIPES YET.` etc.
@@ -121,7 +121,7 @@ Every card is a `<Ticket code={\`REC-\${shortHash(id)} · FIG.03\`}>`. Contents 
 - Description in mono 12px, 3-line clamp
 - 4-cell stat row: `ING | STP | SRV | TOTAL`
 - Footer: `COOKED 14 TIMES · LAST 2026-04-21`
-- Hover state: `border-color: var(--hot); border-width: 2px;` with compensating padding so the row doesn't jump 1px.
+- Hover state: `border-color: var(--brut-hot); border-width: 2px;` with compensating padding so the row doesn't jump 1px.
 
 No hero photo. No gradient. No shadow.
 

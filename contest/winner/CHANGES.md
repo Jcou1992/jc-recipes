@@ -77,9 +77,11 @@ Files: 3.
 Classic mode: byte-identical InkBrush branch preserved.
 All `data-testid="empty-state"` and `data-testid="filtered-empty-state"` selectors preserved.
 
-### U4 — `--hot` token bump to AA-normal (R4) — `edd8195`
+### U4 — `--brut-hot` token bump to AA-normal (R4) — `edd8195`
 
-**The fix:** Single-line token value bump:
+(Token was originally named `--hot`; renamed to `--brut-hot` post-cycle-1 critique to disambiguate from any future classic-mode terracotta naming.)
+
+**The fix:** Single-line token value bump (showing the historical diff at U4 time, when the token was still named `--hot`):
 ```diff
 -    --hot:     oklch(63.2% 0.148 45);
 -    --hot-a:   oklch(63.2% 0.148 45 / 0.14);
@@ -93,19 +95,19 @@ Was 4.9:1 on `--ink-900` (barely AA-large). Now ≥ 5.5:1 (AA-normal). Visually 
 Files: `styles/tokens-brutalist.css` (+3 / −2).
 Classic mode: untouched (classic terracotta lives in `app/globals.css` at `--terracotta`, separate token).
 
-### U5 — `--hot` lint pre-commit (R5) — `4f341d4`
+### U5 — `--brut-hot` lint pre-commit (R5) — `4f341d4`
 
-**The new rule:** Pre-commit hook fails any change that introduces > 1 `--hot` reference per route page (page.tsx + co-located components). The brut grammar requires "one active element per screen" — this enforces it mechanically so it doesn't rot.
+**The new rule:** Pre-commit hook fails any change that introduces > 1 `--brut-hot` reference per route page (page.tsx + co-located components). The brut grammar requires "one active element per screen" — this enforces it mechanically so it doesn't rot.
 
 **Implementation:**
-- `scripts/hot-token-lint.mjs` (191 lines): scans `app/**/page.tsx` + co-located `.tsx`/`.ts`/`.css`, counts `--hot\b` matches per route, fails when total > 1. Allowlists `styles/tokens-brutalist.css` (the source of the token, not a consumer). Sub-100 ms runtime.
+- `scripts/hot-token-lint.mjs` (191 lines): scans `app/**/page.tsx` + co-located `.tsx`/`.ts`/`.css`, counts `--brut-hot\b` matches per route, fails when total > 1. Allowlists `styles/tokens-brutalist.css` (the source of the token, not a consumer). Sub-100 ms runtime.
 - `.githooks/pre-commit`: invokes `node scripts/hot-token-lint.mjs` before `scripts/test-gate.mjs` when any staged file matches `*.{tsx,ts,css}`. Empty PRs skip the scan.
-- `package.json`: adds `"lint:hot": "node scripts/hot-token-lint.mjs"`.
+- `package.json`: adds `"lint:hot": "node scripts/hot-token-lint.mjs"` (task name kept short for ergonomics; internally scans `--brut-hot`).
 - Override pattern `[lint:hot-override: <reason>]` mirrors `[test-gate-override: ...]`. Reads `GATE_COMMIT_MSG` env or `--commit-msg=` arg.
 
 **Failure example:**
 ```
-[hot-lint] FAIL  app/(app)/recipes/[id]/page.tsx contains 2 --hot references.
+[hot-lint] FAIL  app/(app)/recipes/[id]/page.tsx contains 2 --brut-hot references.
 Brut grammar allows ≤ 1 hot element per screen.
 Reduce, or move shared sites to tokens-brutalist.css.
 ```
@@ -178,8 +180,8 @@ Files: 5 (3 new, 2 modified).
 | `cooked_at` + 72 h heat decay | **Team E · Ambient-Atmospheric** | judge + impeccable + ui-ux | U8 + U9 |
 | `[DORMANT Xd]` after 7 days | impeccable extension on Team E | impeccable | U9 |
 | Wayfinder kicker hint row | **Team A · Editorial-Magazine** ("kicker colophon tip") | ui-ux | U7 |
-| `--hot` AA-normal bump | **Team A precedent** (stability bar) | impeccable | U4 |
-| Pre-commit lint enforcing one `--hot` per route | impeccable original | impeccable | U5 |
+| `--brut-hot` AA-normal bump | **Team A precedent** (stability bar) | impeccable | U4 |
+| Pre-commit lint enforcing one `--brut-hot` per route | impeccable original | impeccable | U5 |
 
 ## Files added
 
@@ -209,7 +211,7 @@ Files: 5 (3 new, 2 modified).
 ## Operator follow-ups
 
 1. **Apply the migration:** `supabase db push` against dev → staging → prod. Until applied, `cooked_at` and `cooked_count` are null/0 on existing rows; `recordCooked` server action will fail at the DB layer (caught + logged in the cook-mode completion handler — does not break completion flow).
-2. **Verify `--hot` lint** runs on next commit by anyone — `node scripts/hot-token-lint.mjs` from the repo root.
+2. **Verify `--brut-hot` lint** runs on next commit by anyone — `node scripts/hot-token-lint.mjs` from the repo root.
 3. **Re-baseline the test-gate** after this PR merges: `npm run test:gate:bootstrap`. The 4 logged overrides are intentional (3 brand-new test files); after baseline they become the new floor.
 4. **Refresh `CLAUDE.md`** "Phase 2 features" line to add: "+ recipe heat memory (`cooked_at` + 72 h decay)" once U8 migration is live.
 

@@ -99,27 +99,27 @@ The `T+MM:SS` ticks live every second while the cook is in progress.
   ```
 - Tap **CLEAR FILTERS** → list re-populates.
 
-### 4.4 `--hot` token bump to AA-normal (U4)
+### 4.4 `--brut-hot` token bump to AA-normal (U4)
 
-**What to see:** every brut `--hot` site (cook-mode active step number, scaler `×N.NN` digit, sort-pill underline, hover card border, primary CTA border, etc.) is slightly brighter terracotta. Now ≥ 5.5:1 contrast on `--ink-900`.
+**What to see:** every brut `--brut-hot` site (cook-mode active step number, scaler `×N.NN` digit, sort-pill underline, hover card border, primary CTA border, etc.) is slightly brighter terracotta. Now ≥ 5.5:1 contrast on `--ink-900`.
 
 **Try it:**
 - Open cook mode under brut → step number `3/7` reads with crisp terracotta hue.
 - Open any recipe detail → adjust scaler to ×2 → the `×2.00` digit is the brighter terracotta.
 
-### 4.5 `--hot` lint (U5)
+### 4.5 `--brut-hot` lint (U5)
 
-**What to see:** if anyone tries to commit a route that uses `--hot` more than once, the pre-commit hook fails with a clear message. The brut grammar's "one active element per screen" rule is now mechanically enforced.
+**What to see:** if anyone tries to commit a route that uses `--brut-hot` more than once, the pre-commit hook fails with a clear message. The brut grammar's "one active element per screen" rule is now mechanically enforced.
 
 **Try it:**
 
 ```bash
-# Add two --hot in app/(app)/recipes/page.tsx temporarily
-echo "/* var(--hot) and var(--hot) */" >> "app/(app)/recipes/page.tsx"
+# Add two --brut-hot in app/(app)/recipes/page.tsx temporarily
+echo "/* var(--brut-hot) and var(--brut-hot) */" >> "app/(app)/recipes/page.tsx"
 git add "app/(app)/recipes/page.tsx"
 git commit -m "test: should fail"
 # Expected output:
-# [hot-lint] FAIL  app/(app)/recipes/page.tsx contains 2 --hot references.
+# [hot-lint] FAIL  app/(app)/recipes/page.tsx contains 2 --brut-hot references.
 # Brut grammar allows ≤ 1 hot element per screen.
 # Reduce, or move shared sites to tokens-brutalist.css.
 
@@ -137,7 +137,7 @@ npm run lint:hot
 To override the lint when there's a legitimate reason (e.g. truly two active states need terracotta on a single screen for accessibility), include the override tag in the commit message:
 
 ```
-feat: explain why two --hot are needed here
+feat: explain why two --brut-hot are needed here
 
 [lint:hot-override: cook-mode timer overdue + step number both must be hot per spec §X]
 ```

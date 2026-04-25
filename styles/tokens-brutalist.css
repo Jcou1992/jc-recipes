@@ -32,8 +32,8 @@
 
     /* ── Accents — restrained ─────────────────────────────────────────────── */
     /* AA-normal contrast (5.5:1+) on --ink-900; lint enforces ≤ 1 use site per route — see U5 */
-    --hot:     oklch(66% 0.15 45);       /* terracotta, active/hot */
-    --hot-a:   oklch(66% 0.15 45 / 0.14);
+    --brut-hot:     oklch(66% 0.15 45);       /* terracotta, active/hot */
+    --brut-hot-a:   oklch(66% 0.15 45 / 0.14);
     --medal:   oklch(86.5% 0.089 89);       /* gold, earned moments */
     --medal-a: oklch(86.5% 0.089 89 / 0.14);
     --go:      oklch(72% 0.17 145);         /* success / done */
@@ -49,7 +49,7 @@
     --text-2: var(--bone-200);
     --text-3: var(--bone-300);
     --text-4: var(--bone-400);
-    --focus:  var(--hot);
+    --focus:  var(--brut-hot);
 
     /* ── Type ─────────────────────────────────────────────────────────────── */
     --font-mono:    'Berkeley Mono', var(--font-plex-mono), ui-monospace, Menlo, monospace;
@@ -163,13 +163,13 @@
     white-space: nowrap;
   }
   :root[data-design="brut"] .brut-ticket[data-hot="1"] {
-    border-color: var(--hot);
+    border-color: var(--brut-hot);
     border-width: 2px;
     /* compensate 1px so content doesn't jump */
     padding: calc(var(--s-6) - 1px) calc(var(--s-4) - 1px) calc(var(--s-4) - 1px);
   }
   :root[data-design="brut"] .brut-ticket[data-hot="1"]::before {
-    color: var(--hot);
+    color: var(--brut-hot);
   }
 
   /* ── Empty-state ticket [ MISE · EMPTY ] (R3) ────────────────────────────── */
@@ -226,7 +226,7 @@
     margin: 0 0.125rem;
   }
   :root[data-design="brut"] .brut-empty-action {
-    color: var(--hot, var(--text-1));
+    color: var(--brut-hot, var(--text-1));
     text-decoration: underline;
     text-underline-offset: 3px;
     background: none;
@@ -276,7 +276,7 @@
   :root[data-design="brut"] .brut-way-crumb  { color: var(--text-2); font-weight: 500; }
   :root[data-design="brut"] .brut-way-mode   { color: var(--text-2); }
   :root[data-design="brut"] .brut-way-status { color: var(--text-2); }
-  :root[data-design="brut"] .brut-wayfinder[data-hot="1"] .brut-way-status { color: var(--hot); }
+  :root[data-design="brut"] .brut-wayfinder[data-hot="1"] .brut-way-status { color: var(--brut-hot); }
   :root[data-design="brut"] .brut-way-user   { color: var(--text-3); }
 
   @media print {
@@ -540,9 +540,9 @@
     padding: 0 var(--s-4);
   }
   :root[data-design="brut"] .input-base:focus {
-    outline: 2px solid var(--hot);
+    outline: 2px solid var(--brut-hot);
     outline-offset: 0;
-    border-color: var(--hot);
+    border-color: var(--brut-hot);
   }
   :root[data-design="brut"] .input-base::placeholder {
     color: var(--text-4);
@@ -682,12 +682,12 @@
   }
   /* Hover: fire the ticket — 1px to 2px hot. */
   :root[data-design="brut"] .recipe-card:hover {
-    border-color: var(--hot) !important;
+    border-color: var(--brut-hot) !important;
     border-width: 2px !important;
     padding: calc(var(--s-6) - 1px) calc(var(--s-4) - 1px) calc(var(--s-4) - 1px) !important;
   }
   :root[data-design="brut"] .recipe-card:hover::before {
-    color: var(--hot);
+    color: var(--brut-hot);
   }
   /* Card title — mono uppercase 20px. */
   :root[data-design="brut"] .recipe-card h2 {
@@ -779,8 +779,8 @@
     color: var(--text-1) !important;
   }
   :root[data-design="brut"] [data-testid^="sort-pill-"][aria-checked="true"] {
-    color: var(--hot) !important;
-    box-shadow: inset 0 -2px 0 var(--hot) !important;
+    color: var(--brut-hot) !important;
+    box-shadow: inset 0 -2px 0 var(--brut-hot) !important;
     background: transparent !important;
   }
   /* The hint sub-label wraps under the label — keep visible but muted. */
@@ -972,8 +972,8 @@
   }
   :root[data-design="brut"] [data-testid="scaler-decrease"]:hover,
   :root[data-design="brut"] [data-testid="scaler-increase"]:hover {
-    border-color: var(--hot) !important;
-    color: var(--hot) !important;
+    border-color: var(--brut-hot) !important;
+    color: var(--brut-hot) !important;
   }
   :root[data-design="brut"] [data-testid="scaler-value"] {
     font-family: var(--font-mono) !important;
@@ -996,13 +996,13 @@
      scaler-scaled-badge is the sentinel; its presence means multiplier !== 1. */
   :root[data-design="brut"] [data-testid="serving-scaler"]:has([data-testid="scaler-scaled-badge"])
     [data-testid="scaler-value"] {
-    color: var(--hot) !important;
-    border-color: var(--hot) !important;
+    color: var(--brut-hot) !important;
+    border-color: var(--brut-hot) !important;
   }
   :root[data-design="brut"] [data-testid="scaler-scaled-badge"] {
     background: transparent !important;
-    color: var(--hot) !important;
-    border: 1px solid var(--hot) !important;
+    color: var(--brut-hot) !important;
+    border: 1px solid var(--brut-hot) !important;
     border-radius: 0 !important;
     font-family: var(--font-mono);
     text-transform: uppercase;
@@ -1218,7 +1218,7 @@
   :root[data-design="brut"] [data-testid^="timer-pill-"],
   :root[data-design="brut"] [data-testid^="cook-timer-reset-"] {
     border-radius: 0 !important;
-    background: var(--hot) !important;
+    background: var(--brut-hot) !important;
     color: var(--bg) !important;
     font-family: var(--font-mono) !important;
     letter-spacing: 0.1em;
@@ -1315,7 +1315,7 @@
   }
   /* Focus ring — already set globally. Re-declare for belt-and-suspenders. */
   :root[data-design="brut"] :focus-visible {
-    outline: 2px solid var(--hot) !important;
+    outline: 2px solid var(--brut-hot) !important;
     outline-offset: 0 !important;
   }
 }

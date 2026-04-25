@@ -2,15 +2,19 @@
 /**
  * Hot-token lint (R5).
  *
- * Brut grammar rule: at most ONE `--hot` accent per route screen.
- * `--hot` is the loud terracotta drumbeat. Overusing it dilutes it into
- * decoration. One sets the focus; two competes; three is noise.
+ * Brut grammar rule: at most ONE `--brut-hot` accent per route screen.
+ * `--brut-hot` is the loud terracotta drumbeat. Overusing it dilutes it
+ * into decoration. One sets the focus; two competes; three is noise.
+ *
+ * The token is named `--brut-hot` (not `--hot`) to disambiguate from any
+ * future classic-mode terracotta naming. The script + npm task name remain
+ * `lint:hot` for ergonomics; the matched token internally is `--brut-hot`.
  *
  * What this script checks
  * -----------------------
  * For every Next.js route page (`app/(app)/**\/page.tsx`,
  * `app/(auth)/**\/page.tsx`, plus `app/page.tsx`), count the number of
- * raw `--hot` references in:
+ * raw `--brut-hot` references in:
  *   1. The `page.tsx` file itself.
  *   2. Any `.tsx` / `.ts` / `.css` file co-located in the SAME directory
  *      (the route's leaf components — `PrintAutoTrigger.tsx`, etc.).
@@ -20,8 +24,8 @@
  * Allowlist
  * ---------
  * `styles/tokens-brutalist.css` defines the token and applies it to many
- * shared selectors. It is the SOURCE of `--hot`, not a consumer. Excluded
- * from the scan entirely.
+ * shared selectors. It is the SOURCE of `--brut-hot`, not a consumer.
+ * Excluded from the scan entirely.
  *
  * Override
  * --------
@@ -39,8 +43,8 @@ import path from 'node:path';
 
 const ROOT = process.cwd();
 
-// Files where `--hot` may appear freely. The token-definition file owns
-// the system-wide application of the accent; it is not a route surface.
+// Files where `--brut-hot` may appear freely. The token-definition file
+// owns the system-wide application of the accent; it is not a route surface.
 const ALLOWLIST = new Set([
   'styles/tokens-brutalist.css',
 ]);
@@ -50,8 +54,8 @@ const ROUTE_ROOTS = [
   'app',
 ];
 
-// File extensions we scan for `--hot`. JSX/TSX inline styles + className
-// strings, plus any co-located CSS module / vanilla CSS.
+// File extensions we scan for `--brut-hot`. JSX/TSX inline styles +
+// className strings, plus any co-located CSS module / vanilla CSS.
 const SCANNED_EXT = new Set(['.tsx', '.ts', '.css']);
 
 // ── Walk helpers ──────────────────────────────────────────────────────────────
@@ -78,10 +82,10 @@ function readSafe(p) {
 }
 
 function countHot(src) {
-  // Match the raw token reference. Hyphens in `--hot` need no escape inside
-  // a character class, but the leading `--` is literal. We count
+  // Match the raw token reference. Hyphens in `--brut-hot` need no escape
+  // inside a character class, but the leading `--` is literal. We count
   // occurrences, not lines (one line can carry two refs).
-  const m = src.match(/--hot\b/g);
+  const m = src.match(/--brut-hot\b/g);
   return m ? m.length : 0;
 }
 
@@ -170,7 +174,7 @@ function main() {
       ? ` (${f.refs.map(r => `${r.file}:${r.count}`).join(', ')})`
       : '';
     console.error(
-      `[hot-lint] FAIL  ${f.file} contains ${f.count} --hot references${detail}. ` +
+      `[hot-lint] FAIL  ${f.file} contains ${f.count} --brut-hot references${detail}. ` +
       `Brut grammar allows ≤ 1 hot element per screen. ` +
       `Reduce, or move shared sites to tokens-brutalist.css.`
     );
