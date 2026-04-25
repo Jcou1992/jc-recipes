@@ -11,7 +11,7 @@ import {
   PREF_COOKIE_UNITS,
 } from '@/lib/preference-cookies';
 import { DESIGN_MODE_COOKIE, type DesignMode } from '@/lib/brut/design-mode-cookie';
-import { Wayfinder } from '@/components/ui/brut/Wayfinder';
+import { RouteAwareWayfinder } from '@/components/ui/brut/RouteAwareWayfinder';
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
@@ -98,8 +98,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="min-h-screen">
         {/* Brut-only universal telemetry row. Renders null in classic mode
             (Wayfinder reads data-design at mount). Per-route pages may mount
-            richer Wayfinder instances beneath with resource-specific data. */}
-        <Wayfinder crumb="SEKAI" userLabel="" />
+            richer Wayfinder instances beneath with resource-specific data;
+            on `/cook` the route owns its own Wayfinder so the global one is
+            suppressed here to avoid stacking two 32 px header rows. */}
+        <RouteAwareWayfinder crumb="SEKAI" userLabel="" />
         {children}
       </body>
     </html>

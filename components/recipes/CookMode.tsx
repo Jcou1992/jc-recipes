@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useT } from '@/components/ui/LanguageContext';
 import { haptic } from '@/lib/motion/haptic';
+import { Wayfinder } from '@/components/ui/brut/Wayfinder';
+import { fmtRec } from '@/lib/brut/ref-codes';
 import type { Recipe, Step } from '@/types/recipe';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -125,6 +127,14 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [rippleIdx, setRippleIdx] = useState<number | null>(null);
   const [rippleTick, setRippleTick] = useState(0);
+  // Brut mode detection — gates the per-route Wayfinder + hides the local
+  // header strip via a stable `data-cook-local-header` attribute. Reads
+  // `data-design` on `<html>` at mount; matches the pattern Wayfinder uses,
+  // so a design-mode flip already triggers a router refresh that remounts us.
+  const [isBrut, setIsBrut] = useState(false);
+  // Live elapsed seconds for the brut Wayfinder telemetry slot. Ticks only
+  // when brut is active to keep classic mode pixel- and re-render-identical.
+  const [liveElapsed, setLiveElapsed] = useState(0);
 
   function triggerIngredientCheck(i: number) {
     setCheckedIngredients(prev => {
@@ -150,6 +160,22 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   const touchStartX = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const cookStartRef = useRef<number>(Date.now());
+
+  // Detect brut design mode (client-only — matches <Wayfinder> behavior)
+  useEffect(() => {
+    setIsBrut(document.documentElement.getAttribute('data-design') === 'brut');
+  }, []);
+
+  // Live elapsed clock for the brut Wayfinder. Only runs in brut mode and
+  // pauses on the completion screen (where `elapsedSeconds` already snapshots
+  // the final time).
+  useEffect(() => {
+    if (!isBrut || finished) return;
+    const id = setInterval(() => {
+      setLiveElapsed(Math.round((Date.now() - cookStartRef.current) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isBrut, finished]);
 
   // Wake lock
   useEffect(() => {
@@ -277,6 +303,21 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
     return { ...ing, displayAmount: formatAmount(converted), displayUnit: unit };
   });
 
+  // Brut Wayfinder telemetry — mounted only when isBrut and the cook flow is
+  // still active. On the completion screen (which is z-30 absolute and owns
+  // its own ✕ exit) we suppress the bar so its z-50 sticky doesn't overlay
+  // the completion chrome. Pre-formatted so the JSX stays terse and we never
+  // call this work in classic mode.
+  const wayfinderProps = isBrut && !finished
+    ? {
+        crumb: `SEKAI · ${fmtRec(recipe.id)} · COOK`,
+        modeLabel: `STEP ${currentIndex + 1}/${totalSteps}`,
+        statusRight: `T+${formatSeconds(liveElapsed)}`,
+        userLabel: '',
+        hot: true,
+      }
+    : null;
+
   return (
     <div
       role="region"
@@ -292,6 +333,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       }}
       data-testid="cook-mode"
     >
+      {/* Brut-only per-route Wayfinder. Replaces the global one (suppressed
+          on /cook by RouteAwareWayfinder) with cook-specific telemetry:
+          recipe code, current STEP n/N, T+elapsed (terracotta via `hot`).
+          In classic mode wayfinderProps is null, so this whole node is gone
+          and the layout is pixel-identical to before. */}
+      {wayfinderProps && <Wayfinder {...wayfinderProps} />}
+
       {/* Completion screen */}
       {finished && (
         <div
@@ -419,8 +467,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       <div className="hidden sm:flex h-full">
         {/* Left: step panel (60%) */}
         <div className="flex-[3] flex flex-col h-full border-r" style={{ borderColor: 'var(--border)' }}>
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          {/* Header — classic-mode local "EXIT · STEP n/N" strip. Hidden under
+              brut where the Wayfinder above carries the same telemetry. */}
+          <div
+            className="flex items-center justify-between px-6 py-4 border-b"
+            style={{ borderColor: 'var(--border)', display: isBrut ? 'none' : undefined }}
+            data-cook-local-header
+          >
             <Link
               href={`/recipes/${recipe.id}`}
               className="font-label text-xs tracking-widest uppercase transition-colors"
@@ -565,8 +618,13 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        {/* Header — classic-mode local "EXIT · STEP n/N" strip. Hidden under
+            brut where the Wayfinder above carries the same telemetry. */}
+        <div
+          className="flex items-center justify-between px-4 py-3 border-b"
+          style={{ borderColor: 'var(--border)', display: isBrut ? 'none' : undefined }}
+          data-cook-local-header
+        >
           <Link
             href={`/recipes/${recipe.id}`}
             className="font-label text-xs tracking-widest uppercase min-h-[44px] flex items-center pr-4"
