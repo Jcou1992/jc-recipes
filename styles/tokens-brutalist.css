@@ -769,6 +769,31 @@
     min-height: 44px !important;
   }
 
+  /* R8: Tag chip touch targets on mobile. Filter-panel tag chips and tag-rail
+     chips both need >=40px height with comfortable vertical padding for wet
+     hands. Desktop unchanged. */
+  @media (max-width: 640px) {
+    :root[data-design="brut"] [data-testid="tag-rail"] button,
+    :root[data-design="brut"] [data-testid="tag-rail-more"],
+    :root[data-design="brut"] [data-testid^="tag-filter-"] {
+      min-height: 40px !important;
+      padding-block: 8px !important;
+    }
+  }
+
+  /* R9: UNMATCHED ingredient badge — bump text contrast to AA-normal under
+     brut and add a labelled border. Classic stays gold-tinted; under brut we
+     raise the text colour from text-4 (52% L) to text-2 (88% L) and use
+     rule-strong for the 1px border. No layout shift — same padding, same
+     borders, only colour values change. */
+  :root[data-design="brut"] [data-testid^="ingredient-unmatched-"] {
+    color: var(--text-2) !important;
+    background: transparent !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+  }
+
   /* Ink-brush empty state — kill under brut (fallback to text-only empty). */
   :root[data-design="brut"] [data-testid="empty-state"] svg,
   :root[data-design="brut"] [data-testid="empty-state"] .ink-brush,
