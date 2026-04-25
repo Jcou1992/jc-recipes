@@ -61,6 +61,39 @@ export default function RecipeDetailClient({ recipe }: Props) {
     } catch {}
   }, [recipe.id]);
 
+  // Cycle 4: Bind detail-page shortcuts E / K / P that the brut kicker
+  // already advertises. Skips when an input/textarea/contenteditable owns
+  // focus, when modifier keys are held, and when the matchOpen modal is up
+  // (its focus-trap should keep raw keys out, but belt-and-braces).
+  useEffect(() => {
+    function isTypingTarget(el: EventTarget | null): boolean {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (el.isContentEditable) return true;
+      return false;
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+      if (matchOpen) return;
+      // Use e.key (Cmd-less, single character). Match case-insensitively.
+      const k = e.key.toLowerCase();
+      if (k === 'e') {
+        e.preventDefault();
+        router.push(`/recipes/${recipe.id}/edit`);
+      } else if (k === 'k') {
+        e.preventDefault();
+        router.push(`/recipes/${recipe.id}/cook?servings=${targetServings}&units=${unitSystem}`);
+      } else if (k === 'p') {
+        e.preventDefault();
+        router.push(`/recipes/print?ids=${recipe.id}`);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [router, recipe.id, targetServings, unitSystem, matchOpen]);
+
   function toggleUnitSystem(next: UnitSystem) {
     setUnitSystem(next);
     try { localStorage.setItem('preferred-unit-system', next); } catch {}

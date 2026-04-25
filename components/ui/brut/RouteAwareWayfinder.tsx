@@ -38,8 +38,20 @@ import { Wayfinder } from './Wayfinder';
 type Props = React.ComponentProps<typeof Wayfinder>;
 
 // Routes where the global wayfinder must be fully hidden (the route owns
-// its own bar, or has none at all).
-const HIDDEN_PATTERNS = [/\/cook(\/|$)/];
+// its own bar, has none at all, or is a brand/paper surface where the
+// 32 px telemetry strip would compete with the hero).
+//
+// Cycle 4: extend from cook-only to also include /login + /recipes/print.
+// Previously the kicker was nulled on these routes (cycle 2 fix) but the
+// underlying 32 px Wayfinder bar still mounted, leaving a thin telemetry
+// strip above the SEKAI splash and the print preview. Suppressing the
+// bar entirely closes the cycle-3 P3 #8 caveat (login aesthetic) and
+// keeps the print preview pixel-clean for paper output.
+const HIDDEN_PATTERNS = [
+  /\/cook(\/|$)/,
+  /^\/login(\/|$)/,
+  /^\/recipes\/print(\/|$)/,
+];
 
 // Per-route kicker payloads. Each route declares the shortcuts that are
 // actually bound on it. Order matters: longer patterns must come first so
