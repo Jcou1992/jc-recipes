@@ -7,7 +7,7 @@ create index recipes_cooked_at_idx
   where cooked_at is not null;
 
 comment on column recipes.cooked_at is
-  'Timestamp the recipe was last marked cooked. Null = never cooked. Drives brut heat-decay rendering (R6).';
+  'Timestamp the recipe was last marked cooked. Null = never cooked. Mode-neutral cook telemetry. Brut renders the heat-decay row; classic doesn''t — but the column is the source of truth for both, so toggling brut later still shows real cook history.';
 
 comment on column recipes.cooked_count is
   'Lifetime count of "I cooked this" stamps. Monotonically increases via recordCooked server action.';
