@@ -19,8 +19,9 @@
     --bone-400: oklch(52% 0.010 85);   /* disabled / hint */
 
     /* ── Accents — restrained ─────────────────────────────────────────────── */
-    --hot:     oklch(63.2% 0.148 45);       /* terracotta, active/hot */
-    --hot-a:   oklch(63.2% 0.148 45 / 0.14);
+    /* AA-normal contrast (5.5:1+) on --ink-900; lint enforces ≤ 1 use site per route — see U5 */
+    --hot:     oklch(66% 0.15 45);       /* terracotta, active/hot */
+    --hot-a:   oklch(66% 0.15 45 / 0.14);
     --medal:   oklch(86.5% 0.089 89);       /* gold, earned moments */
     --medal-a: oklch(86.5% 0.089 89 / 0.14);
     --go:      oklch(72% 0.17 145);         /* success / done */
