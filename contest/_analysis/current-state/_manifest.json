@@ -1,0 +1,257 @@
+{
+  "results": [
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/login",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/login.png",
+      "bytes": 39629
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/root.png",
+      "bytes": 2710431
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/recipes.png",
+      "bytes": 38384
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/recipe-detail.png",
+      "bytes": 76185
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/edit",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/recipe-edit.png",
+      "bytes": 84138
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/cook",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/recipe-cook.png",
+      "bytes": 16937
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes/print",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/recipes-print.png",
+      "bytes": 15315
+    },
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/settings",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/desktop/settings.png",
+      "bytes": 75822
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/login",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/login.png",
+      "bytes": 51603
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/root.png",
+      "bytes": 2747031
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipes.png",
+      "bytes": 2747031
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes/new",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipes-new.png",
+      "bytes": 78303
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipe-detail.png",
+      "bytes": 77590
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/edit",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipe-edit.png",
+      "bytes": 97579
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/cook",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipe-cook.png",
+      "bytes": 18029
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/recipes/print",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/recipes-print.png",
+      "bytes": 16858
+    },
+    {
+      "viewport": "desktop",
+      "theme": "light",
+      "route": "/settings",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/desktop/settings.png",
+      "bytes": 78870
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/login",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/login.png",
+      "bytes": 89430
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/root.png",
+      "bytes": 2839771
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipes.png",
+      "bytes": 2839771
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes/new",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipes-new.png",
+      "bytes": 138900
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipe-detail.png",
+      "bytes": 137410
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/edit",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipe-edit.png",
+      "bytes": 127679
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/cook",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipe-cook.png",
+      "bytes": 27150
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/recipes/print",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/recipes-print.png",
+      "bytes": 28414
+    },
+    {
+      "viewport": "mobile",
+      "theme": "dark",
+      "route": "/settings",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/dark/mobile/settings.png",
+      "bytes": 156194
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/login",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/login.png",
+      "bytes": 120288
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/root.png",
+      "bytes": 2888961
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipes.png",
+      "bytes": 2888961
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes/new",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipes-new.png",
+      "bytes": 144267
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipe-detail.png",
+      "bytes": 138360
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/edit",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipe-edit.png",
+      "bytes": 132805
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes/f1227c91-2ea3-462b-8a1f-465d6f078f2c/cook",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipe-cook.png",
+      "bytes": 29916
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/recipes/print",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/recipes-print.png",
+      "bytes": 32289
+    },
+    {
+      "viewport": "mobile",
+      "theme": "light",
+      "route": "/settings",
+      "file": "/Users/JC/Dev/jc-recipes/.claude/worktrees/adoring-hamilton-98d792/contest/_analysis/current-state/light/mobile/settings.png",
+      "bytes": 161277
+    }
+  ],
+  "errors": [
+    {
+      "viewport": "desktop",
+      "theme": "dark",
+      "route": "/recipes/new",
+      "error": "Error: page.goto: net::ERR_ABORTED at http://localhost:3100/recipes/new\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3100/recipes/new\", waiting until \"networkidle\"\u001b[22m\n"
+    }
+  ]
+}

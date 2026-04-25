@@ -9,6 +9,7 @@ import { useT } from '@/components/ui/LanguageContext';
 import { recipeToMarkdown, triggerDownload } from '@/lib/utils/export-recipes';
 import { processIngredients, type UnitSystem } from '@/lib/utils/scaling';
 import { formatServings } from '@/lib/utils/format-servings';
+import { nameToSlug } from '@/lib/utils/normalise';
 import { MacrosCard } from '@/components/MacrosCard';
 import { MacrosMatchModal } from '@/components/MacrosMatchModal';
 
@@ -60,6 +61,39 @@ export default function RecipeDetailClient({ recipe }: Props) {
     } catch {}
   }, [recipe.id]);
 
+  // Cycle 4: Bind detail-page shortcuts E / K / P that the brut kicker
+  // already advertises. Skips when an input/textarea/contenteditable owns
+  // focus, when modifier keys are held, and when the matchOpen modal is up
+  // (its focus-trap should keep raw keys out, but belt-and-braces).
+  useEffect(() => {
+    function isTypingTarget(el: EventTarget | null): boolean {
+      if (!(el instanceof HTMLElement)) return false;
+      const tag = el.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (el.isContentEditable) return true;
+      return false;
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target)) return;
+      if (matchOpen) return;
+      // Use e.key (Cmd-less, single character). Match case-insensitively.
+      const k = e.key.toLowerCase();
+      if (k === 'e') {
+        e.preventDefault();
+        router.push(`/recipes/${recipe.id}/edit`);
+      } else if (k === 'k') {
+        e.preventDefault();
+        router.push(`/recipes/${recipe.id}/cook?servings=${targetServings}&units=${unitSystem}`);
+      } else if (k === 'p') {
+        e.preventDefault();
+        router.push(`/recipes/print?ids=${recipe.id}`);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [router, recipe.id, targetServings, unitSystem, matchOpen]);
+
   function toggleUnitSystem(next: UnitSystem) {
     setUnitSystem(next);
     try { localStorage.setItem('preferred-unit-system', next); } catch {}
@@ -72,7 +106,13 @@ export default function RecipeDetailClient({ recipe }: Props) {
 
   function handleExportMd() {
     const md = recipeToMarkdown(recipe);
-    const filename = recipe.name.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.md';
+    // Cycle 2 P3: NFD-normalise + diacritic-strip so "Crème brûlée"
+    // exports as `creme-brulee.md`, not `cr-me-br-l-e.md`. CJK / emoji
+    // collapse to empty so we fall back to `recipe.md` to keep the file
+    // recognisable (downstream tooling like Dropbox / GitHub doesn't
+    // round-trip those characters).
+    const slug = nameToSlug(recipe.name) || 'recipe';
+    const filename = `${slug}.md`;
     triggerDownload(md, filename, 'text/markdown');
   }
 
@@ -135,7 +175,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
             aria-label={t.decreaseServings}
             data-testid="scaler-decrease"
           >
-            −
+            -
           </button>
           <span
             className={`crossfade-number font-label text-sm tracking-wide tabular-nums ${valueChanging ? 'is-changing' : ''}`.trim()}

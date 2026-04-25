@@ -1,0 +1,1372 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * SEKAI · BRUTALIST-RAW-LUXE token layer.
+ * Scoped under :root[data-design="brut"] so classic mode is untouched.
+ * Imported from app/globals.css AFTER the existing @theme block.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Custom-property registration for --card-heat (R6.B) ─────────────────────
+ * Registered as <percentage> so color-mix() can interpolate it directly. The
+ * registration is global (outside the brut-only @layer) because @property
+ * cannot be nested inside @layer. The actual `.brut-card-heat-row` rule that
+ * reads it is scoped under :root[data-design="brut"] further down, so classic
+ * mode is unaffected. */
+@property --card-heat {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 0%;
+}
+
+@layer tokens {
+
+  :root[data-design="brut"] {
+    /* ── Paper — ink & bone, no warmth ───────────────────────────────────── */
+    --ink-900: oklch(8%  0.004 285);   /* body bg, dark */
+    --ink-800: oklch(12% 0.004 285);   /* surface */
+    --ink-700: oklch(17% 0.004 285);   /* surface-raised, input bg */
+    --ink-600: oklch(22% 0.004 285);   /* hairline rules */
+
+    --bone-100: oklch(97% 0.008 85);   /* primary text on dark */
+    --bone-200: oklch(88% 0.010 85);   /* secondary */
+    --bone-300: oklch(72% 0.012 85);   /* tertiary / ref codes */
+    --bone-400: oklch(52% 0.010 85);   /* disabled / hint */
+
+    /* ── Accents — restrained ─────────────────────────────────────────────── */
+    /* AA-normal contrast (5.5:1+) on --ink-900; lint enforces ≤ 1 use site per route — see U5 */
+    --brut-hot:     oklch(66% 0.15 45);       /* terracotta, active/hot */
+    --brut-hot-a:   oklch(66% 0.15 45 / 0.14);
+    --medal:   oklch(86.5% 0.089 89);       /* gold, earned moments */
+    --medal-a: oklch(86.5% 0.089 89 / 0.14);
+    --go:      oklch(72% 0.17 145);         /* success / done */
+    --late:    oklch(58% 0.20 28);          /* overdue */
+
+    /* ── Semantic (dark default) ─────────────────────────────────────────── */
+    --bg:             var(--ink-900);
+    --surface:        var(--ink-800);
+    --surface-raised: var(--ink-700);
+    --rule:           var(--ink-600);
+    --rule-strong:    var(--bone-400);
+    --text-1: var(--bone-100);
+    --text-2: var(--bone-200);
+    --text-3: var(--bone-300);
+    --text-4: var(--bone-400);
+    --focus:  var(--brut-hot);
+
+    /* ── Type ─────────────────────────────────────────────────────────────── */
+    --font-mono:    'Berkeley Mono', var(--font-plex-mono), ui-monospace, Menlo, monospace;
+    --font-display: 'Berkeley Mono Display', 'Berkeley Mono', var(--font-plex-mono), ui-monospace, monospace;
+    --font-jp:      var(--font-noto), 'Hiragino Mincho ProN', serif;
+
+    --t-10: 0.625rem; --t-11: 0.6875rem; --t-12: 0.75rem;  --t-14: 0.875rem;
+    --t-16: 1rem;     --t-20: 1.25rem;   --t-28: 1.75rem;  --t-40: 2.5rem;
+    --t-56: 3.5rem;   --t-64: 4rem;      --t-96: 6rem;
+
+    /* ── Spacing — 4px grid ──────────────────────────────────────────────── */
+    --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+    --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+    --s-16: 64px; --s-24: 96px;
+
+    /* ── Radius — zero, plus two deliberate exceptions ───────────────────── */
+    --r-0: 0px;
+    --r-1: 2px;          /* :focus-visible outline */
+    --r-full: 9999px;    /* cook-mode step bubble only */
+
+    /* ── Borders — two weights ───────────────────────────────────────────── */
+    --border-1: 1px solid var(--rule);
+    --border-2: 2px solid var(--rule-strong);
+
+    /* ── Motion — mechanical, not eased ──────────────────────────────────── */
+    --m-instant: 0ms;
+    --m-tick:    80ms;
+    --m-print:   180ms;
+    --m-reveal:  320ms;
+    --ease-linear: linear;
+    --ease-step:   steps(16);
+  }
+
+  :root[data-design="brut"][data-theme="light"] {
+    --bg:             var(--bone-100);
+    --surface:        #FFFFFF;
+    --surface-raised: #FDFCF8;
+    --rule:           oklch(20% 0.004 285 / 0.18);
+    --rule-strong:    oklch(20% 0.004 285 / 0.55);
+    --text-1: oklch(12% 0.004 285);
+    --text-2: oklch(25% 0.004 285);
+    --text-3: oklch(42% 0.008 285);
+    --text-4: oklch(58% 0.010 285);
+  }
+
+  /* Nuke the grain in brut mode — it's decorative. */
+  :root[data-design="brut"] body::after { display: none !important; }
+
+  /* Kill rounded utilities in brut mode. Scoped + !important because
+     legacy components pass `rounded-full` / `rounded-xl` inline. */
+  :root[data-design="brut"] [class*="rounded-"] {
+    border-radius: 0 !important;
+  }
+  /* …except the single exception: cook-mode step number bubble. */
+  :root[data-design="brut"] [data-brut-round="bubble"] {
+    border-radius: var(--r-full) !important;
+  }
+
+  /* Body face. */
+  :root[data-design="brut"] body {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1, 'ss01' 1, 'cv02' 1, 'cv03' 1;
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text-1);
+  }
+  /* Tabular numerals, globally. Nothing opts out. */
+  :root[data-design="brut"] * {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Focus ring — slim, in-the-cell. */
+  :root[data-design="brut"] :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 0;
+    border-radius: var(--r-1);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Primitive component styles (Phase 1). Scoped under :root[data-design="brut"]
+ * so `.brut-*` markup can exist in the tree at all times (Ticket always emits
+ * `data-code`, TabularNumeral always emits `.brut-num`) but only paints its
+ * brutalist face when the root opts in.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+
+  /* ── Ticket — the universal box with a top-border nameplate ─────────────── */
+  :root[data-design="brut"] .brut-ticket {
+    position: relative;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: var(--s-6) var(--s-4) var(--s-4);
+    transition: border-color var(--m-tick) var(--ease-linear);
+  }
+  :root[data-design="brut"] .brut-ticket::before {
+    content: attr(data-code);
+    position: absolute;
+    top: -7px;
+    left: var(--s-3);
+    padding: 0 var(--s-1);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  :root[data-design="brut"] .brut-ticket[data-hot="1"] {
+    border-color: var(--brut-hot);
+    border-width: 2px;
+    /* compensate 1px so content doesn't jump */
+    padding: calc(var(--s-6) - 1px) calc(var(--s-4) - 1px) calc(var(--s-4) - 1px);
+  }
+  :root[data-design="brut"] .brut-ticket[data-hot="1"]::before {
+    color: var(--brut-hot);
+  }
+
+  /* ── Empty-state ticket [ MISE · EMPTY ] (R3) ────────────────────────────── */
+  :root[data-design="brut"] .brut-empty-ticket {
+    max-width: 32rem;
+    margin: 0 auto;
+  }
+  :root[data-design="brut"] .brut-empty-body {
+    display: grid;
+    gap: var(--s-3);
+    padding: var(--s-2) 0;
+    font-family: var(--font-mono);
+    text-align: left;
+  }
+  :root[data-design="brut"] .brut-empty-rule {
+    color: var(--text-3);
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    user-select: none;
+  }
+  :root[data-design="brut"] .brut-empty-headline {
+    color: var(--text-1);
+    font-size: var(--t-14);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] .brut-empty-meta {
+    color: var(--text-3);
+    font-size: var(--t-11);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] .brut-empty-cta {
+    color: var(--text-2);
+    font-size: var(--t-12);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  :root[data-design="brut"] .brut-empty-hint {
+    color: var(--text-3);
+  }
+  :root[data-design="brut"] .brut-empty-key {
+    display: inline-block;
+    padding: 0 var(--s-2);
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    line-height: 1.4;
+    margin: 0 0.125rem;
+  }
+  :root[data-design="brut"] .brut-empty-action {
+    color: var(--brut-hot, var(--text-1));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  :root[data-design="brut"] .brut-empty-action:hover,
+  :root[data-design="brut"] .brut-empty-action:focus-visible {
+    color: var(--text-1);
+  }
+
+  /* ── Wayfinder — the 32px sticky header ──────────────────────────────────── */
+  :root[data-design="brut"] .brut-wayfinder {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    gap: var(--s-4);
+    align-items: center;
+    height: 32px;
+    padding: 0 var(--s-4);
+    background: var(--bg);
+    border-bottom: var(--border-2);
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+  }
+  :root[data-design="brut"] .brut-wayfinder > * {
+    padding: 0 var(--s-3);
+    border-right: 1px solid var(--rule);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :root[data-design="brut"] .brut-wayfinder > :first-child { padding-left: 0; }
+  :root[data-design="brut"] .brut-wayfinder > :last-child {
+    padding-right: 0;
+    border-right: 0;
+  }
+  :root[data-design="brut"] .brut-way-crumb  { color: var(--text-2); font-weight: 500; }
+  :root[data-design="brut"] .brut-way-mode   { color: var(--text-2); }
+  :root[data-design="brut"] .brut-way-status { color: var(--text-2); }
+  :root[data-design="brut"] .brut-wayfinder[data-hot="1"] .brut-way-status { color: var(--brut-hot); }
+  :root[data-design="brut"] .brut-way-user   { color: var(--text-3); }
+
+  @media print {
+    .brut-wayfinder { display: none !important; }
+  }
+  @media (max-width: 479px) {
+    :root[data-design="brut"] .brut-wayfinder {
+      grid-template-columns: 1fr auto auto;
+      gap: var(--s-2);
+    }
+    :root[data-design="brut"] .brut-way-mode { display: none; }
+  }
+
+  /* ── Wayfinder kicker — 24px keyboard-shortcut hint row (R7) ───────────── */
+  :root[data-design="brut"] .brut-kicker {
+    position: sticky;
+    top: 32px;                   /* sit flush under the wayfinder */
+    z-index: 49;                 /* below wayfinder so it occludes on overlap */
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    height: 24px;
+    padding: 0 var(--s-4);
+    background: var(--bg);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  :root[data-design="brut"] .brut-kicker--collapsed {
+    justify-content: flex-end;
+  }
+  :root[data-design="brut"] .brut-kicker-label {
+    color: var(--text-3);
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .brut-kicker-keys {
+    color: var(--text-3);
+  }
+  /* Cycle 2: optional EXIT link in the kicker row. Used by brut cook mode
+     to restore the affordance suppressed by the cook local-header CSS kill. */
+  :root[data-design="brut"] .brut-kicker-exit {
+    color: var(--brut-hot, var(--color-terracotta));
+    text-decoration: none;
+    margin-right: var(--s-2);
+    padding: 0 var(--s-2);
+    border-right: 1px solid var(--rule);
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+  }
+  :root[data-design="brut"] .brut-kicker-exit:hover,
+  :root[data-design="brut"] .brut-kicker-exit:focus-visible {
+    color: var(--text-1);
+  }
+  :root[data-design="brut"] .brut-show-kicker {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--text-3);
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  :root[data-design="brut"] .brut-show-kicker:hover,
+  :root[data-design="brut"] .brut-show-kicker:focus-visible {
+    color: var(--text-1);
+  }
+
+  @media print {
+    .brut-kicker { display: none !important; }
+  }
+  @media (max-width: 479px) {
+    :root[data-design="brut"] .brut-kicker {
+      gap: var(--s-2);
+      padding: 0 var(--s-3);
+    }
+  }
+
+  /* ── TabularNumeral — mono + tabular, no transition ──────────────────────── */
+  :root[data-design="brut"] .brut-tab-num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'zero' 1;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── GridScaffold — cols-based grid with token gaps ─────────────────────── */
+  :root[data-design="brut"] .brut-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--brut-cols, 12), minmax(0, 1fr));
+  }
+  :root[data-design="brut"] .brut-grid[data-gap="tight"]   { gap: var(--s-3); }
+  :root[data-design="brut"] .brut-grid[data-gap="default"] { gap: var(--s-4); }
+  :root[data-design="brut"] .brut-grid[data-gap="wide"]    { gap: var(--s-6); }
+
+  /* ── RefCode — the in-cell label rendering ──────────────────────────────── */
+  :root[data-design="brut"] .brut-refcode {
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── DesignModeToggle — segmented [ CLASSIC · BRUT ] ────────────────────── */
+  .brut-design-toggle {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--rule-strong, currentColor);
+    font-family: var(--font-plex-mono, ui-monospace, Menlo, monospace);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 32px;
+    background: transparent;
+  }
+  .brut-design-toggle button {
+    appearance: none;
+    background: transparent;
+    color: inherit;
+    border: 0;
+    padding: 0 12px;
+    min-height: 32px;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+  .brut-design-toggle button[aria-pressed="true"] {
+    background: currentColor;
+  }
+  .brut-design-toggle button[aria-pressed="true"] > span {
+    /* Invert: text becomes bg via mix-blend so both themes work. */
+    mix-blend-mode: difference;
+    color: #fff;
+  }
+  .brut-design-toggle .brut-design-sep {
+    width: 1px;
+    align-self: stretch;
+    background: currentColor;
+    opacity: 0.4;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * BRUT · GLOBAL CHROME OVERRIDES
+ * Apply to every existing JSX surface without touching components. Class
+ * selectors match the tailwind + bespoke classes already rendered by
+ * sacred-feature components. Scoped under [data-design="brut"] so classic mode
+ * is untouched.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+
+  /* ── Headings + body typography under brut ──────────────────────────────── */
+  :root[data-design="brut"] h1,
+  :root[data-design="brut"] h2,
+  :root[data-design="brut"] h3,
+  :root[data-design="brut"] h4,
+  :root[data-design="brut"] h5,
+  :root[data-design="brut"] h6 {
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+  :root[data-design="brut"] .font-display,
+  :root[data-design="brut"] .font-body,
+  :root[data-design="brut"] .font-label {
+    font-family: var(--font-mono);
+  }
+
+  /* Kill every rounded utility — scoped hard. Two deliberate exceptions
+     documented above (data-brut-round="bubble" and :focus-visible). */
+  :root[data-design="brut"] .rounded-full,
+  :root[data-design="brut"] .rounded-xl,
+  :root[data-design="brut"] .rounded-2xl,
+  :root[data-design="brut"] .rounded-lg,
+  :root[data-design="brut"] .rounded,
+  :root[data-design="brut"] .rounded-md,
+  :root[data-design="brut"] .rounded-sm,
+  :root[data-design="brut"] .rounded-t-2xl {
+    border-radius: 0 !important;
+  }
+
+  /* Inline style bypass for inputs that force border-radius via style={}.
+     RecipeListClient search input passes borderRadius: 9999px inline — this
+     rule wins at specificity because it's also attribute-specific. */
+  :root[data-design="brut"] input[style*="border-radius"] {
+    border-radius: 0 !important;
+  }
+
+  /* ── Shadow + blur kill — applied to every element in brut mode ─────────── */
+  :root[data-design="brut"] * {
+    box-shadow: none !important;
+  }
+  :root[data-design="brut"] [style*="backdrop-filter"],
+  :root[data-design="brut"] [style*="backdropFilter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* ── Existing btn-* classes — brut-ify into ticket buttons ──────────────── */
+  :root[data-design="brut"] .btn-primary,
+  :root[data-design="brut"] .btn-primary:link,
+  :root[data-design="brut"] .btn-primary:visited {
+    background: var(--text-1);
+    color: var(--bg);
+    border: 1px solid var(--text-1);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 48px;
+    padding: 0 var(--s-4);
+    box-shadow: none;
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .btn-primary:hover {
+    background: var(--bg);
+    color: var(--text-1);
+  }
+  :root[data-design="brut"] .btn-primary:active {
+    transform: translateY(1px);
+  }
+  :root[data-design="brut"] .btn-ghost,
+  :root[data-design="brut"] .btn-ghost:link,
+  :root[data-design="brut"] .btn-ghost:visited {
+    background: transparent;
+    color: var(--text-2);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 44px;
+    padding: 0 var(--s-3);
+    font-weight: 500;
+  }
+  :root[data-design="brut"] .btn-ghost:hover {
+    color: var(--text-1);
+    border-color: var(--rule-strong);
+  }
+  :root[data-design="brut"] .btn-danger {
+    background: transparent;
+    color: var(--late);
+    border: 1px solid var(--late);
+    border-radius: 0;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 44px;
+  }
+  :root[data-design="brut"] .btn-danger:hover {
+    background: var(--late);
+    color: var(--bg);
+  }
+
+  /* ── Inputs — the existing .input-base class gets a hard rectangle ──────── */
+  :root[data-design="brut"] .input-base {
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 0 !important;
+    color: var(--text-1);
+    font-family: var(--font-mono);
+    font-size: var(--t-14);
+    min-height: 48px;
+    padding: 0 var(--s-4);
+  }
+  :root[data-design="brut"] .input-base:focus {
+    outline: 2px solid var(--brut-hot);
+    outline-offset: 0;
+    border-color: var(--brut-hot);
+  }
+  :root[data-design="brut"] .input-base::placeholder {
+    color: var(--text-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: var(--t-11);
+  }
+
+  /* Section labels rendered with the existing .section-label utility class. */
+  :root[data-design="brut"] .section-label {
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    border-top: 2px solid var(--rule-strong);
+    padding-top: var(--s-3);
+    font-weight: 500;
+  }
+
+  /* ── LOGIN — brutalist single column ────────────────────────────────────── */
+  /* The login page uses a dialog-panel-sm card. Under brut: rip the card
+     chrome, centre the column, add the 世界 watermark via ::before on <main>. */
+  :root[data-design="brut"] main {
+    position: relative;
+  }
+  :root[data-design="brut"] .dialog-panel-sm {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    padding: var(--s-8) !important;
+    max-width: 360px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+  /* 世界 watermark on the login viewport. We scope to .dialog-panel-sm's
+     parent <main> to keep it login-only (the settings page also uses
+     section layouts, but those aren't centred <main> landmarks with dark bg). */
+  :root[data-design="brut"] main:has(.dialog-panel-sm)::before {
+    content: '世界';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-jp);
+    font-weight: 700;
+    font-size: clamp(8rem, 22vw, 18rem);
+    color: var(--text-1);
+    opacity: 0.055;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.08em;
+    z-index: 0;
+  }
+  /* Login wordmark — the h1 already carries "SEKAI" text; restyle to brut. */
+  :root[data-design="brut"] .dialog-panel-sm header h1 {
+    font-family: var(--font-mono);
+    font-size: var(--t-64);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: var(--text-1) !important;
+    text-transform: uppercase;
+  }
+  /* Hide the classic 世界 inline-serif glyph, the ornamental hairline rule,
+     and "Recipe tool" caption — we replace with a medal rule + caption. */
+  :root[data-design="brut"] .dialog-panel-sm header > .flex > span[aria-hidden="true"],
+  :root[data-design="brut"] .dialog-panel-sm header > .h-px,
+  :root[data-design="brut"] .dialog-panel-sm header > .mt-4.mb-3 {
+    display: none !important;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header {
+    text-align: center;
+    margin-bottom: var(--s-12);
+    position: relative;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header .flex {
+    justify-content: center;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--medal);
+    margin: var(--s-3) auto 0;
+  }
+  :root[data-design="brut"] .dialog-panel-sm header p {
+    margin-top: var(--s-3);
+    font-size: var(--t-10);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-3) !important;
+  }
+
+  /* Login-footer strip rendered via ::after on the login card itself. */
+  :root[data-design="brut"] .dialog-panel-sm::after {
+    content: 'SEKAI/AUTH/v2.03 · BUILD 20260424·A8F3';
+    display: block;
+    margin-top: var(--s-12);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-4);
+    text-align: center;
+  }
+
+  /* ── RECIPE LIST — service ticket queue ─────────────────────────────────── */
+  /* Hero + CTA — the space-name + [+ NEW RECIPE] row sits below wayfinder.
+     Reshape with a 2px bottom rule. */
+  :root[data-design="brut"] .recipe-card,
+  :root[data-design="brut"] a.recipe-card {
+    background: var(--surface) !important;
+    border: 1px solid var(--rule) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: var(--s-6) var(--s-4) var(--s-4) !important;
+    position: relative;
+    transition: border-color var(--m-tick) var(--ease-linear);
+  }
+  :root[data-design="brut"] .recipe-card::before {
+    content: attr(data-code);
+    position: absolute;
+    top: -7px;
+    left: var(--s-3);
+    padding: 0 var(--s-1);
+    background: var(--bg);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  /* Hover: fire the ticket — 1px to 2px hot. */
+  :root[data-design="brut"] .recipe-card:hover {
+    border-color: var(--brut-hot) !important;
+    border-width: 2px !important;
+    padding: calc(var(--s-6) - 1px) calc(var(--s-4) - 1px) calc(var(--s-4) - 1px) !important;
+  }
+  :root[data-design="brut"] .recipe-card:hover::before {
+    color: var(--brut-hot);
+  }
+  /* Card title — mono uppercase 20px. */
+  :root[data-design="brut"] .recipe-card h2 {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    color: var(--text-1) !important;
+  }
+  :root[data-design="brut"] .recipe-card p {
+    font-family: var(--font-mono);
+    font-size: var(--t-12);
+    color: var(--text-2) !important;
+  }
+  /* Card meta labels inherit mono; force uppercase + tabular. */
+  :root[data-design="brut"] .recipe-card .font-label {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-10) !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  /* Tag chips inside card — hard rectangle, # prefix. */
+  :root[data-design="brut"] .recipe-card .rounded-full {
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--text-3) !important;
+    border: 1px solid var(--rule) !important;
+    padding: 2px var(--s-2) !important;
+    font-size: var(--t-10) !important;
+    letter-spacing: 0.1em !important;
+  }
+  :root[data-design="brut"] .recipe-card .rounded-full::before {
+    content: '#';
+    display: inline;
+  }
+
+  /* ── Heat-decay row (R6.B) ───────────────────────────────────────────────── */
+  /* The card heat row fades from --bone-100 (just-cooked, --card-heat = 100%)
+     to --bone-300 (>= 72 h, --card-heat = 0%) via color-mix. Dormant rows opt
+     out of the ramp by setting `color: var(--bone-400)` inline on the element
+     itself; that inline style wins over this rule's specificity. The 24 px
+     fixed height is set inline on the element to keep layout stable across
+     fresh / decayed / dormant / NEW states (no jump). */
+  :root[data-design="brut"] .brut-card-heat-row {
+    color: color-mix(in oklch, var(--bone-100) var(--card-heat), var(--bone-300));
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.12em;
+    transition: color var(--m-tick) var(--ease-linear);
+  }
+
+  /* Search input — hard rectangle, already overridden by .input-base block,
+     but also strip the inline border-radius set by JSX. */
+  :root[data-design="brut"] [data-testid="recipe-search"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+  }
+
+  /* Sort pills — rewrite to bottom-rule underline grammar. */
+  :root[data-design="brut"] [data-testid="sort-pills"] {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 0;
+    background: transparent;
+  }
+  :root[data-design="brut"] [data-testid^="sort-pill-"] {
+    background: transparent !important;
+    color: var(--text-3) !important;
+    border: 0 !important;
+    border-right: 1px solid var(--rule) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    min-height: 40px !important;
+    padding: 0 var(--s-3) !important;
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: color var(--m-tick) var(--ease-linear),
+                box-shadow var(--m-tick) var(--ease-linear);
+  }
+  :root[data-design="brut"] [data-testid^="sort-pill-"]:last-child {
+    border-right: 0 !important;
+  }
+  :root[data-design="brut"] [data-testid^="sort-pill-"]:hover {
+    color: var(--text-1) !important;
+  }
+  :root[data-design="brut"] [data-testid^="sort-pill-"][aria-checked="true"] {
+    color: var(--brut-hot) !important;
+    box-shadow: inset 0 -2px 0 var(--brut-hot) !important;
+    background: transparent !important;
+  }
+  /* The hint sub-label wraps under the label — keep visible but muted. */
+  :root[data-design="brut"] [data-testid^="sort-pill-"] span {
+    color: inherit !important;
+    background: transparent !important;
+  }
+
+  /* Tag rail chips — hard rectangle, #PREFIX. */
+  :root[data-design="brut"] [data-testid="tag-rail"] button {
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--text-2) !important;
+    border: 1px solid var(--rule) !important;
+    box-shadow: none !important;
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-height: 40px !important;
+    height: 40px;
+    padding: 0 var(--s-3) !important;
+  }
+  :root[data-design="brut"] [data-testid="tag-rail"] button[aria-pressed="true"] {
+    background: var(--text-1) !important;
+    color: var(--bg) !important;
+    border-color: var(--text-1) !important;
+  }
+  :root[data-design="brut"] [data-testid^="tag-filter-"]::before {
+    content: '#';
+    display: inline;
+  }
+  /* More button — ghosty */
+  :root[data-design="brut"] [data-testid="tag-rail-more"] {
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--text-3) !important;
+    border: 1px solid var(--rule) !important;
+    box-shadow: none !important;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    height: 40px;
+    min-height: 40px !important;
+    padding: 0 var(--s-3);
+  }
+
+  /* Result count + inline clear-filters get mono treatment. */
+  :root[data-design="brut"] [data-testid="result-count"] {
+    font-family: var(--font-mono);
+    color: var(--text-3) !important;
+    letter-spacing: 0.14em;
+  }
+
+  /* Select-mode enter/exit buttons → hard rectangles. */
+  :root[data-design="brut"] [data-testid="select-mode-enter"],
+  :root[data-design="brut"] [data-testid="select-mode-exit"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow: none !important;
+  }
+
+  /* Filter panel chips + tag search input — align with the brut grammar. */
+  :root[data-design="brut"] [data-testid="tag-search"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+    background: var(--surface) !important;
+    border: 1px solid var(--rule-strong) !important;
+    color: var(--text-1) !important;
+    min-height: 44px !important;
+  }
+
+  /* R8: Tag chip touch targets on mobile. Filter-panel tag chips and tag-rail
+     chips both need >=40px height with comfortable vertical padding for wet
+     hands. Desktop unchanged. */
+  @media (max-width: 640px) {
+    :root[data-design="brut"] [data-testid="tag-rail"] button,
+    :root[data-design="brut"] [data-testid="tag-rail-more"],
+    :root[data-design="brut"] [data-testid^="tag-filter-"] {
+      min-height: 40px !important;
+      padding-block: 8px !important;
+    }
+  }
+
+  /* R9: UNMATCHED ingredient badge — bump text contrast to AA-normal under
+     brut and add a labelled border. Classic stays gold-tinted; under brut we
+     raise the text colour from text-4 (52% L) to text-2 (88% L) and use
+     rule-strong for the 1px border. No layout shift — same padding, same
+     borders, only colour values change. */
+  :root[data-design="brut"] [data-testid^="ingredient-unmatched-"] {
+    color: var(--text-2) !important;
+    background: transparent !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+  }
+
+  /* Ink-brush empty state — kill under brut (fallback to text-only empty). */
+  :root[data-design="brut"] [data-testid="empty-state"] svg,
+  :root[data-design="brut"] [data-testid="empty-state"] .ink-brush,
+  :root[data-design="brut"] [data-testid="empty-state"] canvas {
+    display: none !important;
+  }
+
+  /* Kill the animate-fade-up stagger on list cards in brut — ticket queue
+     is mechanical, not eased. */
+  :root[data-design="brut"] .animate-fade-up {
+    animation: none !important;
+  }
+
+  /* ── RECIPE DETAIL — spec sheet grammar ─────────────────────────────────── */
+  /* Detail page top header (h1 + tags row above the service bar)
+     R1: long slugs (e.g. BulkDel-style names) were breaking character-by-
+     character on 390px mobile under brut. overflow-wrap:anywhere with
+     word-break:normal lets the engine wrap at long unbreakable runs only
+     when the line truly cannot fit, while keeping normal word boundaries
+     intact. clamp() steps the size down on narrow viewports so the title
+     fits in <= 4 lines. Scoped to brut only — classic stays untouched. */
+  :root[data-design="brut"] .recipe-title,
+  :root[data-design="brut"] main h1.font-display {
+    font-family: var(--font-mono) !important;
+    /* Cycle 2 P0 #2: preserve user-typed casing, kill the all-caps bold
+       look that made recipe names visually indistinguishable from the
+       system-minted ref-codes (`BULKDEL-W2-1776892154725-A`).  The chef
+       typed `Tonkatsu sauce`, the system should render `Tonkatsu sauce`.
+       Tighter clamp keeps the title from dominating empty pages. */
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4vw, 2.25rem) !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: manual;
+  }
+  /* Below-title ref-code chip — the *machine-grammar* identity sits on a
+     11px mono chip just under the human name, not in the page title slot. */
+  :root[data-design="brut"] .brut-detail-ref {
+    display: inline-block;
+    margin: var(--s-1) 0 var(--s-2);
+    font-size: var(--t-10);
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+
+  /* U1 follow-up: on mobile under brut, the detail header row (title column +
+     EDIT/DELETE buttons column) gets too narrow to fit long titles without
+     wrapping in 3-char chunks. Stack the row vertically on <= 640px so the
+     title reclaims the full width; keep the button cluster aligned right
+     below. Targeted via :has() against the recipe-title descendant — there's
+     no stable data-attr on the outer wrapper and this codebase runs
+     evergreen browsers (modern Safari/Chrome/Firefox all support :has()). */
+  @media (max-width: 640px) {
+    :root[data-design="brut"] .flex.items-start.justify-between:has(> .min-w-0 > .recipe-title) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    :root[data-design="brut"] .flex.items-start.justify-between:has(> .min-w-0 > .recipe-title) > .flex.gap-2 {
+      margin-top: var(--s-3);
+      align-self: flex-end;
+    }
+  }
+
+  /* Service bar — add top + bottom hairlines, zero the pill chrome. */
+  :root[data-design="brut"] [data-testid="service-bar"] {
+    border-top: 2px solid var(--rule-strong) !important;
+    border-bottom: 1px solid var(--rule) !important;
+    padding: var(--s-4) 0 !important;
+    gap: var(--s-6) !important;
+    font-family: var(--font-mono);
+  }
+
+  /* Scaler — reshape +/- into 48px square hard buttons, digit in mono t-20. */
+  :root[data-design="brut"] [data-testid="serving-scaler"] {
+    position: relative;
+    padding-top: var(--s-4);
+  }
+  :root[data-design="brut"] [data-testid="serving-scaler"]::before {
+    content: '[ SCALER ]';
+    position: absolute;
+    top: -4px;
+    left: 0;
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  :root[data-design="brut"] [data-testid="scaler-decrease"],
+  :root[data-design="brut"] [data-testid="scaler-increase"] {
+    background: var(--surface) !important;
+    color: var(--text-1) !important;
+    border: 1px solid var(--rule-strong) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    font-weight: 400 !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-decrease"]:hover,
+  :root[data-design="brut"] [data-testid="scaler-increase"]:hover {
+    border-color: var(--brut-hot) !important;
+    color: var(--brut-hot) !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-value"] {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    color: var(--text-1) !important;
+    font-variant-numeric: tabular-nums;
+    /* Reserved ch-width — borrowed from Team A (FeatureSwap) to prevent
+       jitter when servings count changes width. */
+    min-width: 5ch;
+    display: inline-block;
+    text-align: center;
+    padding: 0 var(--s-3);
+    border: 1px solid var(--rule-strong);
+    min-height: 48px;
+    line-height: 48px;
+  }
+  /* When scaled, the digit switches to hot terracotta. Existing
+     scaler-scaled-badge is the sentinel; its presence means multiplier !== 1. */
+  :root[data-design="brut"] [data-testid="serving-scaler"]:has([data-testid="scaler-scaled-badge"])
+    [data-testid="scaler-value"] {
+    color: var(--brut-hot) !important;
+    border-color: var(--brut-hot) !important;
+  }
+  :root[data-design="brut"] [data-testid="scaler-scaled-badge"] {
+    background: transparent !important;
+    color: var(--brut-hot) !important;
+    border: 1px solid var(--brut-hot) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* Unit toggle — the existing segmented control goes full brut. */
+  :root[data-design="brut"] [data-testid="unit-toggle"] {
+    border-radius: 0 !important;
+    border: 1px solid var(--rule-strong) !important;
+  }
+  :root[data-design="brut"] [data-testid="unit-toggle"] button {
+    background: transparent !important;
+    color: var(--text-3) !important;
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    min-height: 48px !important;
+    padding: 0 var(--s-4) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  :root[data-design="brut"] [data-testid="unit-toggle"] button[aria-pressed="true"] {
+    background: var(--text-1) !important;
+    color: var(--bg) !important;
+  }
+
+  /* Export buttons in the service bar — ghosty hard rectangles. */
+  :root[data-design="brut"] [data-testid="recipe-export-md"],
+  :root[data-design="brut"] [data-testid="recipe-export-pdf"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.1em;
+    min-height: 48px !important;
+    padding: 0 var(--s-3) !important;
+  }
+
+  /* Ingredient list → visually tabular via grid. Existing <ul> / <li> stays;
+     style the <li> as a grid row with code | amt | name columns. */
+  :root[data-design="brut"] [data-testid="ingredients-section"] ul {
+    border-top: 2px solid var(--rule-strong);
+    counter-reset: ing-counter;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] li {
+    display: grid !important;
+    grid-template-columns: 48px minmax(96px, auto) 1fr auto;
+    gap: var(--s-3) !important;
+    align-items: baseline !important;
+    padding: var(--s-2) 0 !important;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: var(--t-12);
+    counter-increment: ing-counter;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] li::before {
+    content: 'ING-' counter(ing-counter, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: var(--t-10);
+    letter-spacing: 0.1em;
+    color: var(--text-4);
+    text-transform: uppercase;
+  }
+  :root[data-design="brut"] [data-testid^="ingredient-amount-"] {
+    font-family: var(--font-mono) !important;
+    color: var(--text-1) !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
+    text-align: right !important;
+    min-width: 5ch;
+  }
+  :root[data-design="brut"] [data-testid="ingredients-section"] .ingredient-name {
+    color: var(--text-1) !important;
+    font-family: var(--font-mono) !important;
+  }
+
+  /* Step list in detail — render as a rule-bordered table. */
+  :root[data-design="brut"] main ol {
+    border-top: 2px solid var(--rule-strong);
+    counter-reset: stp-counter;
+  }
+  :root[data-design="brut"] main ol > li {
+    counter-increment: stp-counter;
+    position: relative;
+    border-bottom: 1px solid var(--rule);
+    padding: var(--s-3) 0 var(--s-3) var(--s-16) !important;
+    font-family: var(--font-mono);
+  }
+  :root[data-design="brut"] main ol > li::before {
+    content: 'STP-' counter(stp-counter, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: var(--s-3);
+    font-family: var(--font-mono);
+    font-size: var(--t-11);
+    letter-spacing: 0.16em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  /* The existing gold round bubble on step number — suppress in brut (we
+     render STP-NN in left gutter instead via counter::before). */
+  :root[data-design="brut"] main ol > li > span.font-label.flex-shrink-0 {
+    display: none !important;
+  }
+  :root[data-design="brut"] main ol > li p {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-14);
+    line-height: 1.55;
+    color: var(--text-1) !important;
+  }
+
+  /* Macros card → hard rectangle + 2px top rule. */
+  :root[data-design="brut"] [data-testid^="macros-card-"] {
+    border-radius: 0 !important;
+    border: 0 !important;
+    border-top: 2px solid var(--rule-strong) !important;
+    border-bottom: 1px solid var(--rule) !important;
+    background: transparent !important;
+    font-family: var(--font-mono);
+    padding: var(--s-3) 0 !important;
+  }
+  :root[data-design="brut"] [data-testid="macros-kcal"] {
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+  }
+
+  /* Mobile sticky cook footer — kill blur + round corners + frosted bg. */
+  :root[data-design="brut"] [data-testid="cook-mode-btn"] {
+    border-radius: 0 !important;
+  }
+
+  /* ── Reserved-ch utility (borrowed from Team A FeatureSwap) ─────────────── */
+  :root[data-design="brut"] .brut-reserve-ch {
+    min-width: 5ch;
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── COOK MODE — KDS line printer ───────────────────────────────────────── */
+  /* The cook-mode surface is identified by [data-testid="cook-mode"]. Kill
+     all gradients, strip the step-slide animation, re-style step number
+     and timer with mono tabular. */
+  :root[data-design="brut"] [data-testid="cook-mode"] {
+    background: var(--bg) !important;
+    color: var(--text-1) !important;
+    font-family: var(--font-mono);
+  }
+  /* Hide classic-mode local "EXIT · STEP n/N" header strip in brut.
+     The Wayfinder above carries the same telemetry. CSS-based suppression
+     so the JSX stays byte-identical to baseline in classic. */
+  :root[data-design="brut"] [data-cook-local-header] {
+    display: none !important;
+  }
+  /* Kill the step-slide keyframe motion in brut — mechanical clicks only. */
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-step-slide {
+    animation: none !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-scale-in,
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-pulse,
+  :root[data-design="brut"] [data-testid="cook-mode"] .animate-ring-breath {
+    animation: none !important;
+  }
+
+  /* Progress bar — thinner + hot color flat. */
+  :root[data-design="brut"] [data-testid="cook-mode"] .h-1\\.5 {
+    background: var(--surface) !important;
+  }
+
+  /* Step text → mono, centred for the KDS-as-line-printer feel. */
+  :root[data-design="brut"] [data-testid="cook-step-text"],
+  :root[data-design="brut"] [data-testid="cook-step-text-mobile"] {
+    font-family: var(--font-mono) !important;
+    font-size: var(--t-20) !important;
+    line-height: 1.55 !important;
+    color: var(--text-1) !important;
+  }
+
+  /* Step of N — the "STEP 3/7" display becomes the verb header.  */
+  :root[data-design="brut"] [data-testid="cook-mode"] header span,
+  :root[data-design="brut"] [data-testid="cook-mode"] .font-label.tracking-wide {
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.16em;
+  }
+
+  /* Timer display — giant mono tabular, hot when running, late overdue. */
+  :root[data-design="brut"] [data-testid="cook-timer-display"],
+  :root[data-design="brut"] [data-testid="cook-timer-display-mobile"] {
+    font-family: var(--font-mono) !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    font-weight: 600 !important;
+    font-size: clamp(3rem, 14vw, 5.5rem) !important;
+    line-height: 1 !important;
+  }
+
+  /* Prev/Next nav — 56px tall, hard rectangle. */
+  :root[data-design="brut"] [data-testid="cook-prev-btn"],
+  :root[data-design="brut"] [data-testid="cook-next-btn"],
+  :root[data-design="brut"] [data-testid="cook-prev-btn-mobile"],
+  :root[data-design="brut"] [data-testid="cook-next-btn-mobile"] {
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    min-height: 56px !important;
+  }
+
+  /* Exit and timer-pill buttons. */
+  :root[data-design="brut"] [data-testid="cook-exit-btn"],
+  :root[data-design="brut"] [data-testid="cook-exit-btn-mobile"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.16em;
+  }
+  :root[data-design="brut"] [data-testid^="timer-pill-"],
+  :root[data-design="brut"] [data-testid^="cook-timer-reset-"] {
+    border-radius: 0 !important;
+    background: var(--brut-hot) !important;
+    color: var(--bg) !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.1em;
+    backdrop-filter: none !important;
+  }
+
+  /* Ingredient rows in cook mode → brut-check grammar. */
+  :root[data-design="brut"] [data-testid^="cook-ingredient-"],
+  :root[data-design="brut"] [data-testid="cook-ingredient-sheet"] li {
+    font-family: var(--font-mono);
+    font-size: var(--t-12);
+  }
+  :root[data-design="brut"] [data-testid="cook-ingredient-sheet-toggle"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.2em;
+  }
+
+  /* Completion screen — SERVICE COMPLETE stamp in gold via ::after on the
+     completion wrapper. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] {
+    background: var(--bg) !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel {
+    position: relative;
+  }
+  /* Hide the classic sweep span + keep the title but restyle to mono. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .gold-sweep {
+    display: none !important;
+  }
+  :root[data-design="brut"] [data-testid="cook-completion-title"] {
+    font-family: var(--font-mono) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-weight: 700 !important;
+  }
+  /* The SERVICE COMPLETE stamp — print via steps(16) clip-path. */
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel::before {
+    content: 'SERVICE COMPLETE';
+    display: block;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--medal);
+    margin-bottom: var(--s-8);
+    animation: brut-stamp-print 800ms steps(16) forwards;
+    clip-path: inset(0 100% 0 0);
+  }
+  @keyframes brut-stamp-print {
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0 0 0); }
+  }
+
+  /* Completion screen primary + secondary + tertiary buttons — hard rects. */
+  :root[data-design="brut"] [data-testid="cook-completion-return"],
+  :root[data-design="brut"] [data-testid="cook-completion-print"],
+  :root[data-design="brut"] [data-testid="cook-completion-restart"] {
+    border-radius: 0 !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.12em;
+  }
+
+  /* ── KILL CLASSIC DECORATIONS UNDER BRUT ────────────────────────────────── */
+  /* CSS-based suppression keeps the component files untouched (still usable
+     in classic mode) and keeps the diff minimal. Target the actual rendered
+     class names + testids:
+     - ScrollParallaxCover: <div className="scroll-parallax">
+     - FirstSaveCelebration: <span className="first-save-underline">
+     - WordmarkStrokeIn: data-testid="sekai-wordmark" + .animate-stroke-in
+     - InkBrush: <span className="animate-ink-brush"> (and the empty-state
+       fallback rule above also catches the SVG nested inside). */
+
+  /* Neutralize parallax motion (keep wrapper for layout stability). */
+  :root[data-design="brut"] .scroll-parallax {
+    animation: none !important;
+    transform: none !important;
+  }
+  /* Hide first-save underline + animated wordmark + ink-brush. */
+  :root[data-design="brut"] .first-save-underline,
+  :root[data-design="brut"] [data-testid="sekai-wordmark"],
+  :root[data-design="brut"] .animate-ink-brush,
+  :root[data-design="brut"] .animate-stroke-in {
+    display: none !important;
+  }
+
+  /* ── ACCESSIBILITY — touch targets + focus rings ─────────────────────────── */
+  /* All interactive elements under brut floor at 44px. Sort pills raised to 48.
+     Scaler +/-: 48 (already). Cook prev/next: 56 (already). */
+  :root[data-design="brut"] button,
+  :root[data-design="brut"] a.btn-primary,
+  :root[data-design="brut"] a.btn-ghost {
+    min-height: 44px;
+  }
+  /* Focus ring — already set globally. Re-declare for belt-and-suspenders. */
+  :root[data-design="brut"] :focus-visible {
+    outline: 2px solid var(--brut-hot) !important;
+    outline-offset: 0 !important;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * REDUCED MOTION
+ * Kill stamp steps(16) and any residual ticks. Leaves state changes instant.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-design="brut"] [data-testid="cook-completion-screen"] .dialog-panel::before {
+    animation: none !important;
+    clip-path: none !important;
+  }
+  :root[data-design="brut"] * {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+
+
+
+

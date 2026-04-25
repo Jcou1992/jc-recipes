@@ -95,6 +95,30 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
   redirect(`/recipes/${id}`);
 }
 
+/**
+ * Record a cook completion. Atomic: stamps `cooked_at = NOW()` and increments
+ * `cooked_count` for a recipe owned by the authenticated user.
+ *
+ * Mode-neutral telemetry: this fires from cook-mode completion regardless of
+ * design-mode. Brut renders the heat-decay row on recipe cards; classic does
+ * not. The DB column is the source of truth for both modes — JC can toggle to
+ * brut later and still see real cook history.
+ *
+ * Atomic via the `record_cooked(uuid)` Postgres function (see migration
+ * 20260425004000). Silent on RLS misses: 0 rows updated, no throw.
+ * No `revalidatePath` — heat decay reads via re-mount or client refresh.
+ *
+ * Fire-and-forget from CookMode. Failures (e.g. migration unapplied) are
+ * logged + swallowed at the call site.
+ */
+export async function recordCooked(recipeId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) redirect('/login');
+
+  await supabase.rpc('record_cooked', { recipe_id: recipeId });
+}
+
 export async function deleteRecipe(id: string): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();

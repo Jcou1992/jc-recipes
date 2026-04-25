@@ -735,3 +735,39 @@ body::after {
   .gold-sweep,
   .first-save-underline { display: none !important; }
 }
+
+/* ── Cycle 4: cycle-toggle chevron affordance ───────────────────────────────
+   Theme/Font/Language toggles in the avatar dropdown render as `DRK`, `MD`,
+   `ES` etc. — opaque to first-time sighted users, who can't tell from the
+   label alone that clicking advances the value. This adds a subtle `›`
+   glyph after the label that nudges 2 px right on hover (kicker-style),
+   signalling "click to cycle" without copy.
+
+   Stays subtle in both classic + brut: chevron uses --text-3 (same as the
+   label), so it reads as a dimmer trailing mark rather than a CTA arrow.
+   No emoji, no icon-font, no extra DOM nodes outside the toggle itself.
+*/
+.cycle-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+.cycle-toggle-chevron {
+  display: inline-block;
+  font-size: 0.85em;
+  line-height: 1;
+  opacity: 0.55;
+  transform: translateX(0);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  /* Slight optical-baseline lift; the › glyph sits low otherwise. */
+  position: relative;
+  top: -0.05em;
+}
+.cycle-toggle:hover .cycle-toggle-chevron,
+.cycle-toggle:focus-visible .cycle-toggle-chevron {
+  transform: translateX(2px);
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cycle-toggle-chevron { transition: none !important; }
+}

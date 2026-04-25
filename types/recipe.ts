@@ -50,6 +50,8 @@ export interface Recipe {
   photos: string[] | null;
   macros: RecipeMacros | null;
   macros_computed_at: string | null;
+  cooked_at?: string | null;
+  cooked_count?: number;
   created_at: string;
   updated_at: string;
 }
@@ -57,7 +59,14 @@ export interface Recipe {
 // Shape sent to the DB on create / update (no auto-generated fields)
 export type RecipePayload = Omit<
   Recipe,
-  'id' | 'user_id' | 'created_at' | 'updated_at' | 'macros' | 'macros_computed_at'
+  | 'id'
+  | 'user_id'
+  | 'created_at'
+  | 'updated_at'
+  | 'macros'
+  | 'macros_computed_at'
+  | 'cooked_at'
+  | 'cooked_count'
 >;
 
 export interface BulkActionResult {

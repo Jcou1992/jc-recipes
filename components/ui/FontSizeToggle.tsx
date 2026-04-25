@@ -39,12 +39,13 @@ export default function FontSizeToggle() {
   return (
     <button
       onClick={cycle}
-      className="font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
+      className="cycle-toggle font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
       style={{ color: 'var(--text-3)' }}
       aria-label={`${t.fontSizeLabel}: ${size}. Click to cycle.`}
       data-testid="font-size-toggle"
     >
       {label}
+      <span className="cycle-toggle-chevron" aria-hidden="true">›</span>
     </button>
   );
 }

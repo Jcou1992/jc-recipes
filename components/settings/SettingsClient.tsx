@@ -10,6 +10,7 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import FontSizeToggle from '@/components/ui/FontSizeToggle';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import DesignModeToggle from '@/components/ui/brut/DesignModeToggle';
 import { logout } from '@/app/actions/auth';
 
 interface Props {
@@ -53,6 +54,27 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
 
   return (
     <div className="space-y-10">
+      {/* Design — brut toggle at top. Mirrors ThemeToggle pattern. */}
+      <section>
+        <h2 className="section-label mb-4">DESIGN</h2>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 min-w-0">
+          <span
+            className="font-label text-sm tracking-wide"
+            style={{ color: 'var(--text-2)' }}
+          >
+            Mode
+          </span>
+          <DesignModeToggle />
+          <p
+            className="font-label text-xs tracking-wide basis-full"
+            style={{ color: 'var(--text-3)' }}
+          >
+            CLASSIC — the current Sakai look. BRUT — restaurant service ticket:
+            monospace, ticket grammar, reference codes. Flip any time.
+          </p>
+        </div>
+      </section>
+
       {/* Workspace */}
       <section>
         <h2 className="section-label mb-4">{t.settingsWorkspaceSection}</h2>
@@ -63,14 +85,17 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
         >
           {t.settingsSpaceNameLabel}
         </label>
-        <div className="flex gap-2">
+        {/* Cycle 2 P0 #3: stack input + button vertically on <sm so a long
+            space name like "Test Space 1777082963237" doesn't get visually
+            clipped by the inline SAVE button on a 360px viewport. */}
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             id="space-name-input"
             type="text"
             value={spaceName}
             onChange={e => setSpaceName(e.target.value.slice(0, 30))}
             placeholder={spaceNameFallback}
-            className="input-base flex-1"
+            className="input-base flex-1 w-full"
             maxLength={30}
             aria-label={t.settingsSpaceNameLabel}
             data-testid="settings-space-name-input"
@@ -79,7 +104,7 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
             type="button"
             onClick={saveSpaceName}
             disabled={saving}
-            className="btn-primary"
+            className="btn-primary self-start sm:self-auto"
             data-testid="settings-save-space-name"
           >
             {saving ? t.savingBtn : t.settingsSaveBtn}

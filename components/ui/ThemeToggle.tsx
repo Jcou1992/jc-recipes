@@ -49,11 +49,12 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={cycle}
-      className="font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
+      className="cycle-toggle font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
       style={{ color: 'var(--text-3)' }}
       aria-label={`Theme: ${theme}. Click to cycle.`}
     >
       {label}
+      <span className="cycle-toggle-chevron" aria-hidden="true">›</span>
     </button>
   );
 }

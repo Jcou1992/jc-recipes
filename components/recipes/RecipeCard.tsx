@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import type { KeyboardEvent, MouseEvent } from 'react';
 import type { Recipe } from '@/types/recipe';
 import { useT } from '@/components/ui/LanguageContext';
 import ViewTransitionLink from '@/components/motion/ViewTransitionLink';
+import { fmtRec } from '@/lib/brut/ref-codes';
+import { fmtCookedAge } from '@/lib/brut/cooked-age';
 
 interface Props {
   recipe: Recipe;
@@ -24,6 +27,24 @@ export default function RecipeCard({
 }: Props) {
   const t = useT();
   const totalTime = (recipe.prep_time ?? 0) + (recipe.cook_time ?? 0);
+
+  // Brut detection — same client-only pattern as Wayfinder/CookMode. SSR
+  // returns false (heat row hidden by default); the effect flips to true
+  // post-mount on brut, triggering a single re-render. Classic stays
+  // pixel-identical because the row is not rendered at all in classic.
+  const [isBrut, setIsBrut] = useState(false);
+  useEffect(() => {
+    setIsBrut(document.documentElement.getAttribute('data-design') === 'brut');
+  }, []);
+
+  // Brut ticket nameplate code — rendered via CSS ::before in brut mode.
+  // Skip the formatter call entirely in classic so SSR/first-paint emits
+  // no `data-code` attribute and we don't waste CPU per card per list render.
+  const brutCode = isBrut ? `${fmtRec(recipe.id)} · FIG.03` : undefined;
+
+  // Compute heat-decay descriptor once per render. Pure function, cheap.
+  const cookedAge = fmtCookedAge(recipe.cooked_at);
+  const cookedCount = recipe.cooked_count ?? 0;
 
   const metaRow = (
     <div className="flex flex-wrap gap-x-4 gap-y-1 mb-3">
@@ -58,6 +79,30 @@ export default function RecipeCard({
           {tag}
         </span>
       ))}
+    </div>
+  );
+
+  // Brut-only heat-decay row — fixed 24px height keeps fresh / decayed /
+  // dormant / NEW states layout-stable (Risk table). Not rendered in
+  // classic mode at all. The `--card-heat` percentage is read by the CSS
+  // rule `.brut-card-heat-row { color: color-mix(in oklch, var(--bone-100)
+  // var(--card-heat), var(--bone-300)); }` to fade across 72 h.
+  const heatRow = isBrut && (
+    <div
+      className="brut-card-heat-row mt-3 flex items-center gap-3 font-label text-xs tracking-widest uppercase tabular-nums"
+      style={{
+        height: '24px',
+        // Dormant rows opt out of the heat ramp by reading --bone-400.
+        ['--card-heat' as string]: `${cookedAge.pct}%`,
+        ...(cookedAge.dormant ? { color: 'var(--bone-400)' } : null),
+      } as React.CSSProperties}
+      data-testid="brut-card-heat-row"
+      data-dormant={cookedAge.dormant ? '1' : undefined}
+    >
+      <span data-testid="brut-card-heat-age">[{cookedAge.label}]</span>
+      {!cookedAge.dormant && cookedCount > 0 && (
+        <span data-testid="brut-card-heat-count">[COOKED {cookedCount}×]</span>
+      )}
     </div>
   );
 
@@ -107,6 +152,7 @@ export default function RecipeCard({
 
       {metaRow}
       {tagRow}
+      {heatRow}
     </>
   );
 
@@ -136,6 +182,7 @@ export default function RecipeCard({
         aria-label={selected ? t.deselectRecipeAriaLabel(recipe.name) : t.selectRecipeAriaLabel(recipe.name)}
         data-testid={`recipe-card-${recipe.id}`}
         data-selected={selected ? 'true' : 'false'}
+        data-code={brutCode}
       >
         {inner}
       </button>
@@ -154,6 +201,7 @@ export default function RecipeCard({
         viewTransitionName: `recipe-card-${recipe.id}`,
       } as React.CSSProperties}
       data-testid={`recipe-card-${recipe.id}`}
+      data-code={brutCode}
     >
       {inner}
     </ViewTransitionLink>

@@ -43,9 +43,13 @@ export default function AvatarMenu({ initial, email }: Props) {
         onClick={() => setOpen(v => !v)}
         className="w-10 h-10 rounded-full flex items-center justify-center font-label text-sm font-bold tracking-wide uppercase transition-all"
         style={{
-          background: 'var(--color-terracotta-contrast)',
-          color: 'var(--color-bone)',
-          border: '1px solid var(--color-terracotta)',
+          // Cycle 2 P2: non-destructive tone — was filled terracotta-contrast
+          // (the same red as the DELETE button), reading as a hot CTA.  Now
+          // reads as a *named slot*: bone/card surface, terracotta initial,
+          // soft terracotta border.
+          background: 'var(--bg-card)',
+          color: 'var(--color-terracotta)',
+          border: '1px solid color-mix(in oklch, var(--color-terracotta) 35%, transparent)',
         }}
         aria-haspopup="menu"
         aria-expanded={open}

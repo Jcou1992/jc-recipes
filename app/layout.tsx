@@ -1,20 +1,17 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Serif_JP, Barlow_Condensed, Cormorant_Garamond } from 'next/font/google';
+import { Barlow_Condensed, Cormorant_Garamond } from 'next/font/google';
 import { cookies } from 'next/headers';
 import './globals.css';
+import '../styles/tokens-brutalist.css';
+import { plexMono, notoJp } from './fonts';
 import { getServerLanguage } from '@/lib/i18n-server';
 import {
   PREF_COOKIE_THEME,
   PREF_COOKIE_FONT_SIZE,
   PREF_COOKIE_UNITS,
 } from '@/lib/preference-cookies';
-
-const notoSerifJP = Noto_Serif_JP({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--font-noto',
-  display: 'swap',
-});
+import { DESIGN_MODE_COOKIE, type DesignMode } from '@/lib/brut/design-mode-cookie';
+import { RouteAwareWayfinder } from '@/components/ui/brut/RouteAwareWayfinder';
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
@@ -51,10 +48,11 @@ export const viewport: Viewport = {
 const VALID_THEME: ReadonlyArray<string> = ['light', 'dark'];
 const VALID_FONT_SIZE: ReadonlyArray<string> = ['sm', 'md', 'lg'];
 const VALID_UNITS: ReadonlyArray<string> = ['metric', 'imperial'];
+const VALID_DESIGN_MODE: ReadonlyArray<DesignMode> = ['classic', 'brut'];
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // Read all three preference signals server-side so the first paint matches
-  // the signed-in user's stored state. Strict allow-lists prevent a malformed
+  // Read all preference signals server-side so the first paint matches the
+  // signed-in user's stored state. Strict allow-lists prevent a malformed
   // cookie from flowing into attributes.
   let lang = 'en';
   try {
@@ -66,6 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   let theme: string | null = null;
   let fontSize: string | null = null;
   let units: string = 'metric';
+  let designMode: DesignMode = 'classic';
   try {
     const cookieStore = await cookies();
     const themeRaw = cookieStore.get(PREF_COOKIE_THEME)?.value;
@@ -74,22 +73,38 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     if (fsRaw && VALID_FONT_SIZE.includes(fsRaw)) fontSize = fsRaw;
     const unitsRaw = cookieStore.get(PREF_COOKIE_UNITS)?.value;
     if (unitsRaw && VALID_UNITS.includes(unitsRaw)) units = unitsRaw;
+    const designRaw = cookieStore.get(DESIGN_MODE_COOKIE)?.value;
+    if (designRaw && (VALID_DESIGN_MODE as ReadonlyArray<string>).includes(designRaw)) {
+      designMode = designRaw as DesignMode;
+    }
   } catch {
     // cookies() may throw in edge runtime during certain error paths; fall
     // back to unset attrs (system defaults).
   }
 
-  const htmlProps: Record<string, string> = { 'data-units': units };
+  const htmlProps: Record<string, string> = {
+    'data-units': units,
+    'data-design': designMode,
+  };
   if (theme) htmlProps['data-theme'] = theme;
   if (fontSize) htmlProps['data-font-size'] = fontSize;
 
   return (
     <html
       lang={lang}
-      className={`${notoSerifJP.variable} ${barlowCondensed.variable} ${cormorantGaramond.variable}`}
+      className={`${plexMono.variable} ${notoJp.variable} ${barlowCondensed.variable} ${cormorantGaramond.variable}`}
       {...htmlProps}
     >
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen">
+        {/* Brut-only universal telemetry row. Mount-gated on the server cookie
+            so classic users never download the Wayfinder JS chunk. Per-route
+            pages may mount richer Wayfinder instances beneath with resource-
+            specific data; on `/cook` the route owns its own Wayfinder so the
+            global one is suppressed here to avoid stacking two 32 px header
+            rows. */}
+        {designMode === 'brut' && <RouteAwareWayfinder crumb="SEKAI" userLabel="" />}
+        {children}
+      </body>
     </html>
   );
 }

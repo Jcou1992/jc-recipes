@@ -2,18 +2,17 @@
 
 import { useMemo, useState, useRef, useEffect, useTransition, useCallback } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import RecipeCard from './RecipeCard';
 import BulkActionBar from './BulkActionBar';
 import FilterPanel from './FilterPanel';
 import SortPills, { type SortKey as SortKeyT } from './SortPills';
 import TagRail from './TagRail';
+import { Ticket } from '@/components/ui/brut/Ticket';
 import { useT } from '@/components/ui/LanguageContext';
 import { useKeyboardShortcut } from '@/lib/hooks/useKeyboardShortcut';
+import { normalise } from '@/lib/utils/normalise';
 import type { Recipe } from '@/types/recipe';
-
-function normalise(s: string) {
-  return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
 
 type SortKey = 'newest' | 'az' | 'fastest' | 'most-ingredients';
 
@@ -46,6 +45,15 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIdx, setLastSelectedIdx] = useState<number | null>(null);
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+
+  // Brut design-mode detection — gates the [ MISE · EMPTY ] ticket on the
+  // empty-state path (R3). Reads `data-design` on `<html>` at mount, matches
+  // the pattern Wayfinder/CookMode use; SSR defaults to classic so hydration
+  // stays pixel-identical until the effect runs.
+  const [isBrut, setIsBrut] = useState(false);
+  useEffect(() => {
+    setIsBrut(document.documentElement.getAttribute('data-design') === 'brut');
+  }, []);
 
   useEffect(() => { setSearchInput(q); }, [q]);
 
@@ -405,28 +413,72 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="text-center py-20" data-testid="filtered-empty-state">
-          <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
-            {t.nothingHere}
-          </p>
-          {hasFilters && (
-            <>
-              {(q || activeTags.length > 0) && (
-                <p className="font-label text-xs tracking-wide mb-2" style={{ color: 'var(--text-3)' }}>
-                  {`No match for "${q}"${activeTags.length ? ` with tags [${activeTags.join(', ')}]` : ''}`}
+        isBrut ? (
+          <div className="py-12" data-testid="filtered-empty-state">
+            <Ticket code="MISE · EMPTY" className="brut-empty-ticket">
+              <div className="brut-empty-body">
+                <p className="brut-empty-rule" aria-hidden="true">────────────────────</p>
+                <p className="brut-empty-headline">
+                  {hasFilters ? 'NO MATCHES.' : 'NO RECIPES YET.'}
                 </p>
-              )}
-              {(!q && activeTags.length === 0) && (
-                <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
-                  {t.tryDifferentTags}
-                </p>
-              )}
-              <button onClick={clearFilters} className="btn-ghost" data-testid="clear-filters-btn">
-                {t.clearFiltersBtn}
-              </button>
-            </>
-          )}
-        </div>
+                {hasFilters ? (
+                  <>
+                    {(q || activeTags.length > 0) && (
+                      <p className="brut-empty-meta">
+                        {q && `QUERY: "${q.toUpperCase()}"`}
+                        {q && activeTags.length > 0 && ' · '}
+                        {activeTags.length > 0 && `TAGS: [${activeTags.join(', ').toUpperCase()}]`}
+                      </p>
+                    )}
+                    <p className="brut-empty-cta">
+                      <button
+                        type="button"
+                        onClick={clearFilters}
+                        data-testid="clear-filters-btn"
+                        className="brut-empty-action"
+                      >
+                        CLEAR FILTERS
+                      </button>
+                      <span aria-hidden="true"> · </span>
+                      <span className="brut-empty-hint">OR REPHRASE QUERY.</span>
+                    </p>
+                  </>
+                ) : (
+                  <p className="brut-empty-cta">
+                    <span className="brut-empty-hint">PRESS </span>
+                    <kbd className="brut-empty-key">N</kbd>
+                    <span className="brut-empty-hint"> OR TAP </span>
+                    <Link href="/recipes/new" className="brut-empty-action">+ NEW RECIPE</Link>
+                    <span className="brut-empty-hint">.</span>
+                  </p>
+                )}
+              </div>
+            </Ticket>
+          </div>
+        ) : (
+          <div className="text-center py-20" data-testid="filtered-empty-state">
+            <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
+              {t.nothingHere}
+            </p>
+            {hasFilters && (
+              <>
+                {(q || activeTags.length > 0) && (
+                  <p className="font-label text-xs tracking-wide mb-2" style={{ color: 'var(--text-3)' }}>
+                    {`No match for "${q}"${activeTags.length ? ` with tags [${activeTags.join(', ')}]` : ''}`}
+                  </p>
+                )}
+                {(!q && activeTags.length === 0) && (
+                  <p className="font-body text-base mb-4" style={{ color: 'var(--text-3)' }}>
+                    {t.tryDifferentTags}
+                  </p>
+                )}
+                <button onClick={clearFilters} className="btn-ghost" data-testid="clear-filters-btn">
+                  {t.clearFiltersBtn}
+                </button>
+              </>
+            )}
+          </div>
+        )
       ) : (
         <div
           className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,280px),1fr))] gap-4 transition-opacity"
