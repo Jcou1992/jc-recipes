@@ -96,12 +96,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       {...htmlProps}
     >
       <body className="min-h-screen">
-        {/* Brut-only universal telemetry row. Renders null in classic mode
-            (Wayfinder reads data-design at mount). Per-route pages may mount
-            richer Wayfinder instances beneath with resource-specific data;
-            on `/cook` the route owns its own Wayfinder so the global one is
-            suppressed here to avoid stacking two 32 px header rows. */}
-        <RouteAwareWayfinder crumb="SEKAI" userLabel="" />
+        {/* Brut-only universal telemetry row. Mount-gated on the server cookie
+            so classic users never download the Wayfinder JS chunk. Per-route
+            pages may mount richer Wayfinder instances beneath with resource-
+            specific data; on `/cook` the route owns its own Wayfinder so the
+            global one is suppressed here to avoid stacking two 32 px header
+            rows. */}
+        {designMode === 'brut' && <RouteAwareWayfinder crumb="SEKAI" userLabel="" />}
         {children}
       </body>
     </html>
