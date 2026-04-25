@@ -12,11 +12,12 @@ export default function LanguageToggle() {
         setLanguage(next);
         if (typeof document !== 'undefined') document.documentElement.lang = next;
       }}
-      className="font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
+      className="cycle-toggle font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] px-2"
       style={{ color: 'var(--text-3)' }}
       aria-label={`Switch to ${language === 'en' ? 'Spanish' : 'English'}`}
     >
       {language === 'en' ? 'ES' : 'EN'}
+      <span className="cycle-toggle-chevron" aria-hidden="true">›</span>
     </button>
   );
 }
