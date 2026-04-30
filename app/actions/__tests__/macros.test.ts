@@ -8,6 +8,7 @@ type Recipe = { id: string; user_id: string; ingredients: Ingredient[] };
 let currentRecipe: Recipe | null = null;
 let currentSession: { user: { id: string } } | null = null;
 const updateSpy = jest.fn();
+let updateResult: { error: { message: string } | null; count: number } = { error: null, count: 1 };
 const computeSpy = jest.fn(async (_id: string) => null);
 const searchFdcSpy = jest.fn(async (_q: string, _n: number) => [
   { fdc_id: 100, name: 'stub match', similarity: 0.9 },
@@ -31,15 +32,23 @@ jest.mock('@/lib/supabase/server', () => ({
               }),
             }),
           }),
-          update: (patch: Record<string, unknown>) => ({
-            eq: async () => {
-              updateSpy(patch);
-              if (currentRecipe && 'ingredients' in patch) {
-                currentRecipe.ingredients = patch.ingredients as Ingredient[];
-              }
-              return { error: null };
-            },
-          }),
+          update: (patch: Record<string, unknown>) => {
+            const filters: Record<string, unknown> = {};
+            const chain = {
+              eq: (column: string, value: unknown) => {
+                filters[column] = value;
+                if (Object.keys(filters).length >= 2) {
+                  updateSpy(patch, filters);
+                  if (updateResult.count > 0 && currentRecipe && 'ingredients' in patch) {
+                    currentRecipe.ingredients = patch.ingredients as Ingredient[];
+                  }
+                  return Promise.resolve(updateResult);
+                }
+                return chain;
+              },
+            };
+            return chain;
+          },
         };
       }
       return {};
@@ -68,6 +77,7 @@ beforeEach(() => {
   currentRecipe = null;
   currentSession = null;
   updateSpy.mockClear();
+  updateResult = { error: null, count: 1 };
   computeSpy.mockClear();
   searchFdcSpy.mockClear();
 });
@@ -120,13 +130,29 @@ describe('macros server actions truth table', () => {
       act: () => setIngredientMatch('r1', 0, 'stale name', 123),
       expect: (r) => expect(r).toEqual({ error: 'Ingredient changed — please re-open the modal' }),
     },
+
+    {
+      label: 'setIngredientMatch returns clear error when update affects no rows after verified read',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'g', name: 'chicken' }] },
+      act: async () => {
+        updateResult = { error: null, count: 0 };
+        return setIngredientMatch('r1', 0, 'chicken', 171477);
+      },
+      expect: (r) => expect(r).toEqual({ error: 'Recipe update was blocked or stale. Please refresh and try again.' }),
+      postAssert: () => expect(computeSpy).not.toHaveBeenCalled(),
+    },
+
     {
       label: 'setIngredientMatch writes fdc_id on name match + triggers compute',
       signedIn: true,
       recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'g', name: 'chicken' }] },
       act: () => setIngredientMatch('r1', 0, 'chicken', 171477),
       expect: (r) => expect(r).toEqual({ ok: true }),
-      postAssert: () => expect(computeSpy).toHaveBeenCalledTimes(1),
+      postAssert: () => {
+        expect(computeSpy).toHaveBeenCalledTimes(1);
+        expect(updateSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: 'r1', user_id: 'u1' }));
+      },
     },
     // ── setIngredientOverride validation ───────────────────────────────────
     {
