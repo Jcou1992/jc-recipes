@@ -10,6 +10,7 @@ let currentSession: { user: { id: string } } | null = null;
 const updateSpy = jest.fn();
 let updateResult: { error: { message: string } | null; count: number } = { error: null, count: 1 };
 const computeSpy = jest.fn(async (_id: string) => null);
+let computeFailure: Error | null = null;
 const searchFdcSpy = jest.fn(async (_q: string, _n: number) => [
   { fdc_id: 100, name: 'stub match', similarity: 0.9 },
 ]);
@@ -57,7 +58,10 @@ jest.mock('@/lib/supabase/server', () => ({
 }));
 
 jest.mock('@/lib/macros/compute', () => ({
-  computeRecipeMacros: (id: string) => computeSpy(id),
+  computeRecipeMacros: async (id: string) => {
+    if (computeFailure) throw computeFailure;
+    return computeSpy(id);
+  },
 }));
 
 jest.mock('@/lib/macros/match', () => ({
@@ -79,6 +83,7 @@ beforeEach(() => {
   updateSpy.mockClear();
   updateResult = { error: null, count: 1 };
   computeSpy.mockClear();
+  computeFailure = null;
   searchFdcSpy.mockClear();
 });
 
@@ -122,6 +127,17 @@ describe('macros server actions truth table', () => {
       act: () => triggerCompute('r1'),
       expect: (r) => expect(r).toEqual({ error: 'Not authenticated' }),
     },
+    {
+      label: 'triggerCompute returns compute failures',
+      signedIn: true,
+      recipe: null,
+      act: async () => {
+        computeFailure = new Error('Macro service unavailable');
+        return triggerCompute('r1');
+      },
+      expect: (r) => expect(r).toEqual({ error: 'Macro service unavailable' }),
+    },
+
     // ── setIngredientMatch stale guard ─────────────────────────────────────
     {
       label: 'setIngredientMatch rejects stale expectedName',
@@ -141,6 +157,28 @@ describe('macros server actions truth table', () => {
       },
       expect: (r) => expect(r).toEqual({ error: 'Recipe update was blocked or stale. Please refresh and try again.' }),
       postAssert: () => expect(computeSpy).not.toHaveBeenCalled(),
+    },
+
+    {
+      label: 'setIngredientMatch surfaces update failures',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'g', name: 'chicken' }] },
+      act: async () => {
+        updateResult = { error: { message: 'db down' }, count: 0 };
+        return setIngredientMatch('r1', 0, 'chicken', 171477);
+      },
+      expect: (r) => expect(r).toEqual({ error: 'Failed to update ingredient match: db down' }),
+      postAssert: () => expect(computeSpy).not.toHaveBeenCalled(),
+    },
+    {
+      label: 'setIngredientMatch surfaces compute failures',
+      signedIn: true,
+      recipe: { ...baseRecipe, ingredients: [{ amount: 1, unit: 'g', name: 'chicken' }] },
+      act: async () => {
+        computeFailure = new Error('Compute crashed');
+        return setIngredientMatch('r1', 0, 'chicken', 171477);
+      },
+      expect: (r) => expect(r).toEqual({ error: 'Compute crashed' }),
     },
 
     {

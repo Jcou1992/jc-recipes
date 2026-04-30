@@ -84,8 +84,7 @@ export async function setIngredientMatch(
     .eq('user_id', userId);
   if (error) return { error: `Failed to update ingredient match: ${error.message}` };
   if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
-  await computeRecipeMacros(recipeId);
-  return { ok: true };
+  return computeAndReturn(recipeId);
 }
 
 export async function setIngredientOverride(
@@ -114,8 +113,7 @@ export async function setIngredientOverride(
     .eq('user_id', userId);
   if (error) return { error: `Failed to update ingredient override: ${error.message}` };
   if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
-  await computeRecipeMacros(recipeId);
-  return { ok: true };
+  return computeAndReturn(recipeId);
 }
 
 export interface BatchEntry {
@@ -181,14 +179,28 @@ export async function setIngredientMatches(recipeId: string, entries: BatchEntry
     .eq('user_id', session.user.id);
   if (updateError) return { error: `Failed to update ingredient matches: ${updateError.message}` };
   if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
-  await computeRecipeMacros(recipeId);
-  return { ok: true };
+  return computeAndReturn(recipeId);
+}
+
+
+function normalizeActionError(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string' && error) return error;
+  return fallback;
+}
+
+async function computeAndReturn(recipeId: string): Promise<{ ok: true } | { error: string }> {
+  try {
+    await computeRecipeMacros(recipeId);
+    return { ok: true };
+  } catch (error) {
+    return { error: normalizeActionError(error, 'Failed to compute recipe macros') };
+  }
 }
 
 export async function triggerCompute(recipeId: string) {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) return { error: 'Not authenticated' };
-  await computeRecipeMacros(recipeId);
-  return { ok: true };
+  return computeAndReturn(recipeId);
 }

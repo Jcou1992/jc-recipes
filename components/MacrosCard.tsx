@@ -27,6 +27,7 @@ const panelStyle: React.CSSProperties = {
 export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [computeError, setComputeError] = useState<string | null>(null);
   const isBrut = useIsBrut();
 
   // State 1: not yet computed
@@ -52,7 +53,12 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
           type="button"
           onClick={() =>
             startTransition(async () => {
-              await triggerCompute(recipe.id);
+              setComputeError(null);
+              const result = await triggerCompute(recipe.id);
+              if ('error' in result) {
+                setComputeError(result.error);
+                return;
+              }
               router.refresh();
             })
           }
@@ -62,6 +68,11 @@ export function MacrosCard({ recipe, onOpenMatchModal }: Props) {
         >
           {computeLabel}
         </button>
+        {computeError && (
+          <p className="font-body text-sm" style={{ color: 'var(--color-danger)' }}>
+            {computeError}
+          </p>
+        )}
       </div>
     );
   }
