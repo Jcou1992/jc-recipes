@@ -22,14 +22,14 @@ function narrowLanguage(v: unknown): LanguageValue | null {
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (!session) redirect('/login');
+  if (!user) redirect('/login');
 
   const [t, prefs] = await Promise.all([getServerT(), getUserPreferences()]);
   const initialLanguage = t.language;
 
-  const email = session.user.email ?? '';
+  const email = user.email ?? '';
   const initial = (prefs?.space_name || email || '?').charAt(0).toUpperCase();
 
   // Feed the per-email client cache from authoritative server state so the
@@ -57,7 +57,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               paddingRight: 'max(1rem, env(safe-area-inset-right))',
             }}
           >
-            <Link href="/recipes" aria-label="SEKAI — go to recipes">
+            <Link
+              href="/recipes"
+              aria-label="SEKAI — go to recipes"
+              className="min-h-[44px] inline-flex items-center"
+            >
               <WordmarkStrokeIn />
             </Link>
             <AvatarMenu initial={initial} email={email} />

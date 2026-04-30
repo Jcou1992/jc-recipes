@@ -166,6 +166,16 @@ export default function RecipeDetailClient({ recipe }: Props) {
         style={{ borderBottom: '1px solid var(--border)' }}
         data-testid="service-bar"
       >
+        {recipe.steps.length > 0 && (
+          <Link
+            href={cookUrl}
+            className="btn-primary text-center"
+            data-testid="cook-mode-btn-desktop"
+          >
+            {t.cookBtn}
+          </Link>
+        )}
+
         {/* Serving scaler */}
         <div className="flex items-center gap-2" data-testid="serving-scaler">
           <button
@@ -239,23 +249,34 @@ export default function RecipeDetailClient({ recipe }: Props) {
           ))}
         </div>
 
-        {/* Admin export group */}
-        <div className="ml-auto flex items-center gap-1">
+        <details className="ml-auto relative">
+          <summary className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg cursor-pointer list-none">
+            Tools
+          </summary>
+          <div
+            className="absolute right-0 mt-2 z-20 flex min-w-[12rem] flex-col gap-1 rounded-lg p-2"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow-dialog)',
+            }}
+          >
           <button
             onClick={handleExportMd}
-            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg"
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg justify-start"
             data-testid="recipe-export-md"
           >
             Markdown
           </button>
           <button
             onClick={handleExportPdf}
-            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg"
+            className="btn-ghost font-label text-xs tracking-wider uppercase px-3 min-h-[44px] rounded-lg justify-start"
             data-testid="recipe-export-pdf"
           >
             Print / PDF
           </button>
-        </div>
+          </div>
+        </details>
       </div>
 
       {/* Two-column body on md+ */}
@@ -288,7 +309,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
                             onClick={() => setMatchOpen(true)}
                             aria-label={`Ingredient ${ing.name} unmatched — tap to resolve`}
                             data-testid={`ingredient-unmatched-${i}`}
-                            className="font-label text-[10px] tracking-widest uppercase rounded-full px-2 py-0.5 transition-colors"
+                            className="font-label text-[10px] tracking-widest uppercase rounded-full px-3 min-h-[44px] inline-flex items-center transition-colors"
                             style={{
                               color: 'var(--color-gold)',
                               background: 'color-mix(in oklch, var(--color-gold) 14%, transparent)',
@@ -329,17 +350,6 @@ export default function RecipeDetailClient({ recipe }: Props) {
               </div>
             )}
 
-            {recipe.steps.length > 0 && (
-              <div className="hidden md:block">
-                <Link
-                  href={cookUrl}
-                  className="btn-primary w-full text-center"
-                  data-testid="cook-mode-btn-desktop"
-                >
-                  {t.cookBtn}
-                </Link>
-              </div>
-            )}
           </aside>
         )}
 

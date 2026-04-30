@@ -18,7 +18,7 @@ const searchFdcSpy = jest.fn(async (_q: string, _n: number) => [
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(async () => ({
     auth: {
-      getSession: async () => ({ data: { session: currentSession } }),
+      getUser: async () => ({ data: { user: currentSession?.user ?? null } }),
     },
     from: (table: string) => {
       if (table === 'recipes') {

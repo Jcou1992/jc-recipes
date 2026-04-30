@@ -32,7 +32,7 @@ beforeEach(() => {
   deleteMock.mockReturnValue({
     in: jest.fn().mockReturnValue({
       eq: jest.fn().mockReturnValue({
-        select: jest.fn().mockResolvedValue({ data: [], error: null }),
+        select: jest.fn().mockResolvedValue({ data: [], error: null } as never),
       }),
     }),
   });
@@ -54,7 +54,7 @@ beforeEach(() => {
   }));
 
   createClientMock.mockResolvedValue({
-    auth: { getSession: jest.fn().mockResolvedValue({ data: { session: { user: { id: 'u1' } } } }) },
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'u1' } } } as never) },
     from: fromMock,
   });
 });

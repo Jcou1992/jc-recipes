@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import IngredientRow, { type IngredientField } from './IngredientRow';
 import StepRow, { type StepField } from './StepRow';
@@ -75,6 +75,41 @@ function stepsToFields(steps: Step[]): StepField[] {
 
 const labelStyle: React.CSSProperties = { color: 'var(--text-3)' };
 
+function formSignature(data: {
+  name: string;
+  servings: string;
+  servingSizeLabel: string;
+  description: string;
+  prepTime: string;
+  cookTime: string;
+  tags: string;
+  notes: string;
+  ingredients: IngredientField[];
+  steps: StepField[];
+}) {
+  return JSON.stringify({
+    name: data.name,
+    servings: data.servings,
+    servingSizeLabel: data.servingSizeLabel,
+    description: data.description,
+    prepTime: data.prepTime,
+    cookTime: data.cookTime,
+    tags: data.tags,
+    notes: data.notes,
+    ingredients: data.ingredients.map(i => ({
+      amount: i.amount,
+      unit: i.unit,
+      name: i.name,
+      fdc_id: i.fdc_id ?? null,
+    })),
+    steps: data.steps.map(s => ({
+      content: s.content,
+      timerEnabled: s.timerEnabled,
+      timerInput: s.timerInput,
+    })),
+  });
+}
+
 interface IngredientEntry {
   field: IngredientField;
   deletedAt?: number;
@@ -125,6 +160,43 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
   const activeIngredients = ingredientEntries.filter(e => !e.deletedAt);
   const activeSteps = stepEntries.filter(e => !e.deletedAt);
 
+  const initialSignature = useMemo(() => formSignature({
+    name: initialData?.name ?? '',
+    servings: String(initialData?.servings ?? 1),
+    servingSizeLabel: initialData?.serving_size_label ?? '',
+    description: initialData?.description ?? '',
+    prepTime: initialData?.prep_time ? String(initialData.prep_time) : '',
+    cookTime: initialData?.cook_time ? String(initialData.cook_time) : '',
+    tags: (initialData?.tags ?? []).join(', '),
+    notes: initialData?.notes ?? '',
+    ingredients: ingredientsToFields(initialData?.ingredients ?? []),
+    steps: stepsToFields(initialData?.steps ?? []),
+  }), [initialData]);
+
+  const currentSignature = useMemo(() => formSignature({
+    name,
+    servings,
+    servingSizeLabel,
+    description,
+    prepTime,
+    cookTime,
+    tags,
+    notes,
+    ingredients: activeIngredients.map(e => e.field),
+    steps: activeSteps.map(e => e.field),
+  }), [
+    name,
+    servings,
+    servingSizeLabel,
+    description,
+    prepTime,
+    cookTime,
+    tags,
+    notes,
+    ingredientEntries,
+    stepEntries,
+  ]);
+
   // Disabled-until-valid for the submit button. Mirrors `validate()` but
   // computed cheaply on every render so the button reflects state live.
   const hasName = name.trim().length > 0;
@@ -133,16 +205,8 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
   const isValid = hasName && hasIngredient && hasStep;
 
   useEffect(() => {
-    const dirty =
-      name !== (initialData?.name ?? '') ||
-      servings !== String(initialData?.servings ?? 1) ||
-      servingSizeLabel !== (initialData?.serving_size_label ?? '') ||
-      description !== (initialData?.description ?? '') ||
-      notes !== (initialData?.notes ?? '') ||
-      activeIngredients.length !== (initialData?.ingredients?.length ?? 1) ||
-      activeSteps.length !== (initialData?.steps?.length ?? 1);
-    setIsDirty(dirty);
-  }, [name, servings, servingSizeLabel, description, notes, activeIngredients.length, activeSteps.length, initialData]);
+    setIsDirty(currentSignature !== initialSignature);
+  }, [currentSignature, initialSignature]);
 
   useUnsavedChanges(isDirty);
 

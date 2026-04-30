@@ -9,6 +9,10 @@ const nextConfig = {
   },
 };
 
-initOpenNextCloudflareForDev();
+const isNextDev = process.argv.some(arg => arg === 'dev');
+
+if (isNextDev) {
+  initOpenNextCloudflareForDev();
+}
 
 export default nextConfig;

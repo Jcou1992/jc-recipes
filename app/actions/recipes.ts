@@ -31,15 +31,15 @@ async function safeCompute(recipeId: string): Promise<void> {
 
 export async function createRecipe(payload: RecipePayload): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const normalized = normalizeServingSizeLabel(payload);
   if ('error' in normalized) return normalized;
 
   const { data, error } = await supabase
     .from('recipes')
-    .insert({ ...normalized, user_id: session.user.id })
+    .insert({ ...normalized, user_id: user.id })
     .select('id')
     .single();
 
@@ -52,8 +52,8 @@ export async function createRecipe(payload: RecipePayload): Promise<ActionResult
 
 export async function updateRecipe(id: string, payload: RecipePayload): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const normalized = normalizeServingSizeLabel(payload);
   if ('error' in normalized) return normalized;
@@ -64,7 +64,7 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
     .from('recipes')
     .select('ingredients')
     .eq('id', id)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single();
 
   if (existing) {
@@ -86,7 +86,7 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
     .from('recipes')
     .update(normalized)
     .eq('id', id)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
 
   if (error) return { error: error.message };
 
@@ -113,22 +113,22 @@ export async function updateRecipe(id: string, payload: RecipePayload): Promise<
  */
 export async function recordCooked(recipeId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   await supabase.rpc('record_cooked', { recipe_id: recipeId });
 }
 
 export async function deleteRecipe(id: string): Promise<ActionResult> {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const { error } = await supabase
     .from('recipes')
     .delete()
     .eq('id', id)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
 
   if (error) return { error: error.message };
 

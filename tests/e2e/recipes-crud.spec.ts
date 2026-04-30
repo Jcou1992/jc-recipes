@@ -35,7 +35,7 @@ test('create via form populates detail page with every persisted field @smoke', 
   );
 
   await expect(page.getByRole('heading', { name })).toBeVisible();
-  await expect(page.getByText('Serves 4')).toBeVisible();
+  await expect(page.getByTestId('scaler-value')).toHaveText('Serves 4');
   await expect(page.getByText('A test description')).toBeVisible();
   await expect(page.getByText('flour', { exact: true })).toBeVisible();
   await expect(page.getByText('Mix flour and water.')).toBeVisible();

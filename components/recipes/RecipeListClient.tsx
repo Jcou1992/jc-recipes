@@ -460,7 +460,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
           </div>
         ) : (
           <div className="text-center py-20" data-testid="filtered-empty-state">
-            <p className="font-display text-xl font-semibold mb-2" style={{ color: 'var(--text-2)' }}>
+            <p className="font-display text-3xl font-semibold mb-3" style={{ color: 'var(--text-2)' }}>
               {t.nothingHere}
             </p>
             {hasFilters && (

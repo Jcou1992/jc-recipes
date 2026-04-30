@@ -33,7 +33,12 @@ describe('updateSession', () => {
       request: makeRequest('/recipes', 'sb-auth-token=stale'),
       prepare: () => {
         createServerClientMock.mockImplementation((_url, _key, options) => {
-          options?.cookies?.setAll?.([
+          const cookieOptions = options as unknown as {
+            cookies?: {
+              setAll?: (cookies: Array<{ name: string; value: string; options: { maxAge: number; path: string } }>) => void;
+            };
+          };
+          cookieOptions.cookies?.setAll?.([
             { name: 'sb-auth-token', value: '', options: { maxAge: 0, path: '/' } },
           ]);
 

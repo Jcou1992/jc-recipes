@@ -7,8 +7,9 @@ export const metadata: Metadata = { title: 'Log in — SEKAI' };
 export default function LoginPage() {
   return (
     <main
-      className="min-h-screen flex items-center justify-center px-4"
+      className="min-h-screen flex items-center justify-center px-4 py-8"
       style={{ background: 'var(--bg)' }}
+      data-auth-login
     >
       <div
         className="dialog-panel-sm rounded-2xl p-8 animate-scale-in"

@@ -10,7 +10,6 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import FontSizeToggle from '@/components/ui/FontSizeToggle';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import DesignModeToggle from '@/components/ui/brut/DesignModeToggle';
 import { logout } from '@/app/actions/auth';
 
 interface Props {
@@ -54,27 +53,6 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
 
   return (
     <div className="space-y-10">
-      {/* Design — brut toggle at top. Mirrors ThemeToggle pattern. */}
-      <section>
-        <h2 className="section-label mb-4">DESIGN</h2>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 min-w-0">
-          <span
-            className="font-label text-sm tracking-wide"
-            style={{ color: 'var(--text-2)' }}
-          >
-            Mode
-          </span>
-          <DesignModeToggle />
-          <p
-            className="font-label text-xs tracking-wide basis-full"
-            style={{ color: 'var(--text-3)' }}
-          >
-            CLASSIC — the current Sakai look. BRUT — restaurant service ticket:
-            monospace, ticket grammar, reference codes. Flip any time.
-          </p>
-        </div>
-      </section>
-
       {/* Workspace */}
       <section>
         <h2 className="section-label mb-4">{t.settingsWorkspaceSection}</h2>

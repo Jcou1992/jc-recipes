@@ -87,7 +87,13 @@ export default function RecipeCard({
   // classic mode at all. The `--card-heat` percentage is read by the CSS
   // rule `.brut-card-heat-row { color: color-mix(in oklch, var(--bone-100)
   // var(--card-heat), var(--bone-300)); }` to fade across 72 h.
-  const heatRow = isBrut && (
+  const cookedLabel = recipe.cooked_at == null
+    ? 'Not cooked yet'
+    : cookedAge.label === 'NEW'
+      ? 'Cooked recently'
+      : `Cooked ${cookedAge.label.toLowerCase()}`;
+
+  const heatRow = isBrut ? (
     <div
       className="brut-card-heat-row mt-3 flex items-center gap-3 font-label text-xs tracking-widest uppercase tabular-nums"
       style={{
@@ -104,12 +110,16 @@ export default function RecipeCard({
         <span data-testid="brut-card-heat-count">[COOKED {cookedCount}×]</span>
       )}
     </div>
+  ) : (
+    <p className="font-label text-sm tracking-wide mt-3 tabular-nums" style={{ color: 'var(--text-3)' }}>
+      {cookedCount > 0 ? `${cookedLabel} · ${cookedCount}x` : cookedLabel}
+    </p>
   );
 
   const padClass = featured ? 'p-6' : 'p-5';
   const titleClass = featured
-    ? 'font-display text-2xl font-semibold leading-snug mb-2'
-    : 'font-display text-xl font-semibold leading-snug mb-1 line-clamp-2';
+    ? 'font-display text-4xl font-semibold leading-tight mb-3'
+    : 'font-display text-2xl font-semibold leading-tight mb-2 line-clamp-2';
   const descClass = featured
     ? 'font-body text-base line-clamp-3 mb-4'
     : 'font-body text-base line-clamp-2 mb-3';

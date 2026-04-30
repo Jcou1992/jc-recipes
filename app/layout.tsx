@@ -12,6 +12,7 @@ import {
 } from '@/lib/preference-cookies';
 import { DESIGN_MODE_COOKIE, type DesignMode } from '@/lib/brut/design-mode-cookie';
 import { RouteAwareWayfinder } from '@/components/ui/brut/RouteAwareWayfinder';
+import KonamiEasterEgg from '@/components/motion/KonamiEasterEgg';
 
 const barlowCondensed = Barlow_Condensed({
   subsets: ['latin'],
@@ -103,6 +104,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             global one is suppressed here to avoid stacking two 32 px header
             rows. */}
         {designMode === 'brut' && <RouteAwareWayfinder crumb="SEKAI" userLabel="" />}
+        <KonamiEasterEgg />
         {children}
       </body>
     </html>

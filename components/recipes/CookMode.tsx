@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
 import Link from 'next/link';
 import { useT } from '@/components/ui/LanguageContext';
 import { haptic } from '@/lib/motion/haptic';
@@ -152,6 +152,12 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
       }
       return next;
     });
+  }
+
+  function onIngredientCheckKeyDown(e: KeyboardEvent<HTMLButtonElement>, i: number) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    triggerIngredientCheck(i);
   }
 
   useEffect(() => {
@@ -492,7 +498,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           >
             <Link
               href={`/recipes/${recipe.id}`}
-              className="font-label text-xs tracking-widest uppercase transition-colors"
+              className="font-label text-xs tracking-widest uppercase transition-colors min-h-[44px] flex items-center pr-4"
               style={{ color: 'var(--text-3)' }}
               data-testid="cook-exit-btn"
             >
@@ -586,42 +592,49 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
           </h2>
           <ul className="space-y-3">
             {displayedIngredients.map((ing, i) => (
-              <li
-                key={i}
-                className="flex items-center gap-3 cursor-pointer"
-                onClick={() => triggerIngredientCheck(i)}
-              >
-                <div
-                  className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
-                  style={{
-                    position: 'relative',
-                    ...(checkedIngredients.has(i)
-                      ? { background: 'var(--color-terracotta)', borderColor: 'var(--color-terracotta)' }
-                      : { background: 'transparent', borderColor: 'var(--border-input)' }),
-                  }}
+              <li key={i}>
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={checkedIngredients.has(i)}
+                  className="flex min-h-[44px] w-full items-center gap-3 cursor-pointer text-left"
+                  onClick={() => triggerIngredientCheck(i)}
+                  onKeyDown={e => onIngredientCheckKeyDown(e, i)}
+                  data-testid={`cook-ingredient-toggle-${i}`}
                 >
-                  {checkedIngredients.has(i) && (
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="#fff">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  {rippleIdx === i && (
-                    <span key={`ripple-${i}-${rippleTick}`} className="ingredient-ripple" aria-hidden="true" />
-                  )}
-                </div>
-                <span
-                  className="ingredient-name font-body text-sm"
-                  style={{
-                    color: checkedIngredients.has(i) ? 'color-mix(in oklch, var(--text-1) 30%, transparent)' : 'var(--text-2)',
-                    textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
-                  }}
-                  data-testid={`cook-ingredient-${i}`}
-                >
-                  <span className="tabular-nums" style={{ color: 'var(--color-terracotta)', marginRight: '0.5rem' }}>
-                    {ing.displayAmount}{ing.displayUnit ? ` ${ing.displayUnit}` : ''}
+                  <span
+                    className="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all"
+                    style={{
+                      position: 'relative',
+                      ...(checkedIngredients.has(i)
+                        ? { background: 'var(--color-terracotta)', borderColor: 'var(--color-terracotta)' }
+                        : { background: 'transparent', borderColor: 'var(--border-input)' }),
+                    }}
+                    aria-hidden="true"
+                  >
+                    {checkedIngredients.has(i) && (
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="#fff">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    {rippleIdx === i && (
+                      <span key={`ripple-${i}-${rippleTick}`} className="ingredient-ripple" aria-hidden="true" />
+                    )}
                   </span>
-                  {ing.name}
-                </span>
+                  <span
+                    className="ingredient-name font-body text-sm"
+                    style={{
+                      color: checkedIngredients.has(i) ? 'color-mix(in oklch, var(--text-1) 30%, transparent)' : 'var(--text-2)',
+                      textDecoration: checkedIngredients.has(i) ? 'line-through' : 'none',
+                    }}
+                    data-testid={`cook-ingredient-${i}`}
+                  >
+                    <span className="tabular-nums" style={{ color: 'var(--color-terracotta)', marginRight: '0.5rem' }}>
+                      {ing.displayAmount}{ing.displayUnit ? ` ${ing.displayUnit}` : ''}
+                    </span>
+                    {ing.name}
+                  </span>
+                </button>
               </li>
             ))}
           </ul>

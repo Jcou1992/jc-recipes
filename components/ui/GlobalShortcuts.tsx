@@ -34,12 +34,12 @@ export default function GlobalShortcuts() {
             // zero visible surface for the dialog. This button adds a
             // single round [?] glyph in the bottom-right safe area, AA
             // contrast against --bg, scoped to non-immersive routes.
-            width: '36px',
-            height: '36px',
+            width: '44px',
+            height: '44px',
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
             color: 'var(--text-2)',
-            fontSize: '13px',
+            fontSize: '14px',
             letterSpacing: '0.05em',
             boxShadow: 'var(--shadow-card, 0 1px 2px rgb(0 0 0 / 0.08))',
             // Respect iOS safe-area on phones in landscape.

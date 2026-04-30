@@ -582,15 +582,15 @@
   /* ── LOGIN — brutalist single column ────────────────────────────────────── */
   /* The login page uses a dialog-panel-sm card. Under brut: rip the card
      chrome, centre the column, add the 世界 watermark via ::before on <main>. */
-  :root[data-design="brut"] main {
+  :root[data-design="brut"] main[data-auth-login] {
     position: relative;
   }
-  :root[data-design="brut"] .dialog-panel-sm {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm {
     background: transparent !important;
     box-shadow: none !important;
     border: 0 !important;
-    padding: var(--s-8) !important;
-    max-width: 360px;
+    padding: clamp(var(--s-5), 6vw, var(--s-8)) !important;
+    max-width: min(360px, calc(100vw - 32px));
     width: 100%;
     position: relative;
     z-index: 1;
@@ -598,7 +598,7 @@
   /* 世界 watermark on the login viewport. We scope to .dialog-panel-sm's
      parent <main> to keep it login-only (the settings page also uses
      section layouts, but those aren't centred <main> landmarks with dark bg). */
-  :root[data-design="brut"] main:has(.dialog-panel-sm)::before {
+  :root[data-design="brut"] main[data-auth-login]::before {
     content: '世界';
     position: absolute;
     inset: 0;
@@ -615,31 +615,31 @@
     z-index: 0;
   }
   /* Login wordmark — the h1 already carries "SEKAI" text; restyle to brut. */
-  :root[data-design="brut"] .dialog-panel-sm header h1 {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header h1 {
     font-family: var(--font-mono);
-    font-size: var(--t-64);
+    font-size: clamp(var(--t-40), 14vw, var(--t-64));
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     line-height: 1;
     color: var(--text-1) !important;
     text-transform: uppercase;
   }
   /* Hide the classic 世界 inline-serif glyph, the ornamental hairline rule,
      and "Recipe tool" caption — we replace with a medal rule + caption. */
-  :root[data-design="brut"] .dialog-panel-sm header > .flex > span[aria-hidden="true"],
-  :root[data-design="brut"] .dialog-panel-sm header > .h-px,
-  :root[data-design="brut"] .dialog-panel-sm header > .mt-4.mb-3 {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header > .flex > span[aria-hidden="true"],
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header > .h-px,
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header > .mt-4.mb-3 {
     display: none !important;
   }
-  :root[data-design="brut"] .dialog-panel-sm header {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header {
     text-align: center;
-    margin-bottom: var(--s-12);
+    margin-bottom: clamp(var(--s-6), 7vw, var(--s-12));
     position: relative;
   }
-  :root[data-design="brut"] .dialog-panel-sm header .flex {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header .flex {
     justify-content: center;
   }
-  :root[data-design="brut"] .dialog-panel-sm header::after {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header::after {
     content: '';
     display: block;
     width: 40px;
@@ -647,7 +647,7 @@
     background: var(--medal);
     margin: var(--s-3) auto 0;
   }
-  :root[data-design="brut"] .dialog-panel-sm header p {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm header p {
     margin-top: var(--s-3);
     font-size: var(--t-10);
     letter-spacing: 0.3em;
@@ -656,7 +656,7 @@
   }
 
   /* Login-footer strip rendered via ::after on the login card itself. */
-  :root[data-design="brut"] .dialog-panel-sm::after {
+  :root[data-design="brut"] main[data-auth-login] .dialog-panel-sm::after {
     content: 'SEKAI/AUTH/v2.03 · BUILD 20260424·A8F3';
     display: block;
     margin-top: var(--s-12);
@@ -666,6 +666,7 @@
     text-transform: uppercase;
     color: var(--text-4);
     text-align: center;
+    overflow-wrap: anywhere;
   }
 
   /* ── RECIPE LIST — service ticket queue ─────────────────────────────────── */
@@ -1365,7 +1366,6 @@
     animation-iteration-count: 1 !important;
   }
 }
-
 
 
 

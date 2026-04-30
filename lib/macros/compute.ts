@@ -20,10 +20,11 @@ export async function computeRecipeMacros(recipeId: string): Promise<RecipeMacro
 
   const promise = doCompute(recipeId);
   computeCache.set(recipeId, { at: now, promise });
-  setTimeout(() => {
+  const cleanupTimer = setTimeout(() => {
     const c = computeCache.get(recipeId);
     if (c && c.at === now) computeCache.delete(recipeId);
   }, THROTTLE_MS);
+  cleanupTimer.unref?.();
   return promise;
 }
 

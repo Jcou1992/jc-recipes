@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(async () => ({
-    auth: { getSession: async () => ({ data: { session: currentSession } }) },
+    auth: { getUser: async () => ({ data: { user: currentSession?.user ?? null } }) },
     from: (table: string) => {
       if (table === 'recipes') {
         return {

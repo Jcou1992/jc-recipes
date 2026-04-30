@@ -57,8 +57,8 @@ export async function bulkDeleteRecipes(ids: string[]): Promise<BulkActionResult
   if (ids.length > BATCH_LIMIT) return overLimit(ids);
 
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const chunks: string[][] = [];
   for (let i = 0; i < ids.length; i += DELETE_CHUNK_SIZE)
@@ -70,7 +70,7 @@ export async function bulkDeleteRecipes(ids: string[]): Promise<BulkActionResult
         .from('recipes')
         .delete()
         .in('id', chunk)
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .select('id')
     )
   );
@@ -95,14 +95,14 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
   if (ids.length > BATCH_LIMIT) return overLimit(ids);
 
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const { data: sources, error: fetchError } = await supabase
     .from('recipes')
     .select('*')
     .in('id', ids)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
 
   if (fetchError || !sources) {
     return {
@@ -124,7 +124,10 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
     };
   }
 
-  const { error: insertError } = await supabase.from('recipes').insert(clones);
+  const { data: inserted, error: insertError } = await supabase
+    .from('recipes')
+    .insert(clones)
+    .select('id');
 
   if (insertError) {
     return {
@@ -135,7 +138,7 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
 
   const notFound = ids.filter(id => !foundIds.has(id));
   return {
-    succeeded: Array.from(foundIds),
+    succeeded: (inserted ?? []).map(r => r.id as string),
     failed: notFound.map(id => ({ id, error: 'Not found' })),
   };
 }
@@ -165,14 +168,14 @@ export async function bulkUpdateTags(
   }
 
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect('/login');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
   const { data: sources, error: fetchError } = await supabase
     .from('recipes')
     .select('id, tags')
     .in('id', ids)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
 
   if (fetchError || !sources) {
     return {
@@ -204,7 +207,7 @@ export async function bulkUpdateTags(
         .from('recipes')
         .update({ tags: newTags.length > 0 ? newTags : null })
         .eq('id', r.id)
-        .eq('user_id', session.user.id);
+        .eq('user_id', user.id);
       if (error) throw new Error(error.message);
       return r.id as string;
     }),

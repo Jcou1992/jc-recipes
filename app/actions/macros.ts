@@ -27,8 +27,8 @@ function validateOverride(o: MacroValues, basis: 'per_100g' | 'per_unit'): strin
 
 export async function searchFdcAction(query: string) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { error: 'Not authenticated' };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
   const candidates = await searchFdc(query, 5);
   return { candidates };
 }
@@ -44,20 +44,20 @@ async function verifyAndGetIngredients(
   | { supabase: SupabaseClient; ingredients: Ingredient[]; userId: string }
 > {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { error: 'Not authenticated' };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
   const { data: recipe, error } = await supabase
     .from('recipes')
     .select('id, ingredients')
     .eq('id', recipeId)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single();
   if (error || !recipe) return { error: 'Recipe not found' };
   const ingredients = (recipe.ingredients ?? []) as Ingredient[];
   if (!ingredients[index] || ingredients[index].name !== expectedName) {
     return { error: 'Ingredient changed — please re-open the modal' };
   }
-  return { supabase, ingredients, userId: session.user.id };
+  return { supabase, ingredients, userId: user.id };
 }
 
 export async function setIngredientMatch(
@@ -127,13 +127,13 @@ export interface BatchEntry {
 
 export async function setIngredientMatches(recipeId: string, entries: BatchEntry[]) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { error: 'Not authenticated' };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
   const { data: recipe, error } = await supabase
     .from('recipes')
     .select('id, ingredients')
     .eq('id', recipeId)
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.id)
     .single();
   if (error || !recipe) return { error: 'Recipe not found' };
   const ingredients = (recipe.ingredients ?? []) as Ingredient[];
@@ -176,7 +176,7 @@ export async function setIngredientMatches(recipeId: string, entries: BatchEntry
     .from('recipes')
     .update({ ingredients }, { count: 'exact' })
     .eq('id', recipeId)
-    .eq('user_id', session.user.id);
+    .eq('user_id', user.id);
   if (updateError) return { error: `Failed to update ingredient matches: ${updateError.message}` };
   if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
   return computeAndReturn(recipeId);
@@ -200,7 +200,7 @@ async function computeAndReturn(recipeId: string): Promise<{ ok: true } | { erro
 
 export async function triggerCompute(recipeId: string) {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return { error: 'Not authenticated' };
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
   return computeAndReturn(recipeId);
 }
