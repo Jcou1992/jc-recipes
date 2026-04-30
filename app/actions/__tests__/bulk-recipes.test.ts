@@ -20,7 +20,9 @@ jest.mock('@/lib/supabase/server', () => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { bulkDeleteRecipes, sanitizeTags, validateTagPayload, bulkUpdateTags } = require('../bulk-recipes');
+const { bulkDeleteRecipes, bulkUpdateTags } = require('../bulk-recipes');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { sanitizeTags, validateTagPayload } = require('@/lib/bulk-recipes-tags');
 
 beforeEach(() => {
   createClientMock.mockReset();
