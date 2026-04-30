@@ -71,5 +71,16 @@ export type RecipePayload = Omit<
 
 export interface BulkActionResult {
   succeeded: string[];
-  failed: Array<{ id: string; error: string }>;
+  failed: Array<{
+    id: string;
+    error: string;
+    code?: 'TAG_VALIDATION';
+    details?: {
+      field: 'addTags' | 'removeTags' | 'recipeTags';
+      reason: 'too_many_tags' | 'tag_too_long';
+      max: number;
+      actual: number;
+      tag?: string;
+    };
+  }>;
 }
