@@ -31,7 +31,7 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
   const q = searchParams.get('q') ?? '';
   const activeTags = useMemo(() => {
     const tag = searchParams.get('tags');
-    return tag ? tag.split(',').filter(Boolean) : [];
+    return tag ? Array.from(new Set(tag.split(',').map(t => t.trim().toLowerCase()).filter(Boolean))) : [];
   }, [searchParams]);
   const sort = (searchParams.get('sort') ?? 'newest') as SortKey;
 
@@ -114,7 +114,10 @@ export default function RecipeListClient({ recipes, allTags }: Props) {
     }
 
     if (activeTags.length > 0) {
-      list = list.filter(r => activeTags.every(tag => r.tags?.includes(tag)));
+      list = list.filter(r => {
+        const recipeTags = new Set((r.tags ?? []).map(tag => tag.trim().toLowerCase()));
+        return activeTags.every(tag => recipeTags.has(tag));
+      });
     }
 
     switch (sort) {
