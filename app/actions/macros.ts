@@ -41,7 +41,7 @@ async function verifyAndGetIngredients(
   expectedName: string
 ): Promise<
   | { error: string }
-  | { supabase: SupabaseClient; ingredients: Ingredient[] }
+  | { supabase: SupabaseClient; ingredients: Ingredient[]; userId: string }
 > {
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
@@ -57,7 +57,7 @@ async function verifyAndGetIngredients(
   if (!ingredients[index] || ingredients[index].name !== expectedName) {
     return { error: 'Ingredient changed — please re-open the modal' };
   }
-  return { supabase, ingredients };
+  return { supabase, ingredients, userId: session.user.id };
 }
 
 export async function setIngredientMatch(
@@ -69,7 +69,7 @@ export async function setIngredientMatch(
 ) {
   const res = await verifyAndGetIngredients(recipeId, index, expectedName);
   if ('error' in res) return res;
-  const { supabase, ingredients } = res;
+  const { supabase, ingredients, userId } = res;
   ingredients[index] = {
     ...ingredients[index],
     fdc_id: fdcId,
@@ -77,7 +77,13 @@ export async function setIngredientMatch(
     macros_override: undefined,
     macros_override_basis: undefined,
   };
-  await supabase.from('recipes').update({ ingredients }).eq('id', recipeId);
+  const { error, count } = await supabase
+    .from('recipes')
+    .update({ ingredients }, { count: 'exact' })
+    .eq('id', recipeId)
+    .eq('user_id', userId);
+  if (error) return { error: `Failed to update ingredient match: ${error.message}` };
+  if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
   await computeRecipeMacros(recipeId);
   return { ok: true };
 }
@@ -95,13 +101,19 @@ export async function setIngredientOverride(
   }
   const res = await verifyAndGetIngredients(recipeId, index, expectedName);
   if ('error' in res) return res;
-  const { supabase, ingredients } = res;
+  const { supabase, ingredients, userId } = res;
   ingredients[index] = {
     ...ingredients[index],
     macros_override: override ?? undefined,
     macros_override_basis: override ? basis : undefined,
   };
-  await supabase.from('recipes').update({ ingredients }).eq('id', recipeId);
+  const { error, count } = await supabase
+    .from('recipes')
+    .update({ ingredients }, { count: 'exact' })
+    .eq('id', recipeId)
+    .eq('user_id', userId);
+  if (error) return { error: `Failed to update ingredient override: ${error.message}` };
+  if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
   await computeRecipeMacros(recipeId);
   return { ok: true };
 }
@@ -162,7 +174,13 @@ export async function setIngredientMatches(recipeId: string, entries: BatchEntry
     }
   }
 
-  await supabase.from('recipes').update({ ingredients }).eq('id', recipeId);
+  const { error: updateError, count } = await supabase
+    .from('recipes')
+    .update({ ingredients }, { count: 'exact' })
+    .eq('id', recipeId)
+    .eq('user_id', session.user.id);
+  if (updateError) return { error: `Failed to update ingredient matches: ${updateError.message}` };
+  if (!count) return { error: 'Recipe update was blocked or stale. Please refresh and try again.' };
   await computeRecipeMacros(recipeId);
   return { ok: true };
 }
