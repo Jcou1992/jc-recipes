@@ -128,6 +128,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [rippleIdx, setRippleIdx] = useState<number | null>(null);
   const [rippleTick, setRippleTick] = useState(0);
+  //TODO work more on Brut Mode
   // Brut mode detection — gates the per-route Wayfinder + hides the local
   // header strip via a stable `data-cook-local-header` attribute. Reads
   // `data-design` on `<html>` at mount; matches the pattern Wayfinder uses,
