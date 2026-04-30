@@ -16,6 +16,7 @@ function overLimit(ids: string[]): BulkActionResult {
 
 export async function bulkDeleteRecipes(ids: string[]): Promise<BulkActionResult> {
   if (ids.length === 0) return { succeeded: [], failed: [] };
+  if (ids.length > BATCH_LIMIT) return overLimit(ids);
 
   const supabase = await createClient();
   const { data: { session } } = await supabase.auth.getSession();
