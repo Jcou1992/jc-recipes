@@ -43,41 +43,42 @@ flowchart TD
     classDef route fill:#1f1f1f,stroke:#D4703F,color:#EDD18E,stroke-width:2px
     classDef layout fill:#2a2a2a,stroke:#888,color:#fff
     classDef action fill:#3a2a1a,stroke:#EDD18E,color:#EDD18E
-    classDef gate fill:#1a2a3a,stroke:#5a8,color:#fff
+    classDef gate fill:#1a2a3a,stroke:#5a8a8a,color:#fff
+    classDef pain fill:#3a1a1a,stroke:#ff5555,color:#ffdddd
 
-    Browser((Browser request)) --> MW[middleware.ts<br/>cookie-presence check<br/>:auth-token in cookies]
+    Browser([Browser request]) --> MW["middleware.ts<br/>cookie-presence only<br/>no JWT validation"]
     MW -->|no cookie + protected| Login
-    MW -->|cookie present| RootLayout[app/layout.tsx<br/>theme/lang/units cookies<br/>RouteAwareWayfinder]
+    MW -->|cookie present| RootLayout["app root layout<br/>theme/lang/units cookies<br/>RouteAwareWayfinder"]:::layout
 
-    RootLayout --> AuthGroup[/(auth)/layout.tsx<br/>passthrough/]
-    RootLayout --> AppGroup[/(app)/layout.tsx<br/>supabase.auth.getUser<br/>FULL JWT VALIDATION/]:::gate
+    RootLayout --> AuthGroup["auth group layout<br/>passthrough"]:::layout
+    RootLayout --> AppGroup["app group layout<br/>supabase.auth.getUser<br/>FULL JWT VALIDATION"]:::gate
 
-    AuthGroup --> Login[/(auth)/login<br/>LoginForm]
-    AppGroup --> Recipes[/(app)/recipes<br/>list+search<br/>?tour=1/]:::route
-    AppGroup --> RecipeNew[/(app)/recipes/new<br/>'use client' form/]:::route
-    AppGroup --> RecipeDetail[/(app)/recipes/[id]<br/>detail RSC<br/>generateMetadata DUP QUERY/]:::route
-    AppGroup --> RecipeEdit[/(app)/recipes/[id]/edit<br/>force-dynamic<br/>captures updated_at/]:::route
-    AppGroup --> RecipeCook[/(app)/recipes/[id]/cook<br/>?servings ?units<br/>NO WAKE LOCK/]:::route
-    AppGroup --> RecipePrint[/(app)/recipes/print<br/>?ids=csv<br/>SILENT EMPTY FILTER/]:::route
-    AppGroup --> Settings[/(app)/settings<br/>preferences/]:::route
+    AuthGroup --> Login["#47;login<br/>LoginForm"]:::route
+    AppGroup --> Recipes["#47;recipes<br/>list + search<br/>?tour=1"]:::route
+    AppGroup --> RecipeNew["#47;recipes/new<br/>client form + markdown"]:::route
+    AppGroup --> RecipeDetail["#47;recipes/[id]<br/>detail RSC<br/>generateMetadata DUP QUERY"]:::pain
+    AppGroup --> RecipeEdit["#47;recipes/[id]/edit<br/>force-dynamic<br/>captures updated_at"]:::pain
+    AppGroup --> RecipeCook["#47;recipes/[id]/cook<br/>?servings ?units<br/>NO WAKE LOCK"]:::pain
+    AppGroup --> RecipePrint["#47;recipes/print<br/>?ids=csv<br/>SILENT EMPTY FILTER"]:::pain
+    AppGroup --> Settings["#47;settings<br/>preferences"]:::route
 
-    Recipes -->|getUserPreferences| ActPrefs[(app/actions/preferences.ts<br/>get/update preferences)]:::action
-    Recipes -->|bulk ops| ActBulk[(app/actions/bulk-recipes.ts<br/>delete/duplicate/updateTags<br/>NOT ATOMIC)]:::action
-    RecipeNew -->|createRecipe| ActRecipes[(app/actions/recipes.ts<br/>create/update/delete<br/>recordCooked)]:::action
-    RecipeEdit -->|updateRecipe id payload expectedUpdatedAt| ActRecipes
+    Recipes -->|getUserPreferences| ActPrefs[("preferences.ts<br/>get / update")]:::action
+    Recipes -->|bulk ops| ActBulk[("bulk-recipes.ts<br/>delete / duplicate / updateTags<br/>NOT ATOMIC")]:::pain
+    RecipeNew -->|createRecipe| ActRecipes[("recipes.ts<br/>create / update / delete<br/>recordCooked")]:::action
+    RecipeEdit -->|updateRecipe| ActRecipes
     RecipeDetail -->|deleteRecipe| ActRecipes
-    RecipeCook -->|recordCooked implicit| ActRecipes
+    RecipeCook -->|recordCooked| ActRecipes
     Settings -->|updateUserPreferences| ActPrefs
 
-    ActRecipes -->|second auth gate| getUserAction[supabase.auth.getUser<br/>defense in depth]:::gate
-    ActPrefs --> getUserAction
-    ActBulk --> getUserAction
+    ActRecipes -->|second auth gate| Auth2["supabase.auth.getUser<br/>defense in depth"]:::gate
+    ActPrefs --> Auth2
+    ActBulk --> Auth2
 
-    getUserAction -->|RLS user_id = auth.uid| Supabase[(Supabase Postgres<br/>RLS row isolation)]
+    Auth2 -->|RLS user_id = auth.uid| Supabase[("Supabase Postgres<br/>RLS row isolation")]
 
-    RecipeDetail -.calls 3+ times.-> ActPrefs
-    Recipes -.calls 3+ times.-> ActPrefs
-    Settings -.calls 3+ times.-> ActPrefs
+    RecipeDetail -.->|3x per page view| ActPrefs
+    Recipes -.->|3x per page view| ActPrefs
+    Settings -.->|3x per page view| ActPrefs
 ```
 
 ## Ranked Ideas
