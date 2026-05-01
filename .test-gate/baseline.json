@@ -1,15 +1,22 @@
 {
-  "generatedAt": "2026-04-23T22:28:48.511Z",
+  "generatedAt": "2026-05-01T23:21:25.835Z",
   "fileCounts": {
+    "app/actions/__tests__/bulk-recipes.test.ts": 3,
     "app/actions/__tests__/macros.test.ts": 1,
     "app/actions/__tests__/preferences.test.ts": 1,
-    "app/actions/__tests__/recipes.test.ts": 1,
+    "app/actions/__tests__/recipes.test.ts": 5,
+    "app/actions/__tests__/record-cooked.test.ts": 4,
+    "lib/__tests__/validate-recipe.test.ts": 3,
+    "lib/brut/__tests__/cooked-age.test.ts": 2,
+    "lib/brut/__tests__/ref-codes.test.ts": 4,
+    "lib/brut/__tests__/use-shortcut-discovery.test.ts": 3,
     "lib/macros/__tests__/compute.test.ts": 1,
     "lib/macros/__tests__/match.test.ts": 1,
     "lib/macros/__tests__/unit-basis.test.ts": 3,
     "lib/macros/__tests__/unit-to-grams.test.ts": 1,
     "lib/motion/__tests__/haptic.test.ts": 1,
     "lib/motion/__tests__/view-transition.test.ts": 3,
+    "lib/supabase/__tests__/middleware.test.ts": 1,
     "lib/utils/__tests__/export-recipes.test.ts": 11,
     "lib/utils/__tests__/format-servings.test.ts": 1,
     "lib/utils/__tests__/parse-recipe-markdown.test.ts": 17,
@@ -24,7 +31,7 @@
     "tests/e2e/recipes-crud.spec.ts": 9
   },
   "totals": {
-    "jestFiles": 13,
+    "jestFiles": 20,
     "playwrightFiles": 8
   }
 }

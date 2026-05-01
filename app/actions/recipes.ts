@@ -2,31 +2,28 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { computeRecipeMacros } from '@/lib/macros/compute';
+import { safeCompute } from '@/lib/macros/safe-compute';
 import { inferBasisForUnit } from '@/lib/macros/unit-basis';
+import { validateRecipePayload } from '@/lib/validate-recipe';
+import { sanitizeTags } from '@/lib/bulk-recipes-tags';
 import type { Ingredient, RecipePayload } from '@/types/recipe';
 
 export type ActionResult = { error: string } | null;
 
-const SERVING_SIZE_LABEL_MAX = 40;
+const STALE_RECIPE_ERROR = 'This recipe was changed in another tab. Refresh and try again.';
+const NOT_FOUND_ERROR = 'Recipe not found.';
 
-function normalizeServingSizeLabel(payload: RecipePayload): RecipePayload | { error: string } {
+function normalizeServingSizeLabel(payload: RecipePayload): RecipePayload {
   const raw = payload.serving_size_label;
   if (raw == null) return payload;
   const trimmed = raw.trim();
   if (trimmed.length === 0) return { ...payload, serving_size_label: null };
-  if (trimmed.length > SERVING_SIZE_LABEL_MAX) {
-    return { error: `Serving size label must be ${SERVING_SIZE_LABEL_MAX} characters or fewer.` };
-  }
   return { ...payload, serving_size_label: trimmed };
 }
 
-async function safeCompute(recipeId: string): Promise<void> {
-  try {
-    await computeRecipeMacros(recipeId);
-  } catch (err) {
-    console.error('macros compute failed', err);
-  }
+function normalizeTags(payload: RecipePayload): RecipePayload {
+  if (!Array.isArray(payload.tags)) return payload;
+  return { ...payload, tags: sanitizeTags(payload.tags) };
 }
 
 export async function createRecipe(payload: RecipePayload): Promise<ActionResult> {
@@ -34,8 +31,9 @@ export async function createRecipe(payload: RecipePayload): Promise<ActionResult
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const normalized = normalizeServingSizeLabel(payload);
-  if ('error' in normalized) return normalized;
+  const validationError = validateRecipePayload(payload);
+  if (validationError) return validationError;
+  const normalized = normalizeTags(normalizeServingSizeLabel(payload));
 
   const { data, error } = await supabase
     .from('recipes')
@@ -50,45 +48,55 @@ export async function createRecipe(payload: RecipePayload): Promise<ActionResult
   redirect(`/recipes/${data.id}`);
 }
 
-export async function updateRecipe(id: string, payload: RecipePayload): Promise<ActionResult> {
+export async function updateRecipe(
+  id: string,
+  payload: RecipePayload,
+  expectedUpdatedAt: string,
+): Promise<ActionResult> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const normalized = normalizeServingSizeLabel(payload);
-  if ('error' in normalized) return normalized;
+  const validationError = validateRecipePayload(payload);
+  if (validationError) return validationError;
+  const normalized = normalizeTags(normalizeServingSizeLabel(payload));
 
-  // Read existing ingredients so we can clear stale overrides when a unit
-  // change flips the macros basis.
+  // Preflight read: avoids an unnecessary write under the common no-conflict
+  // case AND lets us distinguish not-found from stale-edit. The DB-level
+  // .eq('updated_at', expectedUpdatedAt) on the UPDATE below is the
+  // load-bearing guard against the TOCTOU window.
   const { data: existing } = await supabase
     .from('recipes')
-    .select('ingredients')
+    .select('ingredients, updated_at')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
-  if (existing) {
-    const prev = (existing.ingredients ?? []) as Ingredient[];
-    const next = (normalized.ingredients ?? []) as Ingredient[];
-    for (let i = 0; i < next.length; i++) {
-      const p = prev[i];
-      const n = next[i];
-      if (!p || !n) continue;
-      if (!n.macros_override) continue;
-      if (inferBasisForUnit(p.unit) !== inferBasisForUnit(n.unit)) {
-        delete n.macros_override;
-        delete n.macros_override_basis;
-      }
+  if (!existing) return { error: NOT_FOUND_ERROR };
+  if (existing.updated_at !== expectedUpdatedAt) return { error: STALE_RECIPE_ERROR };
+
+  const prev = (existing.ingredients ?? []) as Ingredient[];
+  const next = (normalized.ingredients ?? []) as Ingredient[];
+  for (let i = 0; i < next.length; i++) {
+    const p = prev[i];
+    const n = next[i];
+    if (!p || !n) continue;
+    if (!n.macros_override) continue;
+    if (inferBasisForUnit(p.unit) !== inferBasisForUnit(n.unit)) {
+      delete n.macros_override;
+      delete n.macros_override_basis;
     }
   }
 
-  const { error } = await supabase
+  const { error, count } = await supabase
     .from('recipes')
-    .update(normalized)
+    .update(normalized, { count: 'exact' })
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .eq('updated_at', expectedUpdatedAt);
 
   if (error) return { error: error.message };
+  if (!count) return { error: STALE_RECIPE_ERROR };
 
   await safeCompute(id);
 

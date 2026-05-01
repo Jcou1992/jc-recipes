@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import type { BulkActionResult } from '@/types/recipe';
 import { MAX_TAGS_PER_RECIPE, validateTagPayload } from '@/lib/bulk-recipes-tags';
+import { safeCompute } from '@/lib/macros/safe-compute';
 
 const BATCH_LIMIT = 100;
 const DELETE_CHUNK_SIZE = 100;
@@ -75,10 +76,20 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
   }
 
   const foundIds = new Set(sources.map(s => s.id));
-  const clones = sources.map(r => {
-    const { id, created_at, updated_at, ...rest } = r;
-    return { ...rest, name: `${r.name} (Copy)` };
-  });
+  const clones = sources.map(r => ({
+    user_id: user.id,
+    name: `${r.name} (Copy)`,
+    ingredients: r.ingredients,
+    steps: r.steps,
+    servings: r.servings,
+    serving_size_label: r.serving_size_label,
+    description: r.description,
+    prep_time: r.prep_time,
+    cook_time: r.cook_time,
+    tags: r.tags,
+    notes: r.notes,
+    photos: r.photos,
+  }));
 
   if (clones.length === 0) {
     return {
@@ -98,6 +109,11 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
       failed: ids.map(id => ({ id, error: insertError.message })),
     };
   }
+
+  // Await macros compute so promises survive in CF Workers (microtasks not
+  // registered here are cancelled when the response flushes). safeCompute
+  // already swallows errors, so failures here do not block the user response.
+  await Promise.all((inserted ?? []).map(r => safeCompute(r.id as string)));
 
   const notFound = ids.filter(id => !foundIds.has(id));
   return {

@@ -7,6 +7,11 @@ import FormWithPreview from '@/components/recipes/FormWithPreview';
 import { updateRecipe } from '@/app/actions/recipes';
 import type { Recipe, RecipePayload } from '@/types/recipe';
 
+// expectedUpdatedAt is captured into the server-action closure at render time;
+// caching the page would freeze a stale timestamp and cause spurious STALE
+// errors on the second save. Force a fresh render every request.
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -31,10 +36,11 @@ export default async function EditRecipePage({ params }: PageProps) {
   if (error || !recipe) notFound();
 
   const t = await getServerT();
+  const expectedUpdatedAt = recipe.updated_at;
 
   async function handleUpdate(payload: RecipePayload) {
     'use server';
-    return updateRecipe(id, payload);
+    return updateRecipe(id, payload, expectedUpdatedAt);
   }
 
   return (
