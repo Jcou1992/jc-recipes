@@ -38,6 +38,11 @@ run_id: a3f7c2e1
 
 ## Routing Visualization
 
+![Routing graph](./img/routes.svg)
+
+<details>
+<summary>Mermaid source (renders inline with bierner.markdown-mermaid extension)</summary>
+
 ```mermaid
 flowchart TD
     classDef route fill:#1f1f1f,stroke:#D4703F,color:#EDD18E,stroke-width:2px
@@ -80,6 +85,8 @@ flowchart TD
     Recipes -.->|3x per page view| ActPrefs
     Settings -.->|3x per page view| ActPrefs
 ```
+
+</details>
 
 ## Ranked Ideas
 
