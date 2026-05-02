@@ -427,7 +427,7 @@ export default function CookMode({ recipe, initialServings, unitSystem }: Props)
 
               {/* Secondary: print */}
               <Link
-                href={`/recipes/${recipe.id}/print`}
+                href={`/recipes/print?ids=${recipe.id}`}
                 className="font-label text-sm tracking-widest uppercase py-4 px-6 text-center transition-colors border"
                 style={{
                   background: 'transparent',
