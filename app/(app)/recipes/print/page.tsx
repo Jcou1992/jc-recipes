@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { DESIGN_MODE_COOKIE } from '@/lib/brut/design-mode-cookie';
+import { getServerT } from '@/lib/i18n-server';
 import type { Recipe } from '@/types/recipe';
 import PrintAutoTrigger from './PrintAutoTrigger';
 
@@ -22,47 +23,19 @@ export default async function PrintPage({ searchParams }: PageProps) {
   const { ids, servings: servingsParam } = await searchParams;
   const idList = (ids ?? '').split(',').map(s => s.trim()).filter(Boolean);
 
+  // F4: empty / missing ?ids= → bounce back to /recipes rather than render
+  // a dead-end empty state. The branded empty card is unreachable now, but
+  // keeping it would only fire if redirect() were short-circuited.
+  if (idList.length === 0) {
+    redirect('/recipes');
+  }
+
   // Optional serving override (preserved from the recipe page's serving scaler).
   // Only applied when a single recipe is being printed — bulk exports keep canonical servings.
   const overrideServings = (() => {
     const n = Number(servingsParam);
     return Number.isFinite(n) && n > 0 ? n : null;
   })();
-
-  if (idList.length === 0) {
-    // Cycle 2 P3: branded empty state. Brut renders a ticket card; classic
-    // keeps the body face but with the SEKAI chrome consistent with the
-    // rest of the app instead of an unbranded one-line message.
-    const cookieStore = await cookies();
-    const isBrut = cookieStore.get(DESIGN_MODE_COOKIE)?.value === 'brut';
-    if (isBrut) {
-      return (
-        <div className="max-w-3xl mx-auto px-6 py-8">
-          <div className="brut-ticket" data-code="PRINT · EMPTY">
-            <p
-              className="font-label text-xs tracking-widest uppercase"
-              style={{ color: 'var(--text-3)' }}
-            >
-              No recipes selected for print.
-            </p>
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        <p
-          className="font-display text-2xl mb-2"
-          style={{ color: 'var(--text-1)' }}
-        >
-          Nothing to print.
-        </p>
-        <p className="font-body text-base" style={{ color: 'var(--text-2)' }}>
-          No recipes were selected. Open a recipe and use Print / PDF.
-        </p>
-      </div>
-    );
-  }
 
   const supabase = await createClient();
   const { data: recipes, error } = await supabase
@@ -89,9 +62,18 @@ export default async function PrintPage({ searchParams }: PageProps) {
   list.sort((a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0));
 
   const applyScale = overrideServings !== null && list.length === 1;
+  const t = await getServerT();
 
   return (
     <div className="print-bulk max-w-3xl mx-auto px-6 py-8">
+      {/* F4: screen-only back link. `print:hidden` keeps the printed page clean. */}
+      <Link
+        href="/recipes"
+        className="font-label text-xs tracking-widest uppercase inline-flex items-center mb-6 transition-colors min-h-[44px] print:hidden"
+        style={{ color: 'var(--text-3)' }}
+      >
+        {t.backToRecipes}
+      </Link>
       {/* Menu-spec print typography: tighter weights, looser tracking, rule under title. */}
       <style>{`
         @media print {

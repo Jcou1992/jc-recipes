@@ -50,6 +50,13 @@ export default async function RecipeDetailPage({ params }: PageProps) {
       className="max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8 pb-24 md:pb-8 animate-fade-up"
       style={{ viewTransitionName: `recipe-card-${id}` } as React.CSSProperties}
     >
+      <Link
+        href="/recipes"
+        className="font-label text-xs tracking-widest uppercase inline-flex items-center mb-6 transition-colors min-h-[44px]"
+        style={{ color: 'var(--text-3)' }}
+      >
+        {t.backToRecipes}
+      </Link>
       <ScrollParallaxCover>
         <div className="flex items-start justify-between gap-4 mb-4 min-w-0">
           <div className="min-w-0 flex-1">

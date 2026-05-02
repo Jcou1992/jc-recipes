@@ -28,6 +28,10 @@ interface Props {
   onSubmit: (payload: RecipePayload) => Promise<ActionResult>;
   submitLabel: string;
   onPreviewChange?: (preview: PreviewData) => void;
+  // F3: where Cancel navigates. Falls back to `router.back()` only if absent
+  // (legacy behavior). All app callers now pass an explicit destination so
+  // the user lands somewhere predictable instead of bouncing into history.
+  cancelHref?: string;
 }
 
 // ── Amount helpers ────────────────────────────────────────────────────────────
@@ -118,7 +122,7 @@ interface IngredientEntry {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function RecipeForm({ initialData, onSubmit, submitLabel, onPreviewChange }: Props) {
+export default function RecipeForm({ initialData, onSubmit, submitLabel, onPreviewChange, cancelHref }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const t = useT();
@@ -724,6 +728,7 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
           type="button"
           onClick={() => {
             if (isDirty) setShowCancelConfirm(true);
+            else if (cancelHref) router.push(cancelHref);
             else router.back();
           }}
           className="btn-ghost"
@@ -763,7 +768,8 @@ export default function RecipeForm({ initialData, onSubmit, submitLabel, onPrevi
         cancelLabel="Keep editing"
         onConfirm={() => {
           setShowCancelConfirm(false);
-          router.back();
+          if (cancelHref) router.push(cancelHref);
+          else router.back();
         }}
         onCancel={() => setShowCancelConfirm(false)}
       />

@@ -111,6 +111,7 @@ export default function NewRecipePage() {
             initialData={initialData}
             onSubmit={createRecipe}
             submitLabel={t.createRecipeSubmitLabel}
+            cancelHref="/recipes"
           />
         )}
         {tab === 'markdown' && <MarkdownImport onImport={handleImport} />}

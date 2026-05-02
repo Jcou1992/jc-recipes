@@ -127,6 +127,7 @@ export interface Translations {
 
   // New recipe page
   backBtn: string;
+  backToRecipes: string;
   newRecipeTitle: string;
   manualTab: string;
   importMarkdownTab: string;
@@ -403,6 +404,7 @@ export const en: Translations = {
   unsavedChangesWarning: 'You have unsaved changes. Leave anyway?',
 
   backBtn: '← Back',
+  backToRecipes: '← Recipes',
   newRecipeTitle: 'New recipe',
   manualTab: 'Manual',
   importMarkdownTab: 'Import from Markdown',
@@ -671,6 +673,7 @@ export const es: Translations = {
   unsavedChangesWarning: 'Tienes cambios sin guardar. ¿Salir de todas formas?',
 
   backBtn: '← Atrás',
+  backToRecipes: '← Recetas',
   newRecipeTitle: 'Nueva receta',
   manualTab: 'Manual',
   importMarkdownTab: 'Importar desde Markdown',

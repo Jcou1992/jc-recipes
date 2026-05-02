@@ -11,6 +11,10 @@ interface Props {
   initialData?: Partial<Recipe>;
   onSubmit: (payload: RecipePayload) => Promise<ActionResult>;
   submitLabel: string;
+  // F3: deterministic Cancel destination. Edit → `/recipes/{id}`, New → `/recipes`.
+  // Optional so existing callers fall back to legacy `router.back()` behavior in
+  // RecipeForm if not supplied (no callers should rely on that path now).
+  cancelHref?: string;
 }
 
 export default function FormWithPreview(props: Props) {

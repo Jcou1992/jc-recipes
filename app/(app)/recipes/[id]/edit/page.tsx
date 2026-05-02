@@ -62,6 +62,7 @@ export default async function EditRecipePage({ params }: PageProps) {
         initialData={recipe}
         onSubmit={handleUpdate}
         submitLabel={t.saveChangesSubmitLabel}
+        cancelHref={`/recipes/${id}`}
       />
     </div>
   );
