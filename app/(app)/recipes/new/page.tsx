@@ -53,7 +53,7 @@ export default function NewRecipePage() {
     <div className={isMarkdown ? 'max-w-5xl mx-auto px-4 py-8' : 'max-w-[min(100%-2rem,1280px)] mx-auto px-4 py-8'}>
       <Link
         href="/recipes"
-        className="font-label text-xs tracking-widest uppercase inline-block mb-6 transition-colors"
+        className="font-label text-xs tracking-widest uppercase inline-flex items-center min-h-[44px] mb-6 transition-colors"
         style={{ color: 'var(--text-3)' }}
       >
         {t.backBtn}
