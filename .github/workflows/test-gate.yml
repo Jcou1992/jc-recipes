@@ -30,10 +30,13 @@ jobs:
 
       - name: Compute changed test files vs base branch
         id: diff
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          BASE="${{ github.event.pull_request.base.sha }}"
-          HEAD="${{ github.event.pull_request.head.sha }}"
-          CHANGED=$(git diff --name-only --diff-filter=AM "$BASE" "$HEAD" \
+          # SHAs come in via env (data, not code) to avoid any chance of
+          # expression-injection at YAML compile time.
+          CHANGED=$(git diff --name-only --diff-filter=AM "$BASE_SHA" "$HEAD_SHA" \
             | grep -E '\.(test|spec)\.(ts|tsx|js|jsx)$' || true)
           echo "changed<<EOF" >> "$GITHUB_OUTPUT"
           echo "$CHANGED" >> "$GITHUB_OUTPUT"
@@ -43,11 +46,12 @@ jobs:
         if: steps.diff.outputs.changed != ''
         env:
           GATE_COMMIT_MSG: ${{ github.event.pull_request.title }} ${{ github.event.pull_request.body }}
-          # Optional — enables Claude escalation layer in CI. Gate works without it.
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CHANGED_FILES: ${{ steps.diff.outputs.changed }}
         run: |
+          # Pass changed files via env to avoid shell-injection from PR-controlled
+          # filenames. Heuristic-only gating (no Claude escalation in CI).
           # shellcheck disable=SC2086
-          node scripts/test-gate.mjs ${{ steps.diff.outputs.changed }}
+          node scripts/test-gate.mjs $CHANGED_FILES
 
       - name: Upload gate report
         if: always()

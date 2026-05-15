@@ -1,9 +1,9 @@
 name: deploy-cloudflare
 
+# Manual-trigger only. The push trigger was removed so that no automated
+# push (bot, Claude session branch, etc.) can ship to production. To deploy,
+# go to Actions → deploy-cloudflare → Run workflow.
 on:
-  push:
-    branches:
-      - claude/recipe-management-app-AaZ7N
   workflow_dispatch:
 
 concurrency:
