@@ -20,8 +20,19 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  let supabase;
+  try {
+    supabase = await createClient();
+  } catch (e) {
+    return { error: `DBG createClient: ${(e as Error).message}; url=${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'MISSING').slice(0, 40)}; keyLen=${(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').length}` };
+  }
+  let signInResult;
+  try {
+    signInResult = await supabase.auth.signInWithPassword({ email, password });
+  } catch (e) {
+    return { error: `DBG signIn: ${(e as Error).message}; url=${(process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'MISSING').slice(0, 40)}` };
+  }
+  const { error } = signInResult;
 
   if (error) return { error: error.message };
 
