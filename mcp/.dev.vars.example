@@ -1,0 +1,6 @@
+# Copy to .dev.vars (gitignored) for local `wrangler dev`.
+# In production these are set via `wrangler secret put --name sekai-mcp`.
+SUPABASE_URL="https://lskukidigisepeauhdpm.supabase.co"
+SUPABASE_ANON_KEY="<the app's NEXT_PUBLIC_SUPABASE_ANON_KEY>"
+# 32-byte random hex, e.g. `openssl rand -hex 32`
+COOKIE_ENCRYPTION_KEY="<openssl rand -hex 32>"

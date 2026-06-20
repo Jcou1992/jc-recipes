@@ -1,0 +1,27 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sekai-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [{ "name": "MCP_OBJECT", "class_name": "SekaiMcp" }]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["SekaiMcp"] }
+  ],
+  // Create once: `cd mcp && npx wrangler kv namespace create OAUTH_KV` → paste the id below.
+  // Local `wrangler dev` simulates KV via Miniflare regardless of this id.
+  "kv_namespaces": [
+    { "binding": "OAUTH_KV", "id": "PLACEHOLDER_RUN_kv_namespace_create" }
+  ],
+  // Only runtime `@/` specifier that survives esbuild (validate-recipe.ts → sanitizeTags).
+  // Resolved relative to this config dir (mcp/), so ../lib = repo-root/lib.
+  "alias": {
+    "@/lib/bulk-recipes-tags": "../lib/bulk-recipes-tags.ts"
+  },
+  "vars": {
+    "APP_BASE_URL": "https://sekai.jcou.workers.dev"
+  },
+  "observability": { "enabled": true }
+}
