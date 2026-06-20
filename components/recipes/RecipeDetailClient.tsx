@@ -12,6 +12,7 @@ import { formatServings } from '@/lib/utils/format-servings';
 import { nameToSlug } from '@/lib/utils/normalise';
 import { MacrosCard } from '@/components/MacrosCard';
 import { MacrosMatchModal } from '@/components/MacrosMatchModal';
+import { FEATURES } from '@/lib/flags';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -131,13 +132,17 @@ export default function RecipeDetailClient({ recipe }: Props) {
 
   return (
     <div>
-      <MacrosCard recipe={recipe} onOpenMatchModal={() => setMatchOpen(true)} />
-      <MacrosMatchModal
-        recipe={recipe}
-        open={matchOpen}
-        onClose={() => setMatchOpen(false)}
-        onSaved={() => router.refresh()}
-      />
+      {FEATURES.macros && (
+        <>
+          <MacrosCard recipe={recipe} onOpenMatchModal={() => setMatchOpen(true)} />
+          <MacrosMatchModal
+            recipe={recipe}
+            open={matchOpen}
+            onClose={() => setMatchOpen(false)}
+            onSaved={() => router.refresh()}
+          />
+        </>
+      )}
 
       {/* Times micro-row */}
       {(recipe.prep_time != null || recipe.cook_time != null || totalTime > 0) && (
@@ -290,7 +295,7 @@ export default function RecipeDetailClient({ recipe }: Props) {
                 <ul className="space-y-2.5">
                   {displayedIngredients.map((ing, i) => {
                     const raw = recipe.ingredients[i];
-                    const unmatched = !!raw && !raw.fdc_id && !raw.macros_override;
+                    const unmatched = FEATURES.macros && !!raw && !raw.fdc_id && !raw.macros_override;
                     return (
                       <li key={i} className="flex gap-3 items-baseline flex-wrap" data-testid={`ingredient-${i}`}>
                         <span

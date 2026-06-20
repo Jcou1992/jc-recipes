@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import type { BulkActionResult } from '@/types/recipe';
 import { MAX_TAGS_PER_RECIPE, validateTagPayload } from '@/lib/bulk-recipes-tags';
 import { safeCompute } from '@/lib/macros/safe-compute';
+import { FEATURES } from '@/lib/flags';
 
 const BATCH_LIMIT = 100;
 const DELETE_CHUNK_SIZE = 100;
@@ -113,7 +114,10 @@ export async function bulkDuplicateRecipes(ids: string[]): Promise<BulkActionRes
   // Await macros compute so promises survive in CF Workers (microtasks not
   // registered here are cancelled when the response flushes). safeCompute
   // already swallows errors, so failures here do not block the user response.
-  await Promise.all((inserted ?? []).map(r => safeCompute(r.id as string)));
+  // Gated: skipped entirely while the macros feature is hidden (lib/flags.ts).
+  if (FEATURES.macros) {
+    await Promise.all((inserted ?? []).map(r => safeCompute(r.id as string)));
+  }
 
   const notFound = ids.filter(id => !foundIds.has(id));
   return {

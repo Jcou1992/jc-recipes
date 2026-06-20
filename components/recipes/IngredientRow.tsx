@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '@/components/ui/LanguageContext';
 import { searchFdcAction } from '@/app/actions/macros';
+import { FEATURES } from '@/lib/flags';
 
 export interface IngredientField {
   amount: string;
@@ -44,6 +45,7 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
     onChange({ ...value, [field]: v });
 
   useEffect(() => {
+    if (!FEATURES.macros) return;
     if (value.name.trim().length < 2) {
       setSuggestions([]);
       return;
@@ -126,7 +128,7 @@ export default function IngredientRow({ value, onChange, onRemove }: Props) {
             aria-activedescendant={activeIdx >= 0 ? `${listboxId}-${activeIdx}` : undefined}
             className="input-base w-full"
           />
-          {open && suggestions.length > 0 && (
+          {FEATURES.macros && open && suggestions.length > 0 && (
             <ul
               id={listboxId}
               role="listbox"

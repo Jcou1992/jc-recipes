@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { safeCompute } from '@/lib/macros/safe-compute';
 import { inferBasisForUnit } from '@/lib/macros/unit-basis';
+import { FEATURES } from '@/lib/flags';
 import { validateRecipePayload } from '@/lib/validate-recipe';
 import { sanitizeTags } from '@/lib/bulk-recipes-tags';
 import type { Ingredient, RecipePayload } from '@/types/recipe';
@@ -43,7 +44,7 @@ export async function createRecipe(payload: RecipePayload): Promise<ActionResult
 
   if (error) return { error: error.message };
 
-  await safeCompute(data.id);
+  if (FEATURES.macros) await safeCompute(data.id);
 
   redirect(`/recipes/${data.id}`);
 }
@@ -98,7 +99,7 @@ export async function updateRecipe(
   if (error) return { error: error.message };
   if (!count) return { error: STALE_RECIPE_ERROR };
 
-  await safeCompute(id);
+  if (FEATURES.macros) await safeCompute(id);
 
   redirect(`/recipes/${id}`);
 }

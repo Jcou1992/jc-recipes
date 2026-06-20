@@ -25,6 +25,13 @@ jest.mock('@/lib/macros/safe-compute', () => ({
   safeCompute: (id: string) => safeComputeMock(id),
 }));
 
+// Macros is hidden behind a build-time flag (lib/flags.ts) and defaults off.
+// Force it on here so the duplicate-recipe compute wiring stays under test —
+// the parked feature must remain verified for an eventual pivot.
+jest.mock('@/lib/flags', () => ({
+  FEATURES: { macros: true },
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { bulkDeleteRecipes, bulkDuplicateRecipes, bulkUpdateTags } = require('../bulk-recipes');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
