@@ -1,0 +1,36 @@
+name: supabase-keepalive
+
+# Free-tier Supabase projects auto-pause after 7 days of inactivity, which takes
+# the whole app down (auth + DB return Cloudflare error 1016). This pings the DB
+# every 3 days to keep it warm, and fails loudly if the backend is unreachable —
+# so a red run here is an early outage alarm.
+
+on:
+  schedule:
+    - cron: '0 6 */3 * *'   # 06:00 UTC every 3rd day — 2x margin under the 7-day pause
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST (keeps the project active)
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/recipes?select=id&limit=1")
+          echo "Supabase REST responded: HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase keep-alive failed — expected 200, got $code (project paused/down?)"
+            exit 1
+          fi
