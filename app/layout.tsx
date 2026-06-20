@@ -29,8 +29,20 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://sekai.jcou.workers.dev'),
   title: 'SEKAI — recipe tool',
   description: 'Personal recipe space — precise, proud, functional.',
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    shortcut: ['/favicon.ico'],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  appleWebApp: { capable: true, title: 'SEKAI', statusBarStyle: 'black-translucent' },
 };
 
 // viewport-fit=cover opts into edge-to-edge on notched devices; combined with
