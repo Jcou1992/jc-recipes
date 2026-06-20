@@ -13,7 +13,7 @@
   // Create once: `cd mcp && npx wrangler kv namespace create OAUTH_KV` → paste the id below.
   // Local `wrangler dev` simulates KV via Miniflare regardless of this id.
   "kv_namespaces": [
-    { "binding": "OAUTH_KV", "id": "PLACEHOLDER_RUN_kv_namespace_create" }
+    { "binding": "OAUTH_KV", "id": "9687aa08e3d6401b9200d7be8b61ffde" }
   ],
   // Only runtime `@/` specifier that survives esbuild (validate-recipe.ts → sanitizeTags).
   // Resolved relative to this config dir (mcp/), so ../lib = repo-root/lib.
