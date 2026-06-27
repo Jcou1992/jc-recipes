@@ -8,8 +8,11 @@ import { seal, open } from './crypto';
 // inline style only, form posts to self.
 const SECURITY_HEADERS: Record<string, string> = {
   'content-type': 'text/html; charset=utf-8',
+  // No form-action directive: it also governs the post-submit 302 redirect, and
+  // the OAuth callback legitimately targets the client's host (e.g. claude.ai).
+  // Open-redirect safety comes from the provider validating redirect_uri.
   'content-security-policy':
-    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
+    "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'",
   'referrer-policy': 'no-referrer',
   'x-content-type-options': 'nosniff',
 };
