@@ -1,5 +1,5 @@
-import type { RecipePayload } from '../../../types/recipe';
-import { sanitizeTags } from '../../../lib/bulk-recipes-tags';
+import type { RecipePayload } from '../../../src/types/recipe';
+import { sanitizeTags } from '../../../src/lib/bulk-recipes-tags';
 
 // Replicated from app/actions/recipes.ts (those helpers are local, not exported).
 // Keep in lock-step with that file if normalization rules change.

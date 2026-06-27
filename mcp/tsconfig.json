@@ -12,14 +12,14 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "paths": {
-      "@/*": ["../*"]
+      "@/*": ["../src/*"]
     }
   },
   "include": [
     "src/**/*.ts",
     "worker-configuration.d.ts",
-    "../types/recipe.ts",
-    "../lib/validate-recipe.ts",
-    "../lib/bulk-recipes-tags.ts"
+    "../src/types/recipe.ts",
+    "../src/lib/validate-recipe.ts",
+    "../src/lib/bulk-recipes-tags.ts"
   ]
 }

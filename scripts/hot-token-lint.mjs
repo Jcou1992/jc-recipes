@@ -46,12 +46,12 @@ const ROOT = process.cwd();
 // Files where `--brut-hot` may appear freely. The token-definition file
 // owns the system-wide application of the accent; it is not a route surface.
 const ALLOWLIST = new Set([
-  'styles/tokens-brutalist.css',
+  'src/styles/tokens-brutalist.css',
 ]);
 
 // Where route pages live. Glob-free walk; small tree.
 const ROUTE_ROOTS = [
-  'app',
+  'src/app',
 ];
 
 // File extensions we scan for `--brut-hot`. JSX/TSX inline styles +

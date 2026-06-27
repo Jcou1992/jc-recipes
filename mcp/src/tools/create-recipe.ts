@@ -1,4 +1,4 @@
-import type { RecipePayload } from '../../../types/recipe';
+import type { RecipePayload } from '../../../src/types/recipe';
 import type { SekaiMcp } from '../mcp-agent';
 import { createRecipeForUser } from '../core/recipe-service';
 import { createRecipeShape } from './schema';

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Recipe, RecipePayload } from '../../../types/recipe';
-import { validateRecipePayload } from '../../../lib/validate-recipe';
-import { sanitizeTags } from '../../../lib/bulk-recipes-tags';
+import type { Recipe, RecipePayload } from '../../../src/types/recipe';
+import { validateRecipePayload } from '../../../src/lib/validate-recipe';
+import { sanitizeTags } from '../../../src/lib/bulk-recipes-tags';
 import { normalizeServingSizeLabel, normalizeTags } from './normalize';
 
 /**

@@ -16,9 +16,9 @@
     { "binding": "OAUTH_KV", "id": "9687aa08e3d6401b9200d7be8b61ffde" }
   ],
   // Only runtime `@/` specifier that survives esbuild (validate-recipe.ts → sanitizeTags).
-  // Resolved relative to this config dir (mcp/), so ../lib = repo-root/lib.
+  // Resolved relative to this config dir (mcp/), so ../src/lib = repo-root/src/lib.
   "alias": {
-    "@/lib/bulk-recipes-tags": "../lib/bulk-recipes-tags.ts"
+    "@/lib/bulk-recipes-tags": "../src/lib/bulk-recipes-tags.ts"
   },
   "vars": {
     "APP_BASE_URL": "https://sekai.jcou.workers.dev"
