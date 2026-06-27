@@ -52,6 +52,7 @@ export interface Recipe {
   macros_computed_at: string | null;
   cooked_at?: string | null;
   cooked_count?: number;
+  is_shared?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -67,6 +68,7 @@ export type RecipePayload = Omit<
   | 'macros_computed_at'
   | 'cooked_at'
   | 'cooked_count'
+  | 'is_shared'
 >;
 
 export interface BulkActionResult {

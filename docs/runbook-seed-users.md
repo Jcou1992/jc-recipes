@@ -50,3 +50,50 @@ Transfer migration: irreversible without a prior backup. Before running, snapsho
 ```sql
 create table recipes_backup_<date> as select * from recipes;
 ```
+
+---
+
+# Admin accounts + shared team folder
+
+## What this adds
+- **Admin dashboard** at `/admin` (gated by `app_metadata.role === 'admin'`): create
+  accounts, reset passwords, grant/revoke admin, delete users + per-user/recipe stats.
+- **Invite email**: creating an account emails the new user their sign-in URL + temp
+  password (best-effort) and also shows the temp password in the dashboard to copy.
+- **Team folder** at `/team`: any user can flip a recipe to "Share with team" on its
+  detail page; shared recipes are read-only for non-owners and labelled "shared by …".
+
+## Apply migrations
+```bash
+supabase db push   # applies recipes ON DELETE CASCADE + is_shared + profiles
+```
+(or paste `20260626000000_*.sql` and `20260626000001_*.sql` into the SQL Editor in order.)
+
+## Bootstrap the first admin
+`scripts/seed-users.mjs` now stamps `jc@sakai.app` with `app_metadata.role='admin'`
+(idempotent — it promotes an existing jc@ too) and backfills the `profiles` directory:
+```bash
+node scripts/seed-users.mjs
+```
+To promote any other account by hand:
+```sql
+-- run as service role / SQL editor is fine for app_metadata? No — use the admin API.
+```
+Prefer the dashboard "Make admin" button, or re-run the seed after adding the email to
+the admin list. (app_metadata is not editable from the SQL editor; it lives in auth.)
+
+## Email configuration (optional — account creation works without it)
+The invite email uses the Cloudflare Email Sending binding (`EMAIL` in `wrangler.jsonc`).
+Until configured, account creation still works — the dashboard shows the temp password to
+share manually. To enable real sending:
+1. Onboard the sending domain once: `wrangler email sending enable <yourdomain>`
+2. Set env / Worker secrets:
+   ```env
+   EMAIL_FROM="SEKAI <welcome@yourdomain>"
+   APP_URL=https://<your-app-url>
+   ```
+   (`wrangler secret put EMAIL_FROM` / `APP_URL` for production.)
+
+Security note: the invite emails a **plaintext temporary password**. Acceptable for a small
+invite-only circle that changes it immediately (Settings → Password). To harden, swap
+`src/lib/email.ts` to send a one-time set-password link instead.

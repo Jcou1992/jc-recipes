@@ -8,6 +8,10 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Transactional email (admin account invites). Requires the sending domain to
+  // be onboarded once: `wrangler email sending enable <domain>`. See
+  // docs/runbook-seed-users.md.
+  "send_email": [{ "name": "EMAIL" }],
   "observability": {
     "enabled": true
   }

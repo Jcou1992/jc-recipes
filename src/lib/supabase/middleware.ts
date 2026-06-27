@@ -37,7 +37,13 @@ export async function updateSession(request: NextRequest) {
     c => c.name.includes('auth-token') && c.value
   );
 
-  const isProtectedPath = pathname.startsWith('/recipes');
+  // Authentication-gated paths. Admin *authorization* (app_metadata.role) is
+  // enforced in the /admin layout + actions — middleware only does the cheap
+  // cookie-presence auth gate here.
+  const isProtectedPath =
+    pathname.startsWith('/recipes') ||
+    pathname.startsWith('/admin') ||
+    pathname.startsWith('/team');
   const isLoginPath = pathname === '/login';
 
   if ((isProtectedPath && hasAuthCookie) || (isLoginPath && hasAuthCookie)) {

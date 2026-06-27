@@ -10,7 +10,7 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import LanguageToggle from '@/components/ui/LanguageToggle';
 import FontSizeToggle from '@/components/ui/FontSizeToggle';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
-import { logout } from '@/app/actions/auth';
+import { logout, changePassword } from '@/app/actions/auth';
 
 interface Props {
   email: string;
@@ -26,6 +26,24 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
   const [saving, setSaving] = useState(false);
   const [confirmReplayOpen, setConfirmReplayOpen] = useState(false);
   const [replayPending, setReplayPending] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [changingPw, setChangingPw] = useState(false);
+
+  async function saveNewPassword() {
+    if (newPassword.length < 8) {
+      showToast(t.settingsPasswordFailed, 'error');
+      return;
+    }
+    setChangingPw(true);
+    const result = await changePassword(newPassword);
+    setChangingPw(false);
+    if (!result.ok) {
+      showToast(result.error ?? t.settingsPasswordFailed, 'error');
+      return;
+    }
+    setNewPassword('');
+    showToast(t.settingsPasswordChanged, 'success');
+  }
 
   async function saveSpaceName() {
     const trimmed = spaceName.trim();
@@ -149,6 +167,40 @@ export default function SettingsClient({ email, initialSpaceName, spaceNameFallb
             disabled={replayPending}
           >
             {t.settingsReplayOnboardingBtn}
+          </button>
+        </div>
+      </section>
+
+      {/* Password */}
+      <section>
+        <h2 className="section-label mb-4">{t.settingsPasswordSection}</h2>
+        <label
+          className="font-label block text-xs tracking-widest uppercase mb-1.5"
+          style={{ color: 'var(--text-3)' }}
+          htmlFor="new-password-input"
+        >
+          {t.settingsNewPasswordLabel}
+        </label>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            id="new-password-input"
+            type="password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="new-password"
+            className="input-base flex-1 w-full"
+            aria-label={t.settingsNewPasswordLabel}
+            data-testid="settings-new-password-input"
+          />
+          <button
+            type="button"
+            onClick={saveNewPassword}
+            disabled={changingPw || newPassword.length < 8}
+            className="btn-primary self-start sm:self-auto"
+            data-testid="settings-change-password-btn"
+          >
+            {changingPw ? t.savingBtn : t.settingsChangePasswordBtn}
           </button>
         </div>
       </section>

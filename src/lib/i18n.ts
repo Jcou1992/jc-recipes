@@ -286,6 +286,25 @@ export interface Translations {
   onboardingUnitsMetric: string;
   onboardingUnitsImperial: string;
   onboardingUnitsHelper: string;
+
+  // Admin nav + team sharing + change password
+  navAdmin: string;
+  navTeam: string;
+  teamPageTitle: string;
+  teamEmptyTitle: string;
+  teamEmptyBody: string;
+  sharedBy: (name: string) => string;
+  shareWithTeamBtn: string;
+  unshareFromTeamBtn: string;
+  sharedBadgeLabel: string;
+  recipeSharedToast: string;
+  recipeUnsharedToast: string;
+  shareFailedToast: string;
+  settingsPasswordSection: string;
+  settingsNewPasswordLabel: string;
+  settingsChangePasswordBtn: string;
+  settingsPasswordChanged: string;
+  settingsPasswordFailed: string;
 }
 
 export const en: Translations = {
@@ -555,6 +574,24 @@ export const en: Translations = {
   onboardingUnitsMetric: 'Metric',
   onboardingUnitsImperial: 'Imperial',
   onboardingUnitsHelper: 'Applies to ingredient amounts.',
+
+  navAdmin: 'Admin',
+  navTeam: 'Team recipes',
+  teamPageTitle: 'Team recipes',
+  teamEmptyTitle: 'No shared recipes yet',
+  teamEmptyBody: 'Recipes shared with the team appear here. Open one of your recipes and tap “Share with team”.',
+  sharedBy: (name) => `shared by ${name}`,
+  shareWithTeamBtn: 'Share with team',
+  unshareFromTeamBtn: 'Shared ✓',
+  sharedBadgeLabel: 'Shared',
+  recipeSharedToast: 'Shared with the team',
+  recipeUnsharedToast: 'Removed from the team',
+  shareFailedToast: 'Could not update sharing',
+  settingsPasswordSection: 'Password',
+  settingsNewPasswordLabel: 'New password',
+  settingsChangePasswordBtn: 'Change password',
+  settingsPasswordChanged: 'Password changed',
+  settingsPasswordFailed: 'Could not change password',
 };
 
 export const es: Translations = {
@@ -824,6 +861,24 @@ export const es: Translations = {
   onboardingUnitsMetric: 'Métrico',
   onboardingUnitsImperial: 'Imperial',
   onboardingUnitsHelper: 'Aplica a cantidades de ingredientes.',
+
+  navAdmin: 'Admin',
+  navTeam: 'Recetas del equipo',
+  teamPageTitle: 'Recetas del equipo',
+  teamEmptyTitle: 'Aún no hay recetas compartidas',
+  teamEmptyBody: 'Las recetas compartidas con el equipo aparecen aquí. Abre una de tus recetas y toca «Compartir con el equipo».',
+  sharedBy: (name) => `compartida por ${name}`,
+  shareWithTeamBtn: 'Compartir con el equipo',
+  unshareFromTeamBtn: 'Compartida ✓',
+  sharedBadgeLabel: 'Compartida',
+  recipeSharedToast: 'Compartida con el equipo',
+  recipeUnsharedToast: 'Quitada del equipo',
+  shareFailedToast: 'No se pudo actualizar el compartido',
+  settingsPasswordSection: 'Contraseña',
+  settingsNewPasswordLabel: 'Nueva contraseña',
+  settingsChangePasswordBtn: 'Cambiar contraseña',
+  settingsPasswordChanged: 'Contraseña cambiada',
+  settingsPasswordFailed: 'No se pudo cambiar la contraseña',
 };
 
 export const translations: Record<Language, Translations> = { en, es };

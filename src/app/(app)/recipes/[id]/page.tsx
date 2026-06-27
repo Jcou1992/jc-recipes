@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n-server';
 import DeleteRecipeButton from '@/components/recipes/DeleteRecipeButton';
 import RecipeDetailClient from '@/components/recipes/RecipeDetailClient';
+import ShareToggle from '@/components/recipes/ShareToggle';
 import ScrollParallaxCover from '@/components/motion/ScrollParallaxCover';
 import FirstSaveCelebration from '@/components/motion/FirstSaveCelebration';
 import { RefCode } from '@/components/ui/brut/RefCode';
@@ -35,6 +36,22 @@ export default async function RecipeDetailPage({ params }: PageProps) {
     .single<Recipe>();
 
   if (error || !recipe) notFound();
+
+  // A recipe reaches here either because the viewer owns it or because it's
+  // shared (RLS "read shared recipes"). Owner-only actions (edit/delete/share)
+  // are gated on ownership; non-owners get a read-only "shared by" chip.
+  const { data: { user } } = await supabase.auth.getUser();
+  const isOwner = !!user && recipe.user_id === user.id;
+
+  let sharedByName: string | null = null;
+  if (!isOwner) {
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('display_name, email')
+      .eq('id', recipe.user_id)
+      .maybeSingle();
+    sharedByName = prof?.display_name || prof?.email?.split('@')[0] || null;
+  }
 
   const t = await getServerT();
   // Cycle 2 P0 #2: under brut, render the machine-grammar ref-code as a
@@ -75,11 +92,30 @@ export default async function RecipeDetailPage({ params }: PageProps) {
             )}
             <FirstSaveCelebration recipeId={id} />
           </div>
-          <div className="flex gap-2 flex-shrink-0 mt-1">
-            <Link href={`/recipes/${id}/edit`} className="btn-ghost">
-              {t.editBtn}
-            </Link>
-            <DeleteRecipeButton id={id} name={recipe.name} />
+          <div className="flex gap-2 flex-shrink-0 mt-1 items-center">
+            {isOwner ? (
+              <>
+                <ShareToggle recipeId={id} initialShared={!!recipe.is_shared} />
+                <Link href={`/recipes/${id}/edit`} className="btn-ghost">
+                  {t.editBtn}
+                </Link>
+                <DeleteRecipeButton id={id} name={recipe.name} />
+              </>
+            ) : (
+              sharedByName && (
+                <span
+                  className="font-label text-xs tracking-wider uppercase px-2.5 py-1 rounded-full"
+                  style={{
+                    background: 'color-mix(in oklch, var(--color-gold) 12%, transparent)',
+                    color: 'var(--color-gold)',
+                    border: '1px solid color-mix(in oklch, var(--color-gold) 20%, transparent)',
+                  }}
+                  data-testid="shared-by-chip"
+                >
+                  {t.sharedBy(sharedByName)}
+                </span>
+              )
+            )}
           </div>
         </div>
 

@@ -55,7 +55,7 @@ const SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { autoRefreshToken: false, persistSession: false } });
 
 const users = [
-  { email: process.env.JC_USER_EMAIL   || 'jc@sakai.app',       password: process.env.JC_USER_PASSWORD,   role: 'JC (primary)' },
+  { email: process.env.JC_USER_EMAIL   || 'jc@sakai.app',       password: process.env.JC_USER_PASSWORD,   role: 'JC (primary)', admin: true },
   { email: process.env.DEMO_USER_EMAIL || 'demo@sakai.app',     password: process.env.DEMO_USER_PASSWORD, role: 'Demo (showcase)' },
   { email: 'test@jc-recipes.local',                             password: process.env.TEST_USER_PASSWORD, role: 'QA (e2e tests)' },
 ];
@@ -157,18 +157,46 @@ const CURATED_RECIPES = [
   },
 ];
 
-async function upsertUser({ email, password, role }) {
+async function upsertUser({ email, password, role, admin: isAdmin }) {
+  const appMeta = isAdmin ? { role: 'admin' } : undefined;
   // Check if exists
   const { data: list } = await admin.auth.admin.listUsers();
   const existing = list?.users?.find(u => u.email === email);
   if (existing) {
-    console.log(`  ✓ User exists: ${email} (${role})`);
+    // Ensure the admin claim is set even on an already-created user.
+    if (isAdmin && existing.app_metadata?.role !== 'admin') {
+      await admin.auth.admin.updateUserById(existing.id, { app_metadata: appMeta });
+      console.log(`  ↑ Promoted to admin: ${email}`);
+    } else {
+      console.log(`  ✓ User exists: ${email} (${role})`);
+    }
     return existing;
   }
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    ...(appMeta ? { app_metadata: appMeta } : {}),
+  });
   if (error) throw new Error(`Failed to create ${email}: ${error.message}`);
-  console.log(`  + Created user: ${email} (${role})`);
+  console.log(`  + Created user: ${email} (${role})${isAdmin ? ' [admin]' : ''}`);
   return data.user;
+}
+
+// Populate the public profiles directory so the shared "team" view can show
+// "shared by {name}". Best-effort: tolerate the table not existing yet.
+async function backfillProfiles(created) {
+  try {
+    const rows = created
+      .filter(u => u?.id)
+      .map(u => ({ id: u.id, email: u.email ?? null, display_name: (u.email ?? '').split('@')[0] || null }));
+    if (rows.length === 0) return;
+    const { error } = await admin.from('profiles').upsert(rows, { onConflict: 'id' });
+    if (error) { console.log(`  · Skipped profiles backfill: ${error.message}`); return; }
+    console.log(`  + Backfilled ${rows.length} profiles`);
+  } catch (e) {
+    console.log(`  · Skipped profiles backfill: ${e.message}`);
+  }
 }
 
 async function resetRecipesForUser(userId, label) {
@@ -190,6 +218,7 @@ async function main() {
   for (const u of users) {
     created.push(await upsertUser(u));
   }
+  await backfillProfiles(created);
   const demoEmail = process.env.DEMO_USER_EMAIL || 'demo@sakai.app';
   const demo = created.find(u => u.email === demoEmail);
   const testUser = created.find(u => u.email === 'test@jc-recipes.local');

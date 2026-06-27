@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { safeCompute } from '@/lib/macros/safe-compute';
 import { inferBasisForUnit } from '@/lib/macros/unit-basis';
 import { FEATURES } from '@/lib/flags';
@@ -126,6 +127,31 @@ export async function recordCooked(recipeId: string): Promise<void> {
   if (!user) redirect('/login');
 
   await supabase.rpc('record_cooked', { recipe_id: recipeId });
+}
+
+/**
+ * Toggle a recipe into / out of the shared "team folder". Owner-scoped via
+ * `.eq('user_id', user.id)` — a non-owner viewing a shared recipe can never
+ * flip the flag. Read access for the team is granted by the "read shared
+ * recipes" RLS policy; writes remain owner-only.
+ */
+export async function setRecipeShared(id: string, shared: boolean): Promise<ActionResult> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
+
+  const { error, count } = await supabase
+    .from('recipes')
+    .update({ is_shared: shared }, { count: 'exact' })
+    .eq('id', id)
+    .eq('user_id', user.id);
+
+  if (error) return { error: error.message };
+  if (!count) return { error: NOT_FOUND_ERROR };
+
+  revalidatePath(`/recipes/${id}`);
+  revalidatePath('/team');
+  return null;
 }
 
 export async function deleteRecipe(id: string): Promise<ActionResult> {

@@ -7,6 +7,7 @@ import AppProviders from '@/components/ui/AppProviders';
 import GlobalShortcuts from '@/components/ui/GlobalShortcuts';
 import EmailSync from '@/components/ui/EmailSync';
 import AvatarMenu from '@/components/ui/AvatarMenu';
+import { isAdmin } from '@/lib/admin-guard';
 import WordmarkStrokeIn from '@/components/motion/WordmarkStrokeIn';
 import type { ThemeValue, FontSizeValue, LanguageValue } from '@/lib/preferences-cache';
 
@@ -64,7 +65,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               <WordmarkStrokeIn />
             </Link>
-            <AvatarMenu initial={initial} email={email} />
+            <AvatarMenu initial={initial} email={email} isAdmin={isAdmin(user)} />
           </div>
         </nav>
         <GlobalShortcuts />

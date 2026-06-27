@@ -12,9 +12,10 @@ import { useT } from './LanguageContext';
 interface Props {
   initial: string; // single character for the circle
   email: string;   // shown in dropdown header
+  isAdmin?: boolean; // gates the Admin link
 }
 
-export default function AvatarMenu({ initial, email }: Props) {
+export default function AvatarMenu({ initial, email, isAdmin = false }: Props) {
   const t = useT();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -91,6 +92,26 @@ export default function AvatarMenu({ initial, email }: Props) {
           >
             {t.avatarMenuSettings}
           </Link>
+          <Link
+            href="/team"
+            className="block px-4 py-3 font-label text-sm tracking-wider uppercase transition-colors hover:brightness-110"
+            style={{ color: 'var(--text-1)', borderTop: '1px solid var(--border)' }}
+            onClick={() => setOpen(false)}
+            data-testid="avatar-menu-team-link"
+          >
+            {t.navTeam}
+          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="block px-4 py-3 font-label text-sm tracking-wider uppercase transition-colors hover:brightness-110"
+              style={{ color: 'var(--color-terracotta)', borderTop: '1px solid var(--border)' }}
+              onClick={() => setOpen(false)}
+              data-testid="avatar-menu-admin-link"
+            >
+              {t.navAdmin}
+            </Link>
+          )}
           <Link
             href="/recipes?tour=1"
             className="block px-4 py-3 font-label text-sm tracking-wider uppercase transition-colors hover:brightness-110"

@@ -1,4 +1,4 @@
-Build ✓ | Jest 258/258 ✓ | Playwright 28/28 (desktop 23, mobile 5) ✓ | No blocking issues
+Build ✓ | Jest 270/270 ✓ | Playwright 28/28 (desktop 23, mobile 5) ✓ + admin/team smoke (desktop) ✓ | No blocking issues
 
 ## Technical Notes
 - Layout: all app code lives under `src/` (app, components, lib, types, styles, middleware.ts); `@/*` → `src/*`. `mcp/` is a separate Worker package, excluded from the root tsconfig. Full map in `PROJECT_STRUCTURE.md`; design contest archived in `docs/design-history/`
@@ -11,6 +11,7 @@ Build ✓ | Jest 258/258 ✓ | Playwright 28/28 (desktop 23, mobile 5) ✓ | No 
   - `test@jc-recipes.local` — QA user for e2e tests (password in .env.local TEST_USER_PASSWORD)
 - QA optimization gate: .githooks/pre-commit + scripts/test-gate.mjs run on every commit. Rules and override procedure in CONTRIBUTING_TESTS.md. Baseline in .test-gate/baseline.json (regenerate: `npm run test:gate:bootstrap`)
 - Phase 2 features: search+tag filter+sort, serving scaler, unit conversion toggle, cooking mode (/cook), toast system, unsaved-changes warning, copy ingredients, unit autocomplete, print view
+- Phase 3 (admin + team): admin dashboard at `/admin` gated by JWT `app_metadata.role==='admin'` (`src/lib/admin-guard.ts`); admin-created accounts via service-role client (`src/lib/supabase/admin.ts`, server-only) + best-effort Cloudflare invite email (`src/lib/email.ts`, temp password also returned to UI); change-own-password in Settings; shared "team folder" at `/team` via `recipes.is_shared` + `profiles` directory. Needs `supabase db push` (migrations `20260626000000/01`) + `seed-users.mjs` to promote jc@ before the admin link appears
 
 ## graphify
 

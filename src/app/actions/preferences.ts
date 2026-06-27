@@ -158,6 +158,24 @@ export async function updateUserPreferences(
 
   if (error) return { ok: false, error: error.message };
 
+  // Mirror the space name into the public profiles directory so the shared
+  // "team" view can label recipes "shared by {name}". Best-effort: a failure
+  // here (e.g. profiles migration not yet applied) must not block saving prefs.
+  if ('space_name' in patch) {
+    try {
+      await supabase.from('profiles').upsert(
+        {
+          id: user.id,
+          email: user.email ?? null,
+          display_name: patch.space_name?.trim() || null,
+        },
+        { onConflict: 'id' },
+      );
+    } catch {
+      // ignore — profile sync is non-critical
+    }
+  }
+
   // Mirror to cookies for SSR on next request.
   const cookieStore = await cookies();
   if ('preferred_theme' in patch) {

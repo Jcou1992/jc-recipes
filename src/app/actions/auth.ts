@@ -44,6 +44,26 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
   redirect(isDemo ? '/recipes?tour=1' : '/recipes');
 }
 
+/**
+ * Change the signed-in user's own password. Uses the anon SSR client, so it
+ * acts on the current session only — no service role, no admin power. Surfaced
+ * in Settings; new users invited by an admin use this to replace their temp
+ * password.
+ */
+export async function changePassword(
+  newPassword: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: 'Not authenticated' };
+  if (newPassword.length < 8) {
+    return { ok: false, error: 'Password must be at least 8 characters.' };
+  }
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function logout() {
   const supabase = await createClient();
   // scope: 'local' invalidates only this device's session. A global sign-out
