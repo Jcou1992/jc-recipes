@@ -7,6 +7,5 @@ Node tooling (`.mjs`). **Do not relocate** — these paths are hard-wired into `
 - `hot-token-lint.mjs` — brut design governance (`--hot` token density). `ALLOWLIST` + `ROUTE_ROOTS` reference `styles/` and `app/`.
 - `seed-users.mjs` — seeds the three Supabase users (see `docs/runbook-seed-users.md`).
 - `gen-icons.mjs` — generates PWA icons into `public/`.
-- `contest-screenshots-*.mjs` — captured design-contest screenshots (historical; output was trimmed from the repo).
 
 Run via npm scripts: `test:gate`, `test:gate:bootstrap`, `lint:hot`, `seed:users`.
