@@ -43,8 +43,10 @@ test('create via form populates detail page with every persisted field @smoke', 
 
 test('create form blocks submission when name is empty @regression', async ({ page }) => {
   await gotoNewRecipe(page);
-  await page.getByRole('button', { name: 'Create recipe' }).click();
-  // Browser-native required validation prevents navigation.
+  // Submit is gated on isValid (name + ingredient + step), so an empty form
+  // keeps the Create button disabled — it can't be clicked or submitted, and
+  // we stay on /recipes/new.
+  await expect(page.getByRole('button', { name: 'Create recipe' })).toBeDisabled();
   await expect(page).toHaveURL(/\/recipes\/new$/);
 });
 
