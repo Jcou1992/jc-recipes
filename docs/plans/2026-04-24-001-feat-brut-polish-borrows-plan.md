@@ -3,14 +3,14 @@ title: "feat: brut polish + targeted borrows from losing teams (E heat-decay, A 
 type: feat
 status: active
 date: 2026-04-24
-origin: contest/reviews/impeccable.md, contest/reviews/ui-ux-pro-max.md
+origin: docs/design-history/contest/reviews/impeccable.md, docs/design-history/contest/reviews/ui-ux-pro-max.md
 ---
 
 # feat: brut polish + targeted borrows from losing teams
 
 ## Overview
 
-The Brutalist-Raw-Luxe winner shipped behind `data-design="brut"` (10 commits, 8 checkpoint tags, all classic-mode behaviour preserved). Two independent reviews — `contest/reviews/impeccable.md` and `contest/reviews/ui-ux-pro-max.md` — converge on (a) three execution bugs visible in the after-screenshots, (b) two governance gaps that will rot the design without enforcement, and (c) two cross-team borrows that materially raise the design. This plan packages those into one reviewable, dependency-ordered work batch.
+The Brutalist-Raw-Luxe winner shipped behind `data-design="brut"` (10 commits, 8 checkpoint tags, all classic-mode behaviour preserved). Two independent reviews — `docs/design-history/contest/reviews/impeccable.md` and `docs/design-history/contest/reviews/ui-ux-pro-max.md` — converge on (a) three execution bugs visible in the after-screenshots, (b) two governance gaps that will rot the design without enforcement, and (c) two cross-team borrows that materially raise the design. This plan packages those into one reviewable, dependency-ordered work batch.
 
 Nothing here invents new product behaviour; everything traces to a specific finding in one or both reviews. The plan is implementation-ready but the user has not yet approved execution.
 
@@ -24,9 +24,9 @@ This plan integrates patterns from three of the four losing teams. Every borrow 
 
 | Borrow | Source team / lane | Source artifact | Recommended by | Lands in this plan |
 |---|---|---|---|---|
-| **`recipe.cooked_at` + `--card-heat` 72 h decay → 7 d dormant** | **Team E · Ambient-Atmospheric** | `contest/teams/team-e-ambient/design-spec.md` (atmosphere layer + cooked-at decay); `contest/teams/team-e-ambient/key-snippets/RecipeCard.ambient.tsx` | Judge scorecard §Recommendations · impeccable §"If you had to borrow ONE more moment" · ui-ux §"Borrow recommendation" — three-way unanimous | **R6**, **Decision E**, **Decision F**, **Unit 8** (schema + action), **Unit 9** (CSS + cook completion wiring) |
+| **`recipe.cooked_at` + `--card-heat` 72 h decay → 7 d dormant** | **Team E · Ambient-Atmospheric** | `docs/design-history/contest/teams/team-e-ambient/design-spec.md` (atmosphere layer + cooked-at decay); `docs/design-history/contest/teams/team-e-ambient/key-snippets/RecipeCard.ambient.tsx` | Judge scorecard §Recommendations · impeccable §"If you had to borrow ONE more moment" · ui-ux §"Borrow recommendation" — three-way unanimous | **R6**, **Decision E**, **Decision F**, **Unit 8** (schema + action), **Unit 9** (CSS + cook completion wiring) |
 | **`DORMANT {Xd}` row after 7 days of inactivity** | **Team E · Ambient-Atmospheric (extension)** | impeccable §"Cross-cutting" — explicit additive proposal on top of Team E's primitive: "a recipe that is not cooked is not a badge-worthy streak-broken loss, just information, stated without emotion. Extremely Team D." | impeccable review only | **R6**, **Decision F**, **Unit 9** (third state in the heat-decay helper) |
-| **Wayfinder kicker hint row for passive shortcut discovery** | **Team A · Editorial-Magazine** | `contest/teams/team-a-editorial/design-spec.md` §"kicker / colophon tip" pattern; spec rationale "passive discovery without modal/popover/tooltip" | ui-ux §"Borrow recommendation (one UX pattern beyond the judge's list)" — distinct from judge's `?`-dialog suggestion | **R7**, **Decision B**, **Unit 7** |
+| **Wayfinder kicker hint row for passive shortcut discovery** | **Team A · Editorial-Magazine** | `docs/design-history/contest/teams/team-a-editorial/design-spec.md` §"kicker / colophon tip" pattern; spec rationale "passive discovery without modal/popover/tooltip" | ui-ux §"Borrow recommendation (one UX pattern beyond the judge's list)" — distinct from judge's `?`-dialog suggestion | **R7**, **Decision B**, **Unit 7** |
 | **AA-normal contrast bump for `--hot` (`oklch(63.2%) → oklch(66%)`)** | **Team A · Editorial-Magazine (precedent)** | Team A stability report flagged AA-normal as the bar for any small-text accent use; impeccable extends the same bar to brut `--hot` | impeccable §"Failures / risks" — exact value proposed | **R4**, **Decision A**, **Unit 4** |
 | **Pre-commit lint enforcing one `--hot` per route** | impeccable original recommendation, no losing team | impeccable §"One concrete next action" | impeccable only | **R5**, **Unit 5** |
 
@@ -128,7 +128,7 @@ None gathered. The codebase patterns for tokens, server actions, migrations, sco
 - **Wayfinder pathname-aware suppression: `headers()` server-read vs `usePathname()` client-wrapper.** Both are valid; pick whichever yields the smaller diff during implementation. Mention in commit body.
 - **Exact threshold for `cooked_at` "fresh" vs "decaying" vs "dormant" boundaries.** Spec'd as 72 h fade + 7 d dormant in this plan; if a real cook reveals 48 h reads better, change the constant in one helper.
 - **Whether the kicker hint auto-collapses after three uses or three sessions.** Implement uses-counter first (simpler to localStorage-track per `?` keypress / `/` keypress); revisit if it feels wrong on first cook.
-- **Whether the `--hot` lint runs on `**/*.tsx` + `**/*.css` or also on `*.md` files (mockups in `contest/`).** Default to `app/`, `components/`, `styles/` only — exclude `contest/` (frozen artifact).
+- **Whether the `--hot` lint runs on `**/*.tsx` + `**/*.css` or also on `*.md` files (mockups in `docs/design-history/contest/`).** Default to `app/`, `components/`, `styles/` only — exclude `docs/design-history/contest/` (frozen artifact).
 
 ## High-Level Technical Design
 
@@ -181,7 +181,7 @@ Diagram framing: the cook-mode strategy and the heat-decay math are the only non
 **Approach:**
 - Add `overflow-wrap: anywhere; word-break: normal; hyphens: manual;` to the brut-scoped `.recipe-title` rule.
 - Wrap the existing `font-size: var(--t-40)` in `clamp(var(--t-20), 5vw, var(--t-40))` so very long titles step down on narrow viewports.
-- Verify against `contest/winner/after-screenshots/dark/mobile/recipe-detail.png` (the BulkDel slug case) — if a screenshot pass shows the title fits in ≤ 4 lines on 390 px, done.
+- Verify against `docs/design-history/contest/winner/after-screenshots/dark/mobile/recipe-detail.png` (the BulkDel slug case) — if a screenshot pass shows the title fits in ≤ 4 lines on 390 px, done.
 
 **Patterns to follow:**
 - All other brut overrides in `styles/tokens-brutalist.css` (scoped under `:root[data-design="brut"]`).
@@ -544,16 +544,16 @@ Diagram framing: the cook-mode strategy and the heat-decay math are the only non
 - Update `CLAUDE.md` "Phase 2 features" line to add: "+ recipe heat memory (`cooked_at` + 72 h decay)" once U8+U9 land.
 - Add a `[hot-lint]` section to `CONTRIBUTING_TESTS.md` mirroring the test-gate override format.
 - Migration in U8 must be applied via `supabase db push` against staging then prod — coordinate with the operator before merging U9 to main; the consumer code in U9 is null-safe and can ship before the migration applies, but `cooked_count` increments will silently fail until the column exists.
-- Once U9 is live, refresh the after-screenshots: re-run `scripts/contest-screenshots-brut.mjs` and replace `contest/winner/after-screenshots/` (or save under `contest/winner/after-screenshots-v2/`).
+- Once U9 is live, refresh the after-screenshots: re-run `scripts/contest-screenshots-brut.mjs` and replace `docs/design-history/contest/winner/after-screenshots/` (or save under `docs/design-history/contest/winner/after-screenshots-v2/`).
 
 ## Sources & References
 
 - **Origin reviews:**
-  - [contest/reviews/impeccable.md](contest/reviews/impeccable.md)
-  - [contest/reviews/ui-ux-pro-max.md](contest/reviews/ui-ux-pro-max.md)
-- **Judge scorecard (background):** [contest/judge/scorecard.md](contest/judge/scorecard.md) — specifically the §Recommendations + §Risks-to-flag sections.
-- **Winner's design + plan:** [contest/winner/design-spec.md](contest/winner/design-spec.md), [contest/winner/implementation-plan.md](contest/winner/implementation-plan.md)
-- **Project briefing:** [contest/_analysis/DOSSIER.md](contest/_analysis/DOSSIER.md)
-- **Visual baseline:** `contest/winner/after-screenshots/` (current brut state with the three visible defects)
+  - [docs/design-history/contest/reviews/impeccable.md](docs/design-history/contest/reviews/impeccable.md)
+  - [docs/design-history/contest/reviews/ui-ux-pro-max.md](docs/design-history/contest/reviews/ui-ux-pro-max.md)
+- **Judge scorecard (background):** [docs/design-history/contest/judge/scorecard.md](docs/design-history/contest/judge/scorecard.md) — specifically the §Recommendations + §Risks-to-flag sections.
+- **Winner's design + plan:** [docs/design-history/contest/winner/design-spec.md](docs/design-history/contest/winner/design-spec.md), [docs/design-history/contest/winner/implementation-plan.md](docs/design-history/contest/winner/implementation-plan.md)
+- **Project briefing:** [docs/design-history/contest/_analysis/DOSSIER.md](docs/design-history/contest/_analysis/DOSSIER.md)
+- **Visual baseline:** `docs/design-history/contest/winner/after-screenshots/` (current brut state with the three visible defects)
 - **Implementation conventions:** [CLAUDE.md](CLAUDE.md), [CONTRIBUTING_TESTS.md](CONTRIBUTING_TESTS.md)
 - **Rollback safety net:** all 8 `checkpoint/*` tags remain valid; this plan adds new commits, never amends prior ones.
