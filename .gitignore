@@ -30,3 +30,8 @@ supabase/.branches/
 .wrangler/
 cloudflare-env.d.ts
 
+# os / editor / local tooling junk
+.DS_Store
+**/.DS_Store
+.context/
+
