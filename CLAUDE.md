@@ -1,6 +1,7 @@
 Build ✓ | Jest 258/258 ✓ | Playwright 28/28 (desktop 23, mobile 5) ✓ | No blocking issues
 
 ## Technical Notes
+- Layout: all app code lives under `src/` (app, components, lib, types, styles, middleware.ts); `@/*` → `src/*`. `mcp/` is a separate Worker package, excluded from the root tsconfig. Full map in `PROJECT_STRUCTURE.md`; design contest archived in `docs/design-history/`
 - Middleware uses cookie-presence check (no API calls) for routing; server actions use getSession() (JWT local validation); RLS enforces data security
 - playwright.config.ts: timeout=60s, fullyParallel=true, workers=50% locally (2 on CI). Setup project writes storageState to tests/e2e/.auth/user.json; all non-auth projects reuse it. Desktop Chrome runs @regression/@smoke/untagged; Mobile Safari runs @mobile|@cross-browser only; Mobile Chrome runs @cross-browser only. WebKit/Mobile Safari is slower; startTransition defers URL updates → use networkidle + element-level timeouts, not waitForURL, for search/filter tests
 - E2E seeding: tests/e2e/helpers.ts exports seedRecipe() (Supabase JS API, ~200ms). Never fill /recipes/new by hand unless the test itself covers the form — gate enforces this
