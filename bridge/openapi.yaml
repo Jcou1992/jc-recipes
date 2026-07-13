@@ -11,7 +11,7 @@ paths:
       operationId: captureRecipes
       summary: Save one or more structured recipes to SEKAI and Google Drive
       description: Performs idempotent dual-write orchestration for a batch of recipes.
-      x-openai-isConsequential: true
+      x-openai-isConsequential: false
       security:
         - bearerAuth: []
       requestBody:
