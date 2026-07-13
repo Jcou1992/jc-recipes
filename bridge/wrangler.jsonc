@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Tanebi Recipe Bridge — single GPT Action endpoint that orchestrates
+  // SEKAI (Supabase via mcp/src/core recipe ops, same RLS boundary) and
+  // Google Drive (Tanebi Whisper Apps Script). See ../mcp/ for the MCP worker;
+  // this worker is its headless sibling for the Recipe Scribe GPT.
+  "name": "tanebi-recipe-bridge",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Same esbuild-surviving alias trick as mcp/wrangler.jsonc.
+  "alias": {
+    "@/lib/bulk-recipes-tags": "../src/lib/bulk-recipes-tags.ts"
+  },
+  "vars": {
+    // Non-secret config. Secrets (ACTION_API_KEY, SEKAI_PASSWORD,
+    // SUPABASE_URL, SUPABASE_ANON_KEY, DRIVE_SCRIPT_URL, DRIVE_SCRIPT_SECRET)
+    // are set via `wrangler secret put`.
+    "APP_BASE_URL": "https://sekai.jcou.workers.dev",
+    "SEKAI_EMAIL": "jc@sakai.app",
+    "DUPLICATE_POLICY_DEFAULT": "version"
+  },
+  "observability": { "enabled": true }
+}

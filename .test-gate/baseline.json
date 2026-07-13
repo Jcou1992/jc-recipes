@@ -1,6 +1,7 @@
 {
-  "generatedAt": "2026-06-27T03:02:11.004Z",
+  "generatedAt": "2026-07-13T06:39:56.488Z",
   "fileCounts": {
+    "bridge/test/bridge.test.ts": 9,
     "src/app/actions/__tests__/admin.test.ts": 8,
     "src/app/actions/__tests__/bulk-recipes.test.ts": 3,
     "src/app/actions/__tests__/macros.test.ts": 1,
