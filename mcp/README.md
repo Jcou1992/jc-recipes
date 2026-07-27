@@ -13,6 +13,7 @@ or Claude Code Skill can reuse them later.
 - `create_recipe` — validate + insert a recipe into the signed-in account.
 - `search_recipes` — by name / tags.
 - `get_recipe` — full recipe by id.
+- `update_recipe` — partial update by id; omitted fields keep their current values, provided lists replace wholesale.
 
 All scoped to the user via Supabase **RLS** (`auth.uid() = user_id`). The worker
 never uses the service-role key.

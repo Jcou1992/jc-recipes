@@ -56,6 +56,61 @@ export async function createRecipeForUser(
   return { ok: true, data: { id: data.id as string } };
 }
 
+export async function updateRecipeForUser(
+  client: SupabaseClient,
+  id: string,
+  partial: Partial<RecipePayload>,
+  userId: string,
+): Promise<ServiceResult<{ id: string; name: string }>> {
+  const { data: existing, error: fetchError } = await client
+    .from('recipes')
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (fetchError) return { ok: false, error: fetchError.message };
+  if (!existing) return { ok: false, error: 'Recipe not found.' };
+
+  const current = existing as Recipe;
+
+  // PATCH semantics: undefined = keep current, null = clear (nullable fields
+  // only — the schema forbids null on name/servings/ingredients/steps).
+  const merged: RecipePayload = {
+    name: partial.name ?? current.name,
+    servings: partial.servings ?? current.servings,
+    ingredients: partial.ingredients ?? current.ingredients,
+    steps: partial.steps ?? current.steps,
+    description: partial.description !== undefined ? partial.description : current.description,
+    prep_time: partial.prep_time !== undefined ? partial.prep_time : current.prep_time,
+    cook_time: partial.cook_time !== undefined ? partial.cook_time : current.cook_time,
+    serving_size_label:
+      partial.serving_size_label !== undefined ? partial.serving_size_label : current.serving_size_label,
+    tags: partial.tags !== undefined ? partial.tags : current.tags,
+    notes: partial.notes !== undefined ? partial.notes : current.notes,
+    photos: current.photos,
+  };
+
+  // Server-side trust boundary — never rely on the client model's pre-validation.
+  const validationError = validateRecipePayload(merged);
+  if (validationError) return { ok: false, error: validationError.error };
+
+  const normalized = normalizeTags(normalizeServingSizeLabel(merged));
+
+  // Optimistic concurrency: the updated_at captured above guards the
+  // read-merge-write window against concurrent edits (same pattern as the
+  // web app's updateRecipe action).
+  const { error, count } = await client
+    .from('recipes')
+    .update(normalized, { count: 'exact' })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .eq('updated_at', current.updated_at);
+
+  if (error) return { ok: false, error: error.message };
+  if (!count) return { ok: false, error: 'Recipe was modified elsewhere — fetch it again and retry.' };
+  return { ok: true, data: { id, name: merged.name } };
+}
+
 export async function searchRecipesForUser(
   client: SupabaseClient,
   opts: SearchOptions,

@@ -7,17 +7,19 @@ import { buildUserClient } from './core/supabase';
 import { registerCreateRecipe } from './tools/create-recipe';
 import { registerSearchRecipes } from './tools/search-recipes';
 import { registerGetRecipe } from './tools/get-recipe';
+import { registerUpdateRecipe } from './tools/update-recipe';
 
 const REFRESH_SKEW_SECONDS = 60;
 const REAUTH_MESSAGE = 'Your SEKAI session expired. Reconnect the connector to continue.';
 
 export class SekaiMcp extends McpAgent<Env, unknown, SekaiProps> {
-  server = new McpServer({ name: 'SEKAI Recipes', version: '0.1.0' });
+  server = new McpServer({ name: 'SEKAI Recipes', version: '0.2.0' });
 
   async init(): Promise<void> {
     registerCreateRecipe(this);
     registerSearchRecipes(this);
     registerGetRecipe(this);
+    registerUpdateRecipe(this);
   }
 
   get appBaseUrl(): string {
